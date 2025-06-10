@@ -7,6 +7,6 @@ enum class TileColour
 {
     RED,
     BLUE,
-    TURQUOISE,
+    CYAN,
     YELLOW
 }

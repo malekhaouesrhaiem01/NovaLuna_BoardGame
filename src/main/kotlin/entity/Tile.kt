@@ -11,7 +11,8 @@ import tools.aqua.bgw.util.Coordinate
  * needed for completion.
  * @property position Coordiantes of the tile on a players grid.
  */
-data class Tile(val time: Int,
+data class Tile(val id : Int,
+                val time: Int,
                 val tileColour: TileColour,
                 val tasks: List<Map<TileColour, Int>>,
                 var position: Coordinate? = null
