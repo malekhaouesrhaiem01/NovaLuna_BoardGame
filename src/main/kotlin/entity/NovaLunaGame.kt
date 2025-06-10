@@ -15,7 +15,6 @@ package entity
  */
 data class NovaLunaGame(var activePlayer: Int,
                         var meeplePosition: Int,
-                        val beginningOrder: List<Int>,
                         var simulationSpeed: Int,
                         val players: MutableList<Player>,
                         val drawPile: MutableList<Tile>,
