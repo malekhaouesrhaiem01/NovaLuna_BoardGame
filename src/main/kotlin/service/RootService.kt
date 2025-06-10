@@ -12,6 +12,8 @@ class RootService{
     val gameService = GameService(this)
     /** The connected [PlayerActionService] for this rootService */
     val playerActionService = PlayerActionService(this)
+    /** The connected [TileLoader] for this rootService */
+    val tileLoader = TileLoader()
 
     /**
      * The currently active [entity.KombiGame]. Can be `null`, if no game has started yet.
