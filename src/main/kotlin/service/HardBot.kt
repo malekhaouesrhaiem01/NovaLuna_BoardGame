@@ -19,7 +19,6 @@ class HardBot {
         TODO("findBestMove not yet implemented") }
 
 
-    // Die folgenden Methoden sind private Helfer für findBestMove.
 
     /**
      * Wählt einen vielversprechenden Knoten im Baum anhand einer Auswahlstrategie (z.B. UCT).

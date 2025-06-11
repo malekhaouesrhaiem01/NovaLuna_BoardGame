@@ -11,6 +11,10 @@ import entity.*
  * @property state Das [NovaLunaGame], den dieser Knoten repräsentiert.
  * @property parent Der Elternknoten im Baum. `null` für den Wurzelknoten.
  * @property moveThatLedHere Das [Tile], der vom Elternknoten zu diesem Zustand geführt hat.
+ * @property untriedMoves Liste an noch nicht versuchten Spielzügen.
+ * @property visits Die Anzahl der Besuche dieses Knotens während der Suche.
+ * @property scores Eine Map von Spieler-IDs zu ihren durchschnittlichen Simulationsergebnissen.
+ * @property children Eine Liste von Kindknoten, die durch Expansion entstanden sind.
  */
 class MCTSNode(
     val state: NovaLunaGame,
@@ -39,8 +43,7 @@ class MCTSNode(
     /**
      * Wählt das beste Kind dieses Knotens basierend auf der UCT-Formel (Upper Confidence Bound for Trees).
      *
-     * @param explorationConstant Der Explorationsparameter C, der das Gleichgewicht zwischen
-     *                            Ausnutzung (exploitation) und Erkundung (exploration) steuert.
+     * @param explorationConstant Der UCT-Erkundungsparameter C (typisch: 1.41).
      * @return Der vielversprechendste Kindknoten.
      */
     fun selectBestChild(explorationConstant: Double = 1.41): MCTSNode? {

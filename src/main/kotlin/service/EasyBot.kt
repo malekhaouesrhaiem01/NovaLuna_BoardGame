@@ -3,6 +3,10 @@ package service
 import entity.Tile
 import tools.aqua.bgw.util.Coordinate
 
+/**
+ * Implementiert den einfachen Bot.
+ * Dieser wählt einen Zug zufällig aus allen möglichen aus.
+ */
 class EasyBot {
     /**
      * Führt den Zug des einfachen Bots aus.
