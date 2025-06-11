@@ -1,6 +1,6 @@
 package service
 
-import entity.Tile
+import entity.*
 import tools.aqua.bgw.util.Coordinate
 
 /**
@@ -11,10 +11,10 @@ class EasyBot {
     /**
      * Führt den Zug des einfachen Bots aus.
      * Es wird zufällig ein möglicher Zug gewählt.
-     *
+     * @return [Move] welchen der Bot diesen Zug spielt
      * @throws IllegalStateException wenn kein Zug gefunden werden konnte (sollte nicht passieren, wenn es Züge gibt).
      */
-    fun playTileEasy(): Tile {
+    fun playTileEasy(): Move {
         TODO("playTileEasy not yet implemented")
     }
 
