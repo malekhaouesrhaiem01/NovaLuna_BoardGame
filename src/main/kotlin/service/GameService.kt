@@ -9,7 +9,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * the game state + drawpile + tile track are initialized.
      * Triggers [refreshAfterGameStarted] to update the UI with the initial game state.
      * @param players The list of players participating in the game (2 to 4 players).
-     * @param simulationSpeed The speed of the game simulation (0 to 10).
+     * @param simulationSpeed The speed of the game simulation (0 to 10)
      * @throws IllegalStateException If a game is already running.
      * @throws IllegalArgumentException or if the simulation speed is greater than 10.
      * @throws IllegalArgumentException If the number of players is not between 2 and 4

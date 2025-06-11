@@ -4,7 +4,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
     /**
      * Allows the current player to select a tile from the Moon Wheel at the specified index
-     * and place it on their personal space  at the desired position .
+     * and place it on their personal space  at the desired position
      * the Meeple is  then moved to that index.
      * The player's time marker is advanced based on the tile's cost.
      * Triggers [refreshAfterTilePlayed] to update the UI accordingly.
