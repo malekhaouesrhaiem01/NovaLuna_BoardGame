@@ -2,6 +2,8 @@ package service
 
 import entity.NovaLunaGame
 import entity.Player
+import entity.Move
+import entity.Tile
 import tools.aqua.bgw.util.Coordinate
 
 class GameService(private val rootService: RootService) : AbstractRefreshingService() {
@@ -159,5 +161,57 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     fun updateTasks(): Unit {
         // Method implementation
     }
+    /**
+     * Gets all valid moves for the active player in a *specific game state*.
+     * This version is used by MCTS in [HardBotService] to explore hypothetical scenarios.
+     *
+     * @param game The hypothetical [NovaLunaGame] state to analyze.
+     * @return A list of all valid [Move] objects for the active player in the given state.
+     */
+    fun getPossibleMovesForState(game: NovaLunaGame): List<Move> {
+        // TODO: Implement the same logic as getPossibleMovesForCurrentPlayer,
 
+        // Placeholder return
+        return emptyList()
+    }
+
+    /**
+     * Gets all valid moves for the currently active player in the *current game*.
+     * This method is the single source of truth for move validation for the UI and simple bots.
+     *
+     * Preconditions:
+     * - A game must be in progress (`rootService.currentGame != null`).
+     * - A player must be active.
+     * - The game must not be over.
+     *
+     * @return A list of all valid [Move] objects. The list can be empty if no moves are possible.
+     * @throws IllegalStateException if no game is currently running.
+     */
+    fun getPossibleMovesForCurrentPlayer(): List<Move> {
+        val game = rootService.currentGame ?: throw IllegalStateException("No game in progress.")
+        return getPossibleMovesForState(game)
+    }
+
+    /**
+     * Updates the meeple and player marker positions after a tile is selected.
+     *
+     * This method moves the shared meeple to the spot of the `selectedTile` on the moon wheel
+     * and advances the current player's marker on the moon track by the tile's time cost.
+     * It is typically called as part of a player's turn execution.
+     *
+     * Preconditions:
+     * - A game must be in progress.
+     * - The `selectedTile` was a valid choice in the preceding state.
+     *
+     * Postconditions:
+     * - `NovaLunaGame.meeplePosition` is updated.
+     * - The current player's `moonTrackPosition` is increased.
+     * - A UI refresh is triggered.
+     *
+     * @param selectedTile The tile that the current player just took from the moon wheel.
+     * @throws IllegalStateException if no game is currently running.
+     */
+    fun moveMeeple(selectedTile: Tile) {
+        // TODO: Implement logic to update meeple position and player's moon track marker.
+    }
 }

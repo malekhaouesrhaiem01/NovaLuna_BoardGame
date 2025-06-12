@@ -2,52 +2,87 @@ package service
 
 import entity.*
 
-
 /**
- * Repräsentiert einen einzelnen Knoten im Monte-Carlo-Suchbaum.
- * Jeder Knoten speichert einen Spielzustand und die Statistik der Simulationen,
- * die durch ihn gelaufen sind.
+ * Represents a single node in the Monte Carlo Search Tree.
+ * Each node stores a specific game state and the statistics gathered from simulations
+ * that have passed through it.
  *
- * @property state Das [NovaLunaGame], den dieser Knoten repräsentiert.
- * @property parent Der Elternknoten im Baum. `null` für den Wurzelknoten.
- * @property moveThatLedHere Das [Tile], der vom Elternknoten zu diesem Zustand geführt hat.
- * @property untriedMoves Liste an noch nicht versuchten Spielzügen.
- * @property visits Die Anzahl der Besuche dieses Knotens während der Suche.
- * @property scores Eine Map von Spieler-IDs zu ihren durchschnittlichen Simulationsergebnissen.
- * @property children Eine Liste von Kindknoten, die durch Expansion entstanden sind.
+ * @param gameState The [NovaLunaGame] instance that this node represents. This should be
+ *   a deep copy of the game state to ensure the MCTS does not alter the actual game.
+ * @param parent The parent node in the tree. This is `null` for the root node of the search tree.
+ * @param moveThatLedHere The [Move] that was applied to the parent's state to reach this state.
+ *   This is `null` for the root node.
+ * @param untriedMoves A mutable list of [Move]s that are possible from this node's state
+ *   but have not yet been used to create a child node (i.e., not yet expanded).
  */
 class MCTSNode(
-    val state: NovaLunaGame,
+    val gameState: NovaLunaGame,
     val parent: MCTSNode? = null,
     val moveThatLedHere: Move? = null,
-    val untriedMoves: MutableList<Move>
+    val untriedMoves: MutableList<Move> // List of moves not yet expanded
 ) {
+    /**
+     * The number of times this node has been visited during the MCTS search.
+     * Used in the UCT calculation.
+     */
     var visits: Int = 0
-    val scores: MutableMap<Int, Double> = mutableMapOf() // Map von Spieler-Index zu Score
+
+    /**
+     * A mutable map storing the cumulative scores for each player based on simulations
+     * that passed through this node. The key is the player's ID ([Int]), and the value
+     * is their accumulated score ([Double]).
+     */
+    val scores: MutableMap<Int, Double> = mutableMapOf() // Map from player index to score
+
+    /**
+     * A mutable list of child nodes that have been created by expanding this node.
+     * Each child represents a possible move from this node's state.
+     */
     val children: MutableList<MCTSNode> = mutableListOf()
 
     /**
-     * Gibt zurück, ob alle möglichen Züge von diesem Knoten aus bereits expandiert wurden.
-     * @return `true`, wenn keine unversuchten Züge mehr vorhanden sind.
+     * Checks if all possible moves from this node's state have already been used
+     * to create child nodes (i.e., if the node is fully expanded).
+     *
+     * @return `true` if there are no untried moves left; `false` otherwise.
      */
     fun isFullyExpanded(): Boolean = untriedMoves.isEmpty()
 
     /**
-     * Gibt zurück, ob der Spielzustand in diesem Knoten ein Endzustand ist.
-     * @return `true`, wenn das Spiel in diesem Zustand beendet ist.
+     * Checks if the game state represented by this node is a terminal state (i.e., the game has ended).
+     * This determination should be based on the rules of Nova Luna.
+     *
+     * @return `true` if the game is over in this state; `false` otherwise.
      */
     fun isTerminal(): Boolean {
-        TODO("Implementiere eine Methode im NovaLunaGame, um zu prüfen, ob das Spiel vorbei ist.")
+        // TODO: Implement this by delegating to a method in your NovaLunaGame entity,
+        return false // Placeholder
     }
 
     /**
-     * Wählt das beste Kind dieses Knotens basierend auf der UCT-Formel (Upper Confidence Bound for Trees).
+     * Selects the best child node from this node's children based on the UCT (Upper Confidence Bound for Trees) formula.
+     * The UCT formula balances between exploitation (choosing children with high average rewards)
+     * and exploration (choosing children that have not been visited often).
      *
-     * @param explorationConstant Der UCT-Erkundungsparameter C (typisch: 1.41).
-     * @return Der vielversprechendste Kindknoten.
+     * The formula for UCT is: `Q(v) + C * sqrt(ln(N(p)) / N(v))`
+     * where:
+     * - `Q(v)` is the average reward of child node `v`.
+     * - `N(v)` is the number of times child node `v` has been visited.
+     * - `N(p)` is the number of times the parent node `p` has been visited.
+     * - `C` is the exploration constant (`explorationConstant`).
+     *
+     * Preconditions:
+     * - This node must have at least one child in its `children` list.
+     *
+     * Postconditions:
+     * - The state of this node and its children remains unchanged.
+     *
+     * @param explorationConstant The exploration parameter 'C' in the UCT formula. A common value is `sqrt(2.0)`.
+     * @return The [MCTSNode] representing the child with the highest UCT value, or `null` if this node has no children.
      */
     fun selectBestChild(explorationConstant: Double = 1.41): MCTSNode? {
-        TODO("Berechne UCT-Wert für alle Kindknoten und gib den besten zurück.")
+        if (children.isEmpty()) return null
+        // TODO: Calculate UCT value for each child and return the one with the maximum value.
+        return children.firstOrNull() // Placeholder
     }
-
 }

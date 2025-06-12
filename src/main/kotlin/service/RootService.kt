@@ -15,6 +15,11 @@ class RootService{
     /** The connected [TileLoader] for this rootService */
     val tileLoader = TileLoader()
 
+    /** The connected [EasyBotService] for this rootService */
+    val easyBotService = EasyBotService(this)
+    /** The connected [HardBotService] for this rootService */
+    val hardBotService = HardBotService(this)
+
     /**
      * The currently active [entity.KombiGame]. Can be `null`, if no game has started yet.
      */
@@ -28,6 +33,8 @@ class RootService{
     private fun addRefreshable(newRefreshable: Refreshable) {
         gameService.addRefreshable(newRefreshable)
         playerActionService.addRefreshable(newRefreshable)
+        easyBotService.addRefreshable(newRefreshable)
+        hardBotService.addRefreshable(newRefreshable)
     }
 
     /**
