@@ -61,18 +61,4 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     */
     fun endGame(){}
 
-    /**
-     * Saves the current Nova Luna game state to a file or persistent storage.
-     *
-     * Only allowed in offline mode while a game is active
-     *
-     * @throws IllegalStateException if no game is active or the game is in network mode
-     * @throws IOException if an error occurs during saving
-     */
-    fun saveGame(){}
-
-
-
-
-
 }
