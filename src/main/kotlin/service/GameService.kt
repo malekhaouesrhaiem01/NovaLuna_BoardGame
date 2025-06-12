@@ -127,7 +127,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalStateException is thrown, when no Game exists
      */
     fun endTurn(){
-        TODO()
     }
 
     /**
