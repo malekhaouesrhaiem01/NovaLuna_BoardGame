@@ -10,4 +10,6 @@ package service
  *
  * @see AbstractRefreshingService
  */
-interface Refreshable
+interface Refreshable{
+    fun refreshAfterStartTurn()
+}

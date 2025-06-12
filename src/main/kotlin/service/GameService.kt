@@ -83,6 +83,52 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         return false
     }
 
+    /**
+     * The method [startTurn] starts the turn for the current Player
+     * and calls the refreshable to change in scenery in the GUI
+     *
+     * Preconditions:
+     * - Game must be started
+     * - It has to be a Players turn
+     *
+     * Postconditions:
+     * - Aktueller Spieler ist am Zug
+     * - Punkte des Aktuellen Spielers werden angezeigt
+     * - Game Matrix des Aktuellen Spielers wird angezeigt
+     * - Ansicht wird auf den des Aktuellen Spielers geändert
+     *
+     * Exceptions:
+     * @throws IllegalStateException is thrown, when no game exists.
+     */
+
+    fun startTurn(){
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        onAllRefreshables { refreshAfterStartTurn() }
+    }
+
+    /**
+     * The method [endTurn] ends the current Players turn,
+     * as well as changing the current Player to the Player next in line.
+     * Calls up the refreshables to update the GUI Scenery.
+     * Unit beendet den Zug des aktuellen Spielers. Dabei wird auch der nächste Spieler der am Zug ist als aktuellen Spieler gesetzt. Ebenfalls werden refreshables für die GUI aufgerufen um den ConfirmNextPlayerScene aufzurufen.
+     *
+     * Preconditions:
+     * - Game must be started
+     * - It has to be a Players Turn
+     * - Player has picked and Played his card
+     *
+     * Postconditions:
+     * - ConfirmNextPlayerScene will be displayed
+     * - The current Player will be changed to the next Player in line
+     *
+     * Exceptions:
+     * @throws IllegalStateException is thrown, when no Game exists
+     */
+    fun endTurn(){
+        TODO()
+    }
 
     /**
     * Ends the current Nova Luna game by determining the winner,

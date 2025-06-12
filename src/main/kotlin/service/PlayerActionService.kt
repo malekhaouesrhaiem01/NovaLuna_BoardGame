@@ -116,5 +116,27 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
     fun load() {
         //Method implementation
     }
+
+
+    /**
+     * The method [refillWheel] fills up the moonWheel with cards in the [drawPile]
+     * when there are 2 or fewer cards in the moonWheel
+     *
+     *
+     * Preconditions:
+     * - Game must be started
+     * - It has to be a players Turn
+     * - Two or fewer cards in the moonWheel
+     *
+     * Postconditions:
+     * - moonWheel is completely filled up (12 Cards)
+     *
+     * Exceptions:
+     * @throws IllegalStateException is thrown, when no game exists.
+     * @throws IllegalArgumentException is thrown, when there are more than 2 cards in the moonWheel.
+     */
+    fun refillWheel(){
+
+    }
 }
 
