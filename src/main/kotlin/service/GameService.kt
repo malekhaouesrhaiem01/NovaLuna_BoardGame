@@ -50,6 +50,38 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
     }
 
+    /**
+     * Checks if one of the two conditions for ending the game are fulfilled.
+     * 1. A player has placed all his tokens
+     * 2. All tiles are laid out so no tile can be played anymore
+     *
+     * Precondition:
+     * - A game has to be running
+     *
+     * Postcondition:
+     * - When the method returns true, endGame() has to be activated
+     *
+     * @returns This method returns a boolean
+     *
+     * @throws IllegalStateException If no game is currently running
+     */
+    fun checkEndGame() : Boolean {
+        if (rootService.currentGame == null) {
+            throw IllegalStateException("No game is currently running.")
+        }
+
+        val game = rootService.currentGame!!
+
+        if(game.players[game.activePlayer].tokenCount < 1){
+            return true
+        }
+        else if(game.tileTrack.size == 0 && game.drawPile.size == 0){
+            return true
+        }
+
+        return false
+    }
+
 
     /**
     * Ends the current Nova Luna game by determining the winner,
