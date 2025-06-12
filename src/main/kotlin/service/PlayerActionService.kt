@@ -1,5 +1,5 @@
 package service
-
+import entity.Move
 import tools.aqua.bgw.util.Coordinate
 
 class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
@@ -19,6 +19,19 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      */
     fun playTile(moonwheelIndex: Int, position: Coordinate) {}
 
+
+    /**
+     * Executes a move for the current player based on a [Move] object.
+     * This method is primarily used by the bot services. It finds the corresponding
+     * tile on the moon wheel and calls the primary `playTile` method.
+     *
+     * @param move The [Move] object containing the tile to play and its target position.
+     * @throws IllegalStateException If no game is active or the tile from the move is not available.
+     * @throws IllegalArgumentException If the move is invalid.
+     */
+    fun playTile(move: Move) {
+
+    }
 
     /**
      * Lets the player undo their last move, if that's allowed in the current mode.
