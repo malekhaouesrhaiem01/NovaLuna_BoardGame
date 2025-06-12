@@ -2,6 +2,7 @@ package service
 
 import entity.NovaLunaGame
 import entity.Player
+import tools.aqua.bgw.util.Coordinate
 
 class GameService(private val rootService: RootService) : AbstractRefreshingService() {
     /**
@@ -92,5 +93,71 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     * @throws IllegalStateException if no game is currently active or the game is already ended
     */
     fun endGame(){}
+
+
+    /**
+     * Checks whether there are fewer than three tiles on the `tileTrack`
+     * and refills it with new tiles from the `drawPile` if necessary.
+     *
+     * Preconditions:
+     * - A running game (`currentGame`) must exist.
+     *
+     * Postconditions:
+     * - The `tileTrack` contains at least three tiles, provided enough tiles are available in the `drawPile`.
+     * - The appropriate refresh methods are called to update the GUI.
+     *
+     * @throws IllegalStateException If no game is currently active.
+     *
+     * @return This method has no return value.
+     *
+     * @sample checkRefill()
+     */
+    fun checkRefill() {
+        // Method implementation
+    }
+
+    /**
+     * Checks whether a given position on the game board is valid for placing a tile.
+     *
+     * Preconditions:
+     * - A running game (`currentGame`) must exist.
+     * - The position must not already be occupied by another tile.
+     * - If it's not the first tile, it must be adjacent to an already placed tile.
+     *
+     * Postconditions:
+     * - Returns `true` if the position is free and satisfies the placement rules.
+     * - Returns `false` if the position is already occupied or invalid.
+     *
+     * @param position The position on the game board to validate.
+     *
+     * @return `true` if the position is valid, otherwise `false`.
+     *
+     * @throws IllegalStateException If no game is currently active (`currentGame == null`).
+     *
+     * @sample validatePosition(Coordinate(2, 3))
+     */
+    fun validatePosition(position: Coordinate): Boolean {
+        return true //placeholder
+    }
+
+    /**
+     * Checks all open tasks of the current player and updates their status.
+     * This method is usually called at the end of a turn to see if any new tiles
+     * have completed more tasks.
+     *
+     * Preconditions:
+     * - A running game (`currentGame`) must exist.
+     *
+     * Postconditions:
+     * - All tasks of the current player are checked again and marked as completed if possible.
+     * - The related refresh method is called so the GUI shows the updated task status.
+     *
+     * @throws IllegalStateException If no game is currently active (`currentGame == null`).
+     *
+     * @sample updateTasks()
+     */
+    fun updateTasks(): Unit {
+        // Method implementation
+    }
 
 }
