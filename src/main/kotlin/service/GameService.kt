@@ -114,7 +114,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * The method [endTurn] ends the current Players turn,
      * as well as changing the current Player to the Player next in line.
      * Calls up the refreshables to update the GUI Scenery.
-     * Unit beendet den Zug des aktuellen Spielers. Dabei wird auch der nächste Spieler der am Zug ist als aktuellen Spieler gesetzt. Ebenfalls werden refreshables für die GUI aufgerufen um den ConfirmNextPlayerScene aufzurufen.
      *
      * Preconditions:
      * - Game must be started
@@ -129,6 +128,22 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalStateException is thrown, when no Game exists
      */
     fun endTurn(){
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        var currentPlayer = game.players.first()
+        for (player in game.players){
+            if(player.moonTrackPosition < currentPlayer.moonTrackPosition){
+                currentPlayer = player
+            } else if(player.moonTrackPosition == currentPlayer.moonTrackPosition){
+                if(player.height > currentPlayer.height){
+                    currentPlayer = player
+                }
+            }
+        }
+        game.activePlayer =  game.players.indexOf(currentPlayer)
+
+        onAllRefreshables { refreshAfterEndTurn() }
     }
 
     /**
@@ -254,9 +269,40 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * - A UI refresh is triggered.
      *
      * @param selectedTile The tile that the current player just took from the moon wheel.
-     * @throws IllegalStateException if no game is currently running.
+     * @throws IllegalStateException if no game is currently running or Tile that is not on the Tile Track is selected.
      */
-    fun moveMeeple(selectedTile: Tile) {
-        // TODO: Implement logic to update meeple position and player's moon track marker.
+    fun moveMeepleAndPlayer(selectedTile: Tile) {
+        val game =  rootService.currentGame
+        checkNotNull(game)
+
+
+        val currentPlayer =  game.players[game.activePlayer]
+        val newMeeplePos = selectedTile.moonTrackPosition
+        checkNotNull(newMeeplePos)
+        val stepsForPlayer =  selectedTile.time
+
+
+        //Update Meeple Position and Remove Tile from that Position
+        game.meeplePosition = newMeeplePos
+        game.tileTrack.remove(selectedTile)
+        selectedTile.moonTrackPosition = null
+
+
+
+        currentPlayer.moonTrackPosition += stepsForPlayer
+        //changes the height of the currentPlayer, for the case two Players are at the same Position
+        for(player in game.players){
+            /* For Every Player that's already in that moonTrackposition, add 1 additional height for the currentPlayer
+             * sind he came last. Therefore, if two Players are at the same position the currentPlayer would have a height
+             * of two making him the Player next in Line.
+             */
+            if(player.moonTrackPosition == currentPlayer.moonTrackPosition){
+                currentPlayer.height++
+            }
+        }
+        // remove 1 height, because we add 1 height for every Player arriving in a new Position
+        currentPlayer.height -= 1
+
+        onAllRefreshables { refreshAfterMoveMeepleAndPlayer() }
     }
 }
