@@ -11,5 +11,13 @@ package service
  * @see AbstractRefreshingService
  */
 interface Refreshable{
-    fun refreshAfterStartTurn()
+    fun refreshAfterStartTurn() {}
+    fun refreshAfterEndTurn() {}
+    fun refreshAfterStartGame() {}
+    fun refreshAfterTilePlayed() {}
+    fun refreshAfterUndo() {}
+    fun refreshAfterRedo() {}
+    fun refreshAfterRefill() {}
+    fun refreshAfterRageQuit() {}
+    fun refreshAfterMoveMeepleAndPlayer()
 }

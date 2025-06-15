@@ -16,5 +16,5 @@ data class Player(val playerName : String,
                   val playerType: PlayerType,
                   val playerColour: PlayerColour,
                   val tiles: MutableList<Tile> = mutableListOf(),
-                  val height : Int
+                  var height : Int
 )
