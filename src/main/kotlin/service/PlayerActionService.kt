@@ -149,7 +149,15 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalArgumentException is thrown, when there are more than 2 cards in the moonWheel.
      */
     fun refillWheel(){
+        val game = rootService.currentGame
+        checkNotNull(game)
 
+        while(game.tileTrack.size < 11 && game.drawPile.isNotEmpty())
+        {
+            game.tileTrack.add(game.drawPile.removeAt(0))
+        }
+
+        onAllRefreshables { refreshAfterRefill() }
     }
 }
 

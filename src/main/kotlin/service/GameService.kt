@@ -175,7 +175,17 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @sample checkRefill()
      */
     fun checkRefill() {
-        // Method implementation
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        if (game.tileTrack.size >= 3) return
+
+        rootService.playerActionService.refillWheel()
+
+        if (game.tileTrack.size < 3 && game.drawPile.isEmpty())
+        {
+            endGame()
+        }
     }
 
     /**
