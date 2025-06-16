@@ -19,5 +19,5 @@ interface Refreshable{
     fun refreshAfterRedo() {}
     fun refreshAfterRefill() {}
     fun refreshAfterRageQuit() {}
-    fun refreshAfterMoveMeepleAndPlayer()
+    // fun refreshAfterMoveMeepleAndPlayer()
 }

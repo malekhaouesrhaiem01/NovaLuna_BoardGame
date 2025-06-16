@@ -313,6 +313,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         // remove 1 height, because we add 1 height for every Player arriving in a new Position
         currentPlayer.height -= 1
 
-        onAllRefreshables { refreshAfterMoveMeepleAndPlayer() }
+        // onAllRefreshables { refreshAfterMoveMeepleAndPlayer() }
     }
 }
