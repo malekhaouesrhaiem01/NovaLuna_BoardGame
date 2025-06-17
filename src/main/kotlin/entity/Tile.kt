@@ -10,10 +10,12 @@ import tools.aqua.bgw.util.Coordinate
  * @property tasks A list of task maps, where each map links a required [TileColour] to the number of adjacent tiles
  * needed for completion.
  * @property position Coordiantes of the tile on a players grid.
+ * @property moonTrackPosition the position of the Tile on the MoonTrack
  */
 data class Tile(val id : Int,
                 val time: Int,
                 val tileColour: TileColour,
                 val tasks: List<Map<TileColour, Int>>,
-                var position: Coordinate? = null
+                var position: Coordinate? = null,
+                var moonTrackPosition: Int?
 )

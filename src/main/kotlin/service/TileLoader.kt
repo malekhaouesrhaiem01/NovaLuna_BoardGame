@@ -30,8 +30,11 @@ class TileLoader {
                         time = time,
                         tileColour = tileColour,
                         tasks = listOf(task1, task2, task3),
-                        position = null
-                    )
+                        position = null,
+                        moonTrackPosition = null,
+                        // Needs to be implemented
+
+                )
                 )
             }
         }

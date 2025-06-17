@@ -69,11 +69,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalStateException If no game is currently running
      */
     fun checkEndGame() : Boolean {
-        if (rootService.currentGame == null) {
-            throw IllegalStateException("No game is currently running.")
-        }
 
-        val game = rootService.currentGame!!
+        val game = checkNotNull(rootService.currentGame)
 
         if(game.players[game.activePlayer].tokenCount < 1){
             return true
@@ -105,7 +102,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
     fun startTurn(){
         val game = rootService.currentGame
-        checkNotNull(game)
+        checkNotNull(game) { "No game is currently running." }
 
         onAllRefreshables { refreshAfterStartTurn() }
     }
@@ -114,7 +111,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * The method [endTurn] ends the current Players turn,
      * as well as changing the current Player to the Player next in line.
      * Calls up the refreshables to update the GUI Scenery.
-     * Unit beendet den Zug des aktuellen Spielers. Dabei wird auch der nächste Spieler der am Zug ist als aktuellen Spieler gesetzt. Ebenfalls werden refreshables für die GUI aufgerufen um den ConfirmNextPlayerScene aufzurufen.
      *
      * Preconditions:
      * - Game must be started
@@ -129,6 +125,22 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalStateException is thrown, when no Game exists
      */
     fun endTurn(){
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        var currentPlayer = game.players.first()
+        for (player in game.players){
+            if(player.moonTrackPosition < currentPlayer.moonTrackPosition){
+                currentPlayer = player
+            } else if(player.moonTrackPosition == currentPlayer.moonTrackPosition){
+                if(player.height > currentPlayer.height){
+                    currentPlayer = player
+                }
+            }
+        }
+        game.activePlayer =  game.players.indexOf(currentPlayer)
+
+        onAllRefreshables { refreshAfterEndTurn() }
     }
 
     /**
@@ -139,7 +151,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     * Triggers [refreshAfterGameEnd] to update the UI with the winner name and players  scores  .
     * @throws IllegalStateException if no game is currently active or the game is already ended
     */
-    fun endGame(){}
+    fun endGame(){
+        // Passiert hier irgendwas auf Entity-Ebene?
+        // Eigentlich muss doch nur auf GUI Ebene die Anzahl der Tokens
+        // der einzelnen Spieler angezeigt werden
+        onAllRefreshables { refreshAfterRageQuit() }
+        rootService.currentGame = null
+    }
 
 
     /**
@@ -160,31 +178,80 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @sample checkRefill()
      */
     fun checkRefill() {
-        // Method implementation
+        val game = rootService.currentGame
+        checkNotNull(game)
+
+        if (game.tileTrack.size >= 3) return
+
+        rootService.playerActionService.refillWheel()
+
+        if (game.tileTrack.size < 3 && game.drawPile.isEmpty())
+        {
+            endGame()
+        }
     }
 
     /**
-     * Checks whether a given position on the game board is valid for placing a tile.
+     * Calculates all valid positions where the current player can place a new tile.
      *
      * Preconditions:
      * - A running game (`currentGame`) must exist.
-     * - The position must not already be occupied by another tile.
-     * - If it's not the first tile, it must be adjacent to an already placed tile.
      *
      * Postconditions:
-     * - Returns `true` if the position is free and satisfies the placement rules.
-     * - Returns `false` if the position is already occupied or invalid.
+     * - Returns a list of coordinates that are free and directly next to already places tiles.
+     * - If the player has no tiles the list will contain only (0,0)
      *
-     * @param position The position on the game board to validate.
-     *
-     * @return `true` if the position is valid, otherwise `false`.
+     * @return A list oft valid positions for placing a tile.
      *
      * @throws IllegalStateException If no game is currently active (`currentGame == null`).
      *
-     * @sample validatePosition(Coordinate(2, 3))
+     * @sample getPossiblePosition()
      */
-    fun validatePosition(position: Coordinate): Boolean {
-        return true //placeholder
+    fun getPossiblePosition(): List<Coordinate>
+    {
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game is currently running." }
+        val player = game.players[game.activePlayer]
+
+        //Liste mit allen Positionen die schon belegt sind
+        val occupied = mutableListOf<Coordinate>()
+        for (tile in player.tiles)
+        {
+            if(tile.position != null)
+            {
+                occupied.add(tile.position!!)
+            }
+        }
+
+        //Wenn noch kein Tile gelegt wurde, also erstes Tile, dann direkt 0,0
+        if( occupied.isEmpty()) return listOf(Coordinate(0, 0))
+
+        //Die Liste, welche returned wird.
+        val possible = mutableListOf<Coordinate>()
+
+        // Alle Nachbar Coodinates der bereits belegten Tiles
+        for (pos in occupied)
+        {
+            val neighbors = listOf(
+                Coordinate(pos.xCoord + 1, pos.yCoord),
+                Coordinate(pos.xCoord - 1, pos.yCoord),
+                Coordinate(pos.xCoord, pos.yCoord + 1),
+                Coordinate(pos.xCoord, pos.yCoord - 1),
+            )
+
+            //Hier wird ermitteltet, welche Nachbar Positionen frei sind
+            for (neighbor in neighbors)
+            {
+                if(!occupied.contains(neighbor) && !possible.contains(neighbor))
+                {
+                    possible.add(neighbor)
+                }
+            }
+        }
+
+        return possible
+
+
     }
 
     /**
@@ -254,9 +321,40 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * - A UI refresh is triggered.
      *
      * @param selectedTile The tile that the current player just took from the moon wheel.
-     * @throws IllegalStateException if no game is currently running.
+     * @throws IllegalStateException if no game is currently running or Tile that is not on the Tile Track is selected.
      */
-    fun moveMeeple(selectedTile: Tile) {
-        // TODO: Implement logic to update meeple position and player's moon track marker.
+    fun moveMeepleAndPlayer(selectedTile: Tile) {
+        val game =  rootService.currentGame
+        checkNotNull(game)
+
+
+        val currentPlayer =  game.players[game.activePlayer]
+        val newMeeplePos = selectedTile.moonTrackPosition
+        checkNotNull(newMeeplePos)
+        val stepsForPlayer =  selectedTile.time
+
+
+        //Update Meeple Position and Remove Tile from that Position
+        game.meeplePosition = newMeeplePos
+        game.tileTrack.remove(selectedTile)
+        selectedTile.moonTrackPosition = null
+
+
+
+        currentPlayer.moonTrackPosition += stepsForPlayer
+        //changes the height of the currentPlayer, for the case two Players are at the same Position
+        for(player in game.players){
+            /* For Every Player that's already in that moonTrackposition, add 1 additional height for the currentPlayer
+             * sind he came last. Therefore, if two Players are at the same position the currentPlayer would have a height
+             * of two making him the Player next in Line.
+             */
+            if(player.moonTrackPosition == currentPlayer.moonTrackPosition){
+                currentPlayer.height++
+            }
+        }
+        // remove 1 height, because we add 1 height for every Player arriving in a new Position
+        currentPlayer.height -= 1
+
+        // onAllRefreshables { refreshAfterMoveMeepleAndPlayer() }
     }
 }
