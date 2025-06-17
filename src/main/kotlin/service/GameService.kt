@@ -69,11 +69,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalStateException If no game is currently running
      */
     fun checkEndGame() : Boolean {
-        if (rootService.currentGame == null) {
-            throw IllegalStateException("No game is currently running.")
-        }
 
-        val game = rootService.currentGame!!
+        val game = checkNotNull(rootService.currentGame)
 
         if(game.players[game.activePlayer].tokenCount < 1){
             return true
@@ -105,7 +102,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
     fun startTurn(){
         val game = rootService.currentGame
-        checkNotNull(game)
+        checkNotNull(game) { "No game is currently running." }
 
         onAllRefreshables { refreshAfterStartTurn() }
     }
@@ -154,7 +151,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     * Triggers [refreshAfterGameEnd] to update the UI with the winner name and players  scores  .
     * @throws IllegalStateException if no game is currently active or the game is already ended
     */
-    fun endGame(){}
+    fun endGame(){
+        // Passiert hier irgendwas auf Entity-Ebene?
+        // Eigentlich muss doch nur auf GUI Ebene die Anzahl der Tokens
+        // der einzelnen Spieler angezeigt werden
+        onAllRefreshables { refreshAfterRageQuit() }
+        rootService.currentGame = null
+    }
 
 
     /**

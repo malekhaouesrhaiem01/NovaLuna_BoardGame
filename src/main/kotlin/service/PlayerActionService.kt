@@ -11,13 +11,38 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * The player's time marker is advanced based on the tile's cost.
      * Triggers [refreshAfterTilePlayed] to update the UI accordingly.
      *
-     * @param moonwheelIndex The index of the tile to take from the Moon Wheel (must be one of the next 3 tiles).
+     * @param tileTrackIndex The index of the tile to take from the tile track (must be one of the next 3 tiles).
      * @param position The coordinate where the tile should be placed on the current player's space .
      *
      * @throws IllegalStateException If no game is active or it's not the current player's turn.
      * @throws IllegalArgumentException If the selected tile is invalid or cannot be placed at the given position.
      */
-    fun playTile(moonwheelIndex: Int, position: Coordinate) {}
+    fun playTile(tileTrackIndex: Int, position: Coordinate) {
+        val game = checkNotNull(rootService.currentGame)
+        // Get the selected tile from the tile track
+        val selectedTile = game.tileTrack[tileTrackIndex]
+        // add the selected tile to the list of tiles of the current player
+        game.players[game.activePlayer].tiles.add(selectedTile)
+        // add the coordinates where the tile is placed to the tile
+        selectedTile.position = position
+
+        // update position on the moon wheel of the token
+        // and the position of the meeple on the tile track
+        rootService.gameService.moveMeepleAndPlayer(selectedTile)
+
+        // check if tasks are now fulfilled
+        rootService.gameService.updateTasks()
+        // end the game if all tokens are placed
+        // ! Passiert das in update tasks? !
+        // if(rootService.gameService.checkEndGame()){
+        //     rootService.gameService.endGame()
+        // }
+
+        // endTurn über Button in der GUI
+
+
+
+    }
 
 
     /**
@@ -30,6 +55,11 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalArgumentException If the move is invalid.
      */
     fun playTile(move: Move) {
+        val game = checkNotNull(rootService.currentGame)
+        // get the index of the selected tile in the [Move] object
+        val tileIndex = game.tileTrack.indexOf(move.tile)
+        // calls the main playTile function to play the selected move from the bot
+        playTile(tileIndex, move.position)
 
     }
 
