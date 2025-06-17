@@ -192,27 +192,66 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     }
 
     /**
-     * Checks whether a given position on the game board is valid for placing a tile.
+     * Calculates all valid positions where the current player can place a new tile.
      *
      * Preconditions:
      * - A running game (`currentGame`) must exist.
-     * - The position must not already be occupied by another tile.
-     * - If it's not the first tile, it must be adjacent to an already placed tile.
      *
      * Postconditions:
-     * - Returns `true` if the position is free and satisfies the placement rules.
-     * - Returns `false` if the position is already occupied or invalid.
+     * - Returns a list of coordinates that are free and directly next to already places tiles.
+     * - If the player has no tiles the list will contain only (0,0)
      *
-     * @param position The position on the game board to validate.
-     *
-     * @return `true` if the position is valid, otherwise `false`.
+     * @return A list oft valid positions for placing a tile.
      *
      * @throws IllegalStateException If no game is currently active (`currentGame == null`).
      *
-     * @sample validatePosition(Coordinate(2, 3))
+     * @sample getPossiblePosition()
      */
-    fun validatePosition(position: Coordinate): Boolean {
-        return true //placeholder
+    fun getPossiblePosition(): List<Coordinate>
+    {
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game is currently running." }
+        val player = game.players[game.activePlayer]
+
+        //Liste mit allen Positionen die schon belegt sind
+        val occupied = mutableListOf<Coordinate>()
+        for (tile in player.tiles)
+        {
+            if(tile.position != null)
+            {
+                occupied.add(tile.position!!)
+            }
+        }
+
+        //Wenn noch kein Tile gelegt wurde, also erstes Tile, dann direkt 0,0
+        if( occupied.isEmpty()) return listOf(Coordinate(0, 0))
+
+        //Die Liste, welche returned wird.
+        val possible = mutableListOf<Coordinate>()
+
+        // Alle Nachbar Coodinates der bereits belegten Tiles
+        for (pos in occupied)
+        {
+            val neighbors = listOf(
+                Coordinate(pos.xCoord + 1, pos.yCoord),
+                Coordinate(pos.xCoord - 1, pos.yCoord),
+                Coordinate(pos.xCoord, pos.yCoord + 1),
+                Coordinate(pos.xCoord, pos.yCoord - 1),
+            )
+
+            //Hier wird ermitteltet, welche Nachbar Positionen frei sind
+            for (neighbor in neighbors)
+            {
+                if(!occupied.contains(neighbor) && !possible.contains(neighbor))
+                {
+                    possible.add(neighbor)
+                }
+            }
+        }
+
+        return possible
+
+
     }
 
     /**
