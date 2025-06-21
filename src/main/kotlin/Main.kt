@@ -6,6 +6,6 @@ import gui.NovaApplication
  * Once the application is closed, it prints a message indicating the end of the application.
  */
 fun main() {
-    NovaApplication().show()
+    NovaApplication.show()
     println("Application ended. Goodbye")
 }
