@@ -14,6 +14,11 @@ class NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
     // also holds the currently active game
     private val rootService = RootService()
 
+    private lateinit var joinGameSceneOne: JoinGameSceneOne
+    private lateinit var joinGameSceneTwo: JoinGameSceneTwo
+    private lateinit var hostGameSceneOne: HostGameSceneOne
+    private lateinit var hostGameSceneTwo: HostGameSceneTwo
+
     // Scenes
 
     // This menu scene is shown after application start and if the "new game" button
@@ -26,13 +31,46 @@ class NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
         offlineButton.onMouseClicked = {
             showMenuScene(offlineScene)
         }
+
+        joinButton.onMouseClicked = {
+            showMenuScene(joinGameSceneOne)
+        }
+
+        hostButton.onMouseClicked = {
+            showMenuScene(hostGameSceneOne)
+        }
     }
 
     private val offlineScene = OfflineScene(rootService).apply {
 
     }
 
+
+
     init {
+
+        joinGameSceneOne = JoinGameSceneOne(rootService).apply {
+            joinButton.onMouseClicked = {
+                showMenuScene(joinGameSceneTwo)
+            }
+
+            backButton.onMouseClicked = {
+                showMenuScene(mainMenuScene)
+            }
+        }
+
+        joinGameSceneTwo = JoinGameSceneTwo(rootService)
+
+        hostGameSceneOne = HostGameSceneOne(rootService).apply {
+            nextButton.onMouseClicked = {
+                showMenuScene(hostGameSceneTwo)
+            }
+
+            backButton.onMouseClicked = {
+                showMenuScene(mainMenuScene)
+            }
+        }
+
         // Register all components that need refresh callbacks
         rootService.addRefreshables(
             this,
