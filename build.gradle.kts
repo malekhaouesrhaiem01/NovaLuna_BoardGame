@@ -14,7 +14,7 @@ group = "edu.udo.cs.sopra"
 version = "1.0"
 
 /* Change this to the version of the BGW you want to use */
-val bgwVersion = "0.9-30-b1fe993-SNAPSHOT"
+val bgwVersion = "0.9-41-e03cd89-SNAPSHOT"
 
 kotlin {
     jvmToolchain(11)
