@@ -274,7 +274,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      */
     fun updateTasks(): Unit {
         val game = rootService.currentGame
-        checkNotNull(game) { "No game is currently running." }
+        checkNotNull(game) { "No game is currently running."}
 
         val visitedTiles  =  mutableListOf<Tile>()
         val colorMap = mutableMapOf<entity.TileColour, Int>()
