@@ -104,6 +104,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
+        checkEndGame()
+
         onAllRefreshables { refreshAfterStartTurn() }
     }
 
@@ -271,8 +273,72 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @sample updateTasks()
      */
     fun updateTasks(): Unit {
-        // Method implementation
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game is currently running." }
+
+        val visitedTiles  =  mutableListOf<Tile>()
+        val colorMap = mutableMapOf<entity.TileColour, Int>()
+
+        // For every Tile update the remaining Task that need to be solved
+        for(tile in game.players[game.activePlayer].tiles){
+            if (tile.tasks.isNotEmpty()) {
+                // Get Surrounding Tiles and count the amount of colors it has as neighbours and store it in the Map colorMap
+                checkSurroundingTiles(tile,  visitedTiles, colorMap)
+            }
+
+            // Mark new Task that are fulfilled by removing them from the Task list of the Tile
+            var solvedTask = false
+            for(task in tile.tasks){
+                for (key in task.keys){
+                    try {
+                        if(task[key]!! > colorMap[key]!!){
+                            solvedTask = false
+                            break
+                        } else {
+                            solvedTask = true
+                        }
+                    } catch (_ : NoSuchElementException){}
+
+                }
+                if(solvedTask){tile.tasks.remove(task)}
+            }
+        }
     }
+
+    private fun checkSurroundingTiles(tile :Tile, visitedTiles : MutableList<Tile>, colorMap : MutableMap<entity.TileColour, Int>) : MutableMap<entity.TileColour, Int> {
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game is currently running." }
+
+        val coordinate = tile.position
+        val neighbors = mutableListOf<Tile>()
+
+        // Get neighbour Tile
+        // refTile == reference Tile
+        for(refTile in game.players[game.activePlayer].tiles){
+            when (refTile.position) {
+                Coordinate(coordinate!!.xCoord + 1, coordinate.yCoord) -> neighbors.add(refTile)
+                Coordinate(coordinate.xCoord - 1, coordinate.yCoord) -> neighbors.add(refTile)
+                Coordinate(coordinate.xCoord, coordinate.yCoord + 1) -> neighbors.add(refTile)
+                Coordinate(coordinate.xCoord, coordinate.yCoord - 1) -> neighbors.add(refTile)
+            }
+
+            //Checks for a sequence of the same color
+            if(tile.tileColour == refTile.tileColour && neighbors.contains(refTile)){
+                visitedTiles.add(refTile)
+                if(!colorMap.containsKey(refTile.tileColour)){
+                    colorMap.put(refTile.tileColour, 1)
+                } else {
+                    // Store the different colors and the amount the Tile has as a neighbour
+                    val temp = colorMap[refTile.tileColour]
+                    colorMap[refTile.tileColour] = temp!! + 1
+                }
+                checkSurroundingTiles(refTile, visitedTiles, colorMap)
+            }
+        }
+        return colorMap
+    }
+
+
     /**
      * Gets all valid moves for the active player in a *specific game state*.
      * This version is used by MCTS in [HardBotService] to explore hypothetical scenarios.
