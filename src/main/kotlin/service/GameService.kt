@@ -104,7 +104,10 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
-        checkEndGame()
+        if (game.tileTrack.isEmpty() && !game.drawPile.isEmpty())
+        {
+            rootService.playerActionService.refillWheel()
+        }
 
         onAllRefreshables { refreshAfterStartTurn() }
     }
@@ -141,6 +144,10 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
             }
         }
         game.activePlayer =  game.players.indexOf(currentPlayer)
+
+        if (checkEndGame()){
+            endGame()
+        }
 
         onAllRefreshables { refreshAfterEndTurn() }
     }
