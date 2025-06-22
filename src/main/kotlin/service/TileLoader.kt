@@ -29,7 +29,7 @@ class TileLoader {
                         id = id,
                         time = time,
                         tileColour = tileColour,
-                        tasks = listOf(task1, task2, task3),
+                        tasks = mutableListOf(task1, task2, task3),
                         position = null,
                         moonTrackPosition = null,
                         // Needs to be implemented
