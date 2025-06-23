@@ -25,6 +25,17 @@ application {
 }
 
 repositories {
+    maven {
+        url = uri("https://sopra-gitlab.cs.tu-dortmund.de/api/v4/projects/2347/packages/maven")
+        credentials(HttpHeaderCredentials::class) {
+            name = "Private-Token"
+            value = "glpat-hgGtbYdUceoyLL-zWveM"
+        }
+        authentication {
+            create<HttpHeaderAuthentication>("header")
+        }
+    }
+
     mavenCentral()
     sonatypeSnapshots()
     sopraPackageRegistry()
