@@ -57,8 +57,16 @@ class MCTSNode(
      * @return `true` if the game is over in this state; `false` otherwise.
      */
     fun isTerminal(): Boolean {
-        // TODO: Implement this by delegating to a method in your NovaLunaGame entity,
-        return false // Placeholder
+        // A player has placed all their tokens. We check this for ALL players, not just the active one.
+        if (gameState.players.any { it.tokenCount < 1 }) {
+            return true
+        }
+
+        // The tile track and draw pile are both empty, so no more moves can be made.
+        if (gameState.tileTrack.isEmpty() && gameState.drawPile.isEmpty()) {
+            return true
+        }
+        return false
     }
 
     /**
