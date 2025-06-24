@@ -33,6 +33,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         // Initializing the tileTrack with the top 11 tiles from the drawPile
         val tileTrack = drawPile.subList(0, 11)
         drawPile.subList(0, 11).clear()
+        // First index is null because there is no tile but the meeple
+        tileTrack.add(0, null)
 
         // setting heights according to beginning order
         players[0].height <- 4
@@ -251,7 +253,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         return possible
 
-
     }
 
     /**
@@ -301,7 +302,38 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      */
     fun getPossibleMovesForCurrentPlayer(): List<Move> {
         val game = rootService.currentGame ?: throw IllegalStateException("No game in progress.")
-        return getPossibleMovesForState(game)
+        // list of the tiles that a player can select
+        val possibleTiles = mutableListOf<Tile?>()
+        // when there are at most three tiles left, the tileTrack list can be used
+        // if there are more tiles left, the next three have to be computed
+        if(game.tileTrack.size <= 3){
+            possibleTiles.addAll(game.tileTrack)
+        }
+        else{
+            // Tile Track as a circular list
+            val circTileTrack = game.tileTrack + game.tileTrack
+            // index of the first position in the tile track after the meeple
+            var index = game.meeplePosition + 1
+            // go through every position in tileTrack after the meeple to seek the next three tiles
+            while(possibleTiles.size < 3){
+                if(circTileTrack[index] != null){
+                    possibleTiles.add(circTileTrack[index])
+                }
+                index += 1
+            }
+
+        }
+        // List with all possible coordinates where a tile can be placed
+        val possibleCoords = getPossiblePosition()
+
+        val possibleMoves = mutableListOf<Move>()
+        for(tile in possibleTiles){
+            for (coord in possibleCoords){
+                possibleMoves.add(Move(tile, coord))
+            }
+        }
+
+        return possibleMoves
     }
 
     /**

@@ -6,5 +6,5 @@ import tools.aqua.bgw.util.Coordinate
  * @property tile The tile that will be moved.
  * @property position The position the tile will be moved to.
  */
-data class Move(val tile: Tile,
+data class Move(val tile: Tile?,
                 val position: Coordinate)
