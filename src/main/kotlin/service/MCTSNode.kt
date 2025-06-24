@@ -61,6 +61,7 @@ class MCTSNode(
         if (gameState.players.any { it.tokenCount < 1 }) {
             return true
         }
+
         // The tile track and draw pile are both empty, so no more moves can be made.
         if (gameState.tileTrack.isEmpty() && gameState.drawPile.isEmpty()) {
             return true
