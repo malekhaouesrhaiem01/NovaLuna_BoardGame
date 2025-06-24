@@ -219,9 +219,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val occupied = mutableListOf<Coordinate>()
         for (tile in player.tiles)
         {
-            if(tile.position != null)
+            if(tile?.position != null)
             {
-                occupied.add(tile.position!!)
+                occupied.add(tile?.position!!)
             }
         }
 
@@ -355,13 +355,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @param selectedTile The tile that the current player just took from the moon wheel.
      * @throws IllegalStateException if no game is currently running or Tile that is not on the Tile Track is selected.
      */
-    fun moveMeepleAndPlayer(selectedTile: Tile) {
+    fun moveMeepleAndPlayer(selectedTile: Tile?) {
         val game =  rootService.currentGame
         checkNotNull(game)
 
 
         val currentPlayer =  game.players[game.activePlayer]
-        val newMeeplePos = selectedTile.moonTrackPosition
+        val newMeeplePos = selectedTile?.moonTrackPosition
         checkNotNull(newMeeplePos)
         val stepsForPlayer =  selectedTile.time
 

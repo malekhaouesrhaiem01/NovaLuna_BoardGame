@@ -24,7 +24,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         // add the selected tile to the list of tiles of the current player
         game.players[game.activePlayer].tiles.add(selectedTile)
         // add the coordinates where the tile is placed to the tile
-        selectedTile.position = position
+        selectedTile?.position = position
 
         // update position on the moon wheel of the token
         // and the position of the meeple on the tile track
