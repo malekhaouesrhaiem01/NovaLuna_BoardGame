@@ -293,7 +293,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
                 // Mark new Task that are fulfilled by removing them from the Task list of the Tile
                 var solvedTask = false
-                for(task in tile.tasks){
+                for(tupleTask in tile.tasks){
+                    val task = tupleTask.first
                     for (key in task.keys){
                         try {
                             if(task[key]!! > colorMap[key]!!){
@@ -305,7 +306,11 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
                         } catch (_ : NoSuchElementException){}
 
                     }
-                    if(solvedTask){tile.tasks.remove(task)}
+                    if(solvedTask){
+                        val index = tile.tasks.indexOf(tupleTask)
+                        tile.tasks.removeAt(index)
+                        tile.tasks.add(index,Pair(task,true))
+                    }
                 }
             }
         }
