@@ -102,6 +102,33 @@ class SelectBestChildTest {
     }
 
     /**
+     * test for prioritizing unvisited children
+     */
+    @Test
+    fun testSelectBestChildUnvisitedChildPrioritized() {
+        val gameState = rootService.currentGame ?: return
+        val parentNode = MCTSNode(gameState, untriedMoves = mutableListOf())
+        parentNode.visits = 50
+        val playerId = gameState.activePlayer
+
+        // Ein vollständig simulierter Knoten
+        val visitedChild = MCTSNode(gameState, parentNode, move, mutableListOf())
+        visitedChild.visits = 10
+        visitedChild.scores[playerId] = 50.0  // Durchschnitt: 5.0
+
+        // Ein unbesuchter Knoten
+        val unvisitedChild = MCTSNode(gameState, parentNode, move, mutableListOf())
+        unvisitedChild.visits = 0  // wichtig: 0 Visits
+
+        parentNode.children.addAll(listOf(visitedChild, unvisitedChild))
+
+        val bestChild = parentNode.selectBestChild()
+
+        // Erwartung: Der unbesuchte Knoten wird immer ausgewählt
+        assertEquals(unvisitedChild, bestChild)
+    }
+
+    /**
      * test for empty children list
      */
     @Test
