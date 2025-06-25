@@ -29,8 +29,6 @@ class SelectBestChildTest {
     private val players = mutableListOf(player1, player2, player3, player4)
     private val tile = Tile(1, 2, TileColour.BLUE, tileColourList, null,
         1)
-    private val tile2 = Tile(2, 3, TileColour.BLUE, tileColourList, null,
-        1)
     private val move= Move(tile, pos)
 
     /**
