@@ -1,4 +1,4 @@
-package edu.udo.cs.sopra.ntf.messages
+package service.message
 
 import edu.udo.cs.sopra.ntf.subtypes.Player
 import tools.aqua.bgw.net.common.GameAction
