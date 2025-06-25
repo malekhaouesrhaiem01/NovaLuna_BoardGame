@@ -163,34 +163,44 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
 
     /**
-     * Checks whether there are fewer than three tiles on the `tileTrack`
-     * and refills it with new tiles from the `drawPile` if necessary.
+     * Returns a list of the indices of the next three positions after the Meeple on the selection track.
+     *
+     * Rules:
+     * - If a tile is present at the position, its index is added to the list.
+     * - If the position is empty, then 'null' is added instead.
+     * - Wrapping is handled using modulo to loop back the beginning of the track if necessary.
      *
      * Preconditions:
-     * - A running game (`currentGame`) must exist.
+     * - A running Game must exist.
      *
      * Postconditions:
-     * - The `tileTrack` contains at least three tiles, provided enough tiles are available in the `drawPile`.
-     * - The appropriate refresh methods are called to update the GUI.
+     * - The returned list has exactly three elements (indices or nulls).
      *
      * @throws IllegalStateException If no game is currently active.
      *
-     * @return This method has no return value.
+     * @return A list of three elements, each being either a valid index Int or null.
      *
-     * @sample checkRefill()
+     * @sample getAvailableTiles()
      */
-    fun checkRefill() {
+    fun getAvailableTiles(): List<Int?>
+    {
         val game = rootService.currentGame
         checkNotNull(game)
 
-        if (game.tileTrack.size >= 3) return
+        val track = game.tileTrack
+        val result = mutableListOf<Int?>()
 
-        rootService.playerActionService.refillWheel()
+        var pos = game.meeplePosition
 
-        if (game.tileTrack.size < 3 && game.drawPile.isEmpty())
+        repeat(3)
         {
-            endGame()
+            pos = (pos + 1) % track.size
+
+            result += if (track[pos] != null) pos else null
         }
+
+        return result
+
     }
 
     /**
