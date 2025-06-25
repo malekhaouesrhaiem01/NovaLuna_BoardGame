@@ -31,7 +31,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val drawPile = rootService.tileLoader.readTiles().shuffled().toMutableList()
 
         // Initializing the tileTrack with the top 11 tiles from the drawPile
-        val tileTrack = drawPile.subList(0, 11)
+        val tileTrack: MutableList<Tile?> = drawPile.subList(0, 11).toMutableList()
         drawPile.subList(0, 11).clear()
         // First index is null because there is no tile but the meeple
         tileTrack.add(0, null)
