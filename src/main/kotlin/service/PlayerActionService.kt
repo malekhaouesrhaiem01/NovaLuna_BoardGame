@@ -32,6 +32,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         // check if tasks are now fulfilled
         rootService.gameService.updateTasks()
+
         // end the game if all tokens are placed
         // ! Passiert das in update tasks? !
         // if(rootService.gameService.checkEndGame()){
@@ -85,7 +86,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws NoSuchElementException If there's no undo state to go back to.
      */
     fun undo() {
-        // Method implementation
+        val game = checkNotNull(rootService.currentGame)
+
+        rootService.currentGame = game.previousState
+
     }
 
 

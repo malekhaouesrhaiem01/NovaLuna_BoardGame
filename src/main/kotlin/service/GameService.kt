@@ -17,7 +17,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalArgumentException or if the simulation speed is greater than 10.
      * @throws IllegalArgumentException If the number of players is not between 2 and 4
      */
-    fun startNewGame(players : List<Player>, simulationSpeed : Int) {
+    fun startNewGame(players : List<Player>, simulationSpeed : Int, randomOrder : Boolean = false) {
 
         // überprüfe, ob Anzahl der Spieler passt (2 bis 4)
         require(players.size in 2..4) { "Spieleranzahl muss zwischen 2 und 4 sein." }
@@ -36,11 +36,24 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         // First index is null because there is no tile but the meeple
         tileTrack.add(0, null)
 
-        // setting heights according to beginning order
-        players[0].height <- 4
-        players[1].height <- 3
-        players[2].height <- 2
-        players[3].height <- 1
+        // setting the start order random when randomOrder = true
+        if (randomOrder) {
+            val playersOrder = players.shuffled()
+            // setting heights according to beginning order
+            for (i in 0 until players.size - 1) {
+                playersOrder[i].height <- players.size - i
+            }
+        }
+        else{
+            // setting heights according to beginning order
+            for (i in 0 until players.size - 1) {
+                players[i].height <- players.size - i
+            }
+        }
+
+
+
+
 
         val game = NovaLunaGame(
             activePlayer = 0,
@@ -106,7 +119,21 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
+        // create at the beginning of the turn as a new NovaLunaGame with a deep copy
+        val newState = game.clone()
+        // set state at the beginning of the turn as the previousState from the new NovaLunaGame
+        newState.previousState = game
+        // set the new NovaLunaGame as the nextState of the original
+        game.nextState = newState
+
+        // replace the currentGame in the rootService with the new NovaLunaGame
+        rootService.currentGame = newState
+
+
         onAllRefreshables { refreshAfterStartTurn() }
+    }
+
+    fun saveForUndoRedo(game : NovaLunaGame) {
     }
 
     /**
