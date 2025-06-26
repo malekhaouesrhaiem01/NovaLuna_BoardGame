@@ -18,7 +18,7 @@ class NovaLunaNetworkClient(
     playerName: String,
     host: String,
     secret: String,
-    private val networkService: NovaLunaNetworkService
+    private val networkService: NetworkService
 ) : BoardGameClient(playerName, host, secret, NetworkLogging.VERBOSE) {
 
     var sessionID: String? = null
