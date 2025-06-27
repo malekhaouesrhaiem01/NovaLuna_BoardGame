@@ -18,7 +18,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @throws IllegalArgumentException or if the simulation speed is greater than 10.
      * @throws IllegalArgumentException If the number of players is not between 2 and 4
      */
-    fun startNewGame(players : List<Player>, simulationSpeed : Int) {
+    fun startNewGame(players : List<Player>, simulationSpeed : Int, randomOrder : Boolean = false) {
 
         // überprüfe, ob Anzahl der Spieler passt (2 bis 4)
         require(players.size in 2..4) { "Spieleranzahl muss zwischen 2 und 4 sein." }
@@ -32,14 +32,29 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val drawPile = rootService.tileLoader.readTiles().toMutableList()
 
         // Initializing the tileTrack with the top 11 tiles from the drawPile
-        val tileTrack = drawPile.take(11).toMutableList()
-        drawPile.removeAll(tileTrack)
+        val tileTrack: MutableList<Tile?> = drawPile.subList(0, 11).toMutableList()
+        drawPile.subList(0, 11).clear()
+        // First index is null because there is no tile but the meeple
+        tileTrack.add(0, null)
 
-        // setting heights according to beginning order
-        players[0].height <- 4
-        players[1].height <- 3
-        players[2].height <- 2
-        players[3].height <- 1
+        // setting the start order random when randomOrder = true
+        if (randomOrder) {
+            val playersOrder = players.shuffled()
+            // setting heights according to beginning order
+            for (i in 0 until players.size - 1) {
+                playersOrder[i].height <- players.size - i
+            }
+        }
+        else{
+            // setting heights according to beginning order
+            for (i in 0 until players.size - 1) {
+                players[i].height <- players.size - i
+            }
+        }
+
+
+
+
 
         val game = NovaLunaGame(
             activePlayer = 0,
@@ -105,12 +120,21 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
-        if (game.tileTrack.isEmpty() && !game.drawPile.isEmpty())
-        {
-            rootService.playerActionService.refillWheel()
-        }
+        // create at the beginning of the turn as a new NovaLunaGame with a deep copy
+        val newState = game.clone()
+        // set state at the beginning of the turn as the previousState from the new NovaLunaGame
+        newState.previousState = game
+        // set the new NovaLunaGame as the nextState of the original
+        game.nextState = newState
+
+        // replace the currentGame in the rootService with the new NovaLunaGame
+        rootService.currentGame = newState
+
 
         onAllRefreshables { refreshAfterStartTurn() }
+    }
+
+    fun saveForUndoRedo(game : NovaLunaGame) {
     }
 
     /**
@@ -171,34 +195,44 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
 
     /**
-     * Checks whether there are fewer than three tiles on the `tileTrack`
-     * and refills it with new tiles from the `drawPile` if necessary.
+     * Returns a list of the indices of the next three positions after the Meeple on the selection track.
+     *
+     * Rules:
+     * - If a tile is present at the position, its index is added to the list.
+     * - If the position is empty, then 'null' is added instead.
+     * - Wrapping is handled using modulo to loop back the beginning of the track if necessary.
      *
      * Preconditions:
-     * - A running game (`currentGame`) must exist.
+     * - A running Game must exist.
      *
      * Postconditions:
-     * - The `tileTrack` contains at least three tiles, provided enough tiles are available in the `drawPile`.
-     * - The appropriate refresh methods are called to update the GUI.
+     * - The returned list has exactly three elements (indices or nulls).
      *
      * @throws IllegalStateException If no game is currently active.
      *
-     * @return This method has no return value.
+     * @return A list of three elements, each being either a valid index Int or null.
      *
-     * @sample checkRefill()
+     * @sample getAvailableTiles()
      */
-    fun checkRefill() {
+    fun getAvailableTiles(): List<Int?>
+    {
         val game = rootService.currentGame
         checkNotNull(game)
 
-        if (game.tileTrack.size >= 3) return
+        val track = game.tileTrack
+        val result = mutableListOf<Int?>()
 
-        rootService.playerActionService.refillWheel()
+        var pos = game.meeplePosition
 
-        if (game.tileTrack.size < 3 && game.drawPile.isEmpty())
+        repeat(3)
         {
-            endGame()
+            pos = (pos + 1) % track.size
+
+            result += if (track[pos] != null) pos else null
         }
+
+        return result
+
     }
 
     /**
@@ -227,9 +261,9 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val occupied = mutableListOf<Coordinate>()
         for (tile in player.tiles)
         {
-            if(tile.position != null)
+            if(tile?.position != null)
             {
-                occupied.add(tile.position!!)
+                occupied.add(tile?.position!!)
             }
         }
 
@@ -260,7 +294,6 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         }
 
         return possible
-
 
     }
 
@@ -416,7 +449,38 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      */
     fun getPossibleMovesForCurrentPlayer(): List<Move> {
         val game = rootService.currentGame ?: throw IllegalStateException("No game in progress.")
-        return getPossibleMovesForState(game)
+        // list of the tiles that a player can select
+        val possibleTiles = mutableListOf<Tile?>()
+        // when there are at most three tiles left, the tileTrack list can be used
+        // if there are more tiles left, the next three have to be computed
+        if(game.tileTrack.size <= 3){
+            possibleTiles.addAll(game.tileTrack)
+        }
+        else{
+            // Tile Track as a circular list
+            val circTileTrack = game.tileTrack + game.tileTrack
+            // index of the first position in the tile track after the meeple
+            var index = game.meeplePosition + 1
+            // go through every position in tileTrack after the meeple to seek the next three tiles
+            while(possibleTiles.size < 3){
+                if(circTileTrack[index] != null){
+                    possibleTiles.add(circTileTrack[index])
+                }
+                index += 1
+            }
+
+        }
+        // List with all possible coordinates where a tile can be placed
+        val possibleCoords = getPossiblePosition()
+
+        val possibleMoves = mutableListOf<Move>()
+        for(tile in possibleTiles){
+            for (coord in possibleCoords){
+                possibleMoves.add(Move(tile, coord))
+            }
+        }
+
+        return possibleMoves
     }
 
     /**
@@ -438,13 +502,13 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @param selectedTile The tile that the current player just took from the moon wheel.
      * @throws IllegalStateException if no game is currently running or Tile that is not on the Tile Track is selected.
      */
-    fun moveMeepleAndPlayer(selectedTile: Tile) {
+    fun moveMeepleAndPlayer(selectedTile: Tile?) {
         val game =  rootService.currentGame
         checkNotNull(game)
 
 
         val currentPlayer =  game.players[game.activePlayer]
-        val newMeeplePos = selectedTile.moonTrackPosition
+        val newMeeplePos = selectedTile?.moonTrackPosition
         checkNotNull(newMeeplePos)
         val stepsForPlayer =  selectedTile.time
 

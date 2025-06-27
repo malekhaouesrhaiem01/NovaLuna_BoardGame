@@ -24,7 +24,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         // add the selected tile to the list of tiles of the current player
         game.players[game.activePlayer].tiles.add(selectedTile)
         // add the coordinates where the tile is placed to the tile
-        selectedTile.position = position
+        selectedTile?.position = position
 
         // update position on the moon wheel of the token
         // and the position of the meeple on the tile track
@@ -32,6 +32,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
 
         // check if tasks are now fulfilled
         rootService.gameService.updateTasks()
+
         // end the game if all tokens are placed
         // ! Passiert das in update tasks? !
         // if(rootService.gameService.checkEndGame()){
@@ -85,7 +86,10 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws NoSuchElementException If there's no undo state to go back to.
      */
     fun undo() {
-        // Method implementation
+        val game = checkNotNull(rootService.currentGame)
+
+        rootService.currentGame = game.previousState
+
     }
 
 
@@ -172,7 +176,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * - Two or fewer cards in the moonWheel
      *
      * Postconditions:
-     * - moonWheel is completely filled up (12 Cards)
+     * - moonWheel is completely filled up (11 Cards)
      *
      * Exceptions:
      * @throws IllegalStateException is thrown, when no game exists.
@@ -182,9 +186,19 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         val game = rootService.currentGame
         checkNotNull(game)
 
-        while(game.tileTrack.size < 11 && game.drawPile.isNotEmpty())
+        val filled = game.tileTrack.count {it != null}
+
+        if (filled > 2) return //falls mehr als 2 funktioniert es nicht.
+
+        var index = (game.meeplePosition + 1) % game.tileTrack.size //index startet 1 nach meeple
+
+        repeat(game.tileTrack.size -1) // -1 da Meeple pos nicht gefüllt werden kann
         {
-            game.tileTrack.add(game.drawPile.removeAt(0))
+            if (game.tileTrack[index] == null && game.drawPile.isNotEmpty())
+            {
+                game.tileTrack[index] = game.drawPile.removeAt(0)
+            }
+            index = (index + 1) % game.tileTrack.size
         }
 
         onAllRefreshables { refreshAfterRefill() }

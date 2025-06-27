@@ -53,7 +53,7 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
 
         // 2. Select a random move
         val randomMove = possibleMoves.random()
-        println("EasyBot selected move: Place tile ${randomMove.tile.id} at ${randomMove.position}")
+        println("EasyBot selected move: Place tile ${randomMove.tile?.id} at ${randomMove.position}")
 
         // 3. Execute the move
 
