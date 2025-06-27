@@ -15,5 +15,4 @@ class TileLoaderTest {
         assertTrue(tiles.size == 68)
     }
 
-
 }
