@@ -21,8 +21,8 @@ class UpdateTasksTest {
         val players = mutableListOf(
             (Player("Anna", 18, 0, false, PlayerType.HUMAN, PlayerColour.BLACK, mutableListOf(), 0)),
             (Player("Bob",18 ,0 , false, PlayerType.HUMAN, PlayerColour.WHITE, mutableListOf(), 0)),
-            (Player("Charles", 18, 0, false, PlayerType.HUMAN, PlayerColour.BLUE, mutableListOf(), 0))
-            (Player("David",18, 0, false, PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0))
+            (Player("David",18, 0, false, PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0)),
+            Player("Charles", 18, 0, false, PlayerType.HUMAN, PlayerColour.BLUE, mutableListOf(), 0)
         )
         rootService.gameService.startNewGame(players, 10)
 
@@ -31,7 +31,7 @@ class UpdateTasksTest {
     @Test
     fun testUpdateTasks(){
         val game = rootService.currentGame
-        val tiles = rootService.tileLoader.readTiles()
+        val tiles = game!!.tileTrack
         val currentPlayerHand = rootService.currentGame?.players?.first()?.tiles!!
         rootService.currentGame?.players?.first()?.tiles?.addAll(tiles.take(10))
 
@@ -52,8 +52,9 @@ class UpdateTasksTest {
         for(i in 1 ..  currentPlayerHand.size - 1){
             currentPlayerHand[i].position = cords[i]
         }
-        game!!.tileTrack.clear()
+        game.tileTrack.clear()
         rootService.gameService.updateTasks()
+
 
         assertEquals(true, currentPlayerHand[1].tasks[1].second)
 
