@@ -36,30 +36,21 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         // First index is null because there is no tile but the meeple
         tileTrack.add(0, null)
 
+        var playersOrder = players
         // setting the start order random when randomOrder = true
         if (randomOrder) {
-            val playersOrder = players.shuffled()
-            // setting heights according to beginning order
-            for (i in 0 until players.size - 1) {
-                playersOrder[i].height <- players.size - i
-            }
+            playersOrder = players.shuffled()
         }
-        else{
-            // setting heights according to beginning order
-            for (i in 0 until players.size - 1) {
-                players[i].height <- players.size - i
-            }
+        // setting heights according to beginning order
+        for (i in 0 until playersOrder.size - 1) {
+            playersOrder[i].height = playersOrder.size - i
         }
-
-
-
-
 
         val game = NovaLunaGame(
             activePlayer = 0,
             meeplePosition = 0,
             simulationSpeed = simulationSpeed,
-            players = players.toMutableList(),
+            players = playersOrder.toMutableList(),
             drawPile = drawPile,
             tileTrack = tileTrack
         )

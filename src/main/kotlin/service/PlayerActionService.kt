@@ -88,6 +88,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
     fun undo() {
         val game = checkNotNull(rootService.currentGame)
 
+
         rootService.currentGame = game.previousState
 
     }
