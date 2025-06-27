@@ -1,5 +1,8 @@
 package gui
 
+import entity.Player
+import entity.PlayerColour
+import entity.PlayerType
 import service.*
 import tools.aqua.bgw.core.*
 import tools.aqua.bgw.components.layoutviews.*
@@ -437,7 +440,76 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
             style.borderRadius = BorderRadius(15)
         }
     ).apply {
-        onMouseClicked = {}
+        onMouseClicked = {
+
+            val playersStartGame = mutableListOf<Player>()
+
+            val tokenCount = if (ifFirstGame) {
+                when (players.size) {
+                    3 -> 18
+                    4 -> 16
+                    else -> 21
+                }
+            } else {
+                21
+            }
+
+            val height = 0
+            val onlineMode = false
+            val moonTrackPosition = 0
+
+            for (player in players){
+                val name = player.defaultInput.text
+                if (name.isEmpty()) {
+                    throw IllegalArgumentException("Name cannot be empty")
+                }
+
+                val playerType = when (player.whichPlayer) {
+                    0 -> {
+                        PlayerType.HUMAN
+                    }
+
+                    1 -> {
+                        PlayerType.EASYBOT
+                    }
+
+                    else -> {
+                        PlayerType.HARDBOT
+                    }
+                }
+
+                val playerColor = when (player.color) {
+                    0 -> {
+                        PlayerColour.BLACK
+                    }
+
+                    1 -> {
+                        PlayerColour.WHITE
+                    }
+
+                    2 -> {
+                        PlayerColour.BLUE
+                    }
+
+                    3 -> {
+                        PlayerColour.ORANGE
+                    }
+
+                    else -> {
+                        throw IllegalArgumentException("Color must be selected")
+                    }
+                }
+
+                playersStartGame.add(Player(playerName = name,
+                                            tokenCount = tokenCount,
+                                            moonTrackPosition = moonTrackPosition,
+                                            onlineMode = onlineMode,
+                                            playerType = playerType,
+                                            playerColour = playerColor,
+                                            height = height))
+            }
+            rootService.gameService.startNewGame(playersStartGame, actualSpeed, ifRandom)
+        }
     }
 
 

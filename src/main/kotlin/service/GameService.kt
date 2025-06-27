@@ -66,6 +66,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
 
         rootService.currentGame = game
 
+        onAllRefreshables { refreshAfterStartGame() }
     }
 
     /**
@@ -170,6 +171,8 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         game.activePlayer =  game.players.indexOf(currentPlayer)
 
         onAllRefreshables { refreshAfterEndTurn() }
+
+        startTurn()
     }
 
     /**
