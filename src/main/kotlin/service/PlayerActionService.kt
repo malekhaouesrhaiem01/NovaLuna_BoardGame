@@ -33,6 +33,8 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         // check if tasks are now fulfilled
         rootService.gameService.updateTasks()
 
+        onAllRefreshables { refreshAfterTilePlayed() }
+
         // end the game if all tokens are placed
         // ! Passiert das in update tasks? !
         // if(rootService.gameService.checkEndGame()){

@@ -14,6 +14,8 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
     private var mainMenuScene: MainMenuScene
     private lateinit var offlineMenuScene: OfflineMenuScene
 
+    private val gameScene = GameScene(rootService)
+
     init {
         // Register all components that need refresh callbacks
 
@@ -31,11 +33,17 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
         rootService.addRefreshables(
             this,
             mainMenuScene,
-            offlineMenuScene
+            offlineMenuScene,
+            gameScene
         )
 
+        this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene)
 
+    }
+
+    override fun refreshAfterStartGame() {
+        hideMenuScene(500)
     }
 
 }
