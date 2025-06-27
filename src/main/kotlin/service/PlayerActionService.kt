@@ -176,7 +176,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * - Two or fewer cards in the moonWheel
      *
      * Postconditions:
-     * - moonWheel is completely filled up (12 Cards)
+     * - moonWheel is completely filled up (11 Cards)
      *
      * Exceptions:
      * @throws IllegalStateException is thrown, when no game exists.
@@ -186,9 +186,19 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
         val game = rootService.currentGame
         checkNotNull(game)
 
-        while(game.tileTrack.size < 11 && game.drawPile.isNotEmpty())
+        val filled = game.tileTrack.count {it != null}
+
+        if (filled > 2) return //falls mehr als 2 funktioniert es nicht.
+
+        var index = (game.meeplePosition + 1) % game.tileTrack.size //index startet 1 nach meeple
+
+        repeat(game.tileTrack.size -1) // -1 da Meeple pos nicht gefüllt werden kann
         {
-            game.tileTrack.add(game.drawPile.removeAt(0))
+            if (game.tileTrack[index] == null && game.drawPile.isNotEmpty())
+            {
+                game.tileTrack[index] = game.drawPile.removeAt(0)
+            }
+            index = (index + 1) % game.tileTrack.size
         }
 
         onAllRefreshables { refreshAfterRefill() }
