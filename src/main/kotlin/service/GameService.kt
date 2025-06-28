@@ -188,7 +188,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      *
      * Rules:
      * - If a tile is present at the position, its index is added to the list.
-     * - If the position is empty, then 'null' is added instead.
+     * - If the position is empty, the position will be skipped.
      * - Wrapping is handled using modulo to loop back the beginning of the track if necessary.
      *
      * Preconditions:
@@ -199,7 +199,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      *
      * @throws IllegalStateException If no game is currently active.
      *
-     * @return A list of three elements, each being either a valid index Int or null.
+     * @return A list of the next max. 3 available Tiles elements, each being a valid index Int.
      *
      * @sample getAvailableTiles()
      */
@@ -212,14 +212,18 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val result = mutableListOf<Int?>()
 
         var pos = game.meeplePosition
+        var checked = 0
 
-        repeat(3)
+        while(result.size < 3 && checked < track.size -1) //result ist max 3 oder alle pos abgecheckt.
         {
-            pos = (pos + 1) % track.size
+            pos = (pos +1) % track.size
 
-            result += if (track[pos] != null) pos else null
+            if(track[pos] != null) //nur wenn Tiles vorhanden und bei null wird geskippt.
+            {
+                result += pos
+            }
+            checked++
         }
-
         return result
 
     }
