@@ -46,9 +46,11 @@ class ExecuteEasyMoveTest {
      */
     @Test
     fun testExecuteEasyMoveRunsAndPlaysMove() {
+        assertNull(rootService.currentGame)
         // Spiel mit EASYBOT starten
         rootService.gameService.startNewGame(mutableListOf(easyBotPlayer, humanPlayer), 1)
-        val game = rootService.currentGame!!
+        val game = rootService.currentGame
+        assertNotNull(game)
         game.activePlayer = 0 // EASYBOT am Zug
         game.simulationSpeed = 1 // 1 Sekunde warten
 
@@ -82,8 +84,10 @@ class ExecuteEasyMoveTest {
      */
     @Test
     fun testExecuteEasyMoveThrowsIfNoPossibleMoves() {
+        assertNull(rootService.currentGame)
         rootService.gameService.startNewGame(mutableListOf(easyBotPlayer, humanPlayer), 1)
-        val game = rootService.currentGame!!
+        val game = rootService.currentGame
+        assertNotNull(game)
         game.activePlayer = 0 // EASYBOT am Zug
         game.simulationSpeed = 1
         val bot = EasyBotService(rootService)
@@ -102,8 +106,10 @@ class ExecuteEasyMoveTest {
      */
     @Test
     fun testExecuteEasyMoveThrowsIfCurrentPlayerIsNotEasyBot() {
+        assertNull(rootService.currentGame)
         rootService.gameService.startNewGame(mutableListOf(humanPlayer, easyBotPlayer), 1)
-        val game = rootService.currentGame!!
+        val game = rootService.currentGame
+        assertNotNull(game)
         game.activePlayer = 0 // Human am Zug (kein EASYBOT)
         game.simulationSpeed = 1
         val bot = EasyBotService(rootService)
@@ -118,8 +124,10 @@ class ExecuteEasyMoveTest {
      */
     @Test
     fun testExecuteEasyMoveWithDifferentSimulationSpeeds() {
+        assertNull(rootService.currentGame)
         rootService.gameService.startNewGame(mutableListOf(easyBotPlayer, humanPlayer), 1)
-        val game = rootService.currentGame!!
+        val game = rootService.currentGame
+        assertNotNull(game)
         game.activePlayer = 0 // EASYBOT am Zug
         val bot = EasyBotService(rootService)
         val speeds = listOf(0, 1, 3) // 0 Sekunden, 1 Sekunde, 3 Sekunden
