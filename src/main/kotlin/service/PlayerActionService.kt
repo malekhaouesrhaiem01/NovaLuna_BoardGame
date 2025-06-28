@@ -2,7 +2,7 @@ package service
 import entity.Move
 import tools.aqua.bgw.util.Coordinate
 
-class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
+open class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
 
     /**
      * Allows the current player to select a tile from the Moon Wheel at the specified index
@@ -57,7 +57,7 @@ class PlayerActionService(private val rootService: RootService) : AbstractRefres
      * @throws IllegalStateException If no game is active or the tile from the move is not available.
      * @throws IllegalArgumentException If the move is invalid.
      */
-    fun playTile(move: Move) {
+    open fun playTile(move: Move) {
         val game = checkNotNull(rootService.currentGame)
         // get the index of the selected tile in the [Move] object
         val tileIndex = game.tileTrack.indexOf(move.tile)
