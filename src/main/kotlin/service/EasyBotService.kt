@@ -1,7 +1,9 @@
 package service
 
 import entity.PlayerType
-
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import javax.swing.SwingUtilities
 /**
  * Service to handle the easy bot's logic.
  * The bot selects a move randomly from all available legal moves.
@@ -10,6 +12,7 @@ import entity.PlayerType
  * [GameService] and [PlayerActionService].
  */
 class EasyBotService(private val rootService: RootService) : AbstractRefreshingService() {
+
 
     /**
      * Executes a complete turn for the easy bot.
@@ -40,7 +43,8 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
         if (currentPlayer.playerType != PlayerType.EASYBOT) {
             throw IllegalStateException("executeEasyMove called, but the current player is not an EASYBOT.")
         }
-
+        val waitTime = game.simulationSpeed.toLong()
+        val scheduler = Executors.newSingleThreadScheduledExecutor()
         // 1. Get all possible moves from the single source of truth
         val possibleMoves = gameService.getPossibleMovesForCurrentPlayer()
 
@@ -50,13 +54,17 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
             // For now, we treat it as an unexpected state as per KDoc.
             throw IllegalStateException("EASYBOT's turn, but no moves are available.")
         }
+        scheduler.schedule({
+            // 2. Select a random move
+            val randomMove = possibleMoves.random()
+            println("EasyBot selected move: Place tile ${randomMove.tile?.id} at ${randomMove.position}")
 
-        // 2. Select a random move
-        val randomMove = possibleMoves.random()
-        println("EasyBot selected move: Place tile ${randomMove.tile?.id} at ${randomMove.position}")
+            // 3. Execute the move
+            SwingUtilities.invokeLater {
+                playerActionService.playTile(randomMove)
+            }
 
-        // 3. Execute the move
-
+        }, waitTime, TimeUnit.SECONDS)
     }
-
 }
+

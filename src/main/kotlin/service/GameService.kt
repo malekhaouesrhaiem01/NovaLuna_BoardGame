@@ -6,7 +6,7 @@ import entity.Move
 import entity.Tile
 import tools.aqua.bgw.util.Coordinate
 
-class GameService(private val rootService: RootService) : AbstractRefreshingService() {
+open class GameService(private val rootService: RootService) : AbstractRefreshingService() {
     /**
      * Starts a new Nova Luna game with the given players and simulation speed.
      * the game state + drawpile + tile track are initialized.
@@ -335,7 +335,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
      * @return A list of all valid [Move] objects. The list can be empty if no moves are possible.
      * @throws IllegalStateException if no game is currently running.
      */
-    fun getPossibleMovesForCurrentPlayer(): List<Move> {
+    open fun getPossibleMovesForCurrentPlayer(): List<Move> {
         val game = rootService.currentGame ?: throw IllegalStateException("No game in progress.")
         // list of the tiles that a player can select
         val possibleTiles = mutableListOf<Tile?>()
