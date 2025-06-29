@@ -15,6 +15,13 @@ data class Player(val playerName : String,
                   val onlineMode: Boolean,
                   val playerType: PlayerType,
                   val playerColour: PlayerColour,
-                  val tiles: MutableList<Tile> = mutableListOf(),
+                  val tiles: MutableList<Tile?> = mutableListOf(),
                   var height : Int
-)
+) : Cloneable{
+    public override fun clone(): Player {
+        val copiedTiles = tiles.map { it?.copy() }.toMutableList()
+        return Player(this.playerName, this.tokenCount, this.moonTrackPosition,
+            this.onlineMode, this.playerType, this.playerColour, copiedTiles,
+            this.height)
+    }
+}

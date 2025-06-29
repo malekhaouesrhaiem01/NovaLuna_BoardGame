@@ -6,12 +6,12 @@ import entity.TileColour
 
 class TileLoader {
 
-    fun readTiles(filePath : String = "/nl_tiles.csv") : MutableList<Tile> {
+    fun readTiles(filePath : String = "/nl_tiles.csv") : MutableList<Tile?> {
         // search for nl_tiles.csv in resources
         val fileURL = object {}.javaClass.getResourceAsStream( filePath )
             ?: throw IllegalArgumentException("file not found: $filePath")
 
-        val novaLunaTiles = mutableListOf<Tile>()
+        val novaLunaTiles = mutableListOf<Tile?>()
 
         fileURL.bufferedReader().useLines { lines ->
             // drop the first line with column names
@@ -29,7 +29,7 @@ class TileLoader {
                         id = id,
                         time = time,
                         tileColour = tileColour,
-                        tasks = listOf(task1, task2, task3),
+                        tasks = listOf(Pair(task1, false), Pair(task2, false), Pair(task3, false)),
                         position = null,
                         moonTrackPosition = null,
                         // Needs to be implemented

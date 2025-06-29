@@ -15,7 +15,7 @@ import tools.aqua.bgw.util.Coordinate
 data class Tile(val id : Int,
                 val time: Int,
                 val tileColour: TileColour,
-                val tasks: List<Map<TileColour, Int>>,
+                var tasks: List<Pair<Map<TileColour, Int>, Boolean>>,
                 var position: Coordinate? = null,
                 var moonTrackPosition: Int?
 )

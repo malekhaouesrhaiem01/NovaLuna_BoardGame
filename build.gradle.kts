@@ -14,7 +14,7 @@ group = "edu.udo.cs.sopra"
 version = "1.0"
 
 /* Change this to the version of the BGW you want to use */
-val bgwVersion = "0.9-30-b1fe993-SNAPSHOT"
+val bgwVersion = "0.9-41-e03cd89-SNAPSHOT"
 
 kotlin {
     jvmToolchain(11)
@@ -25,6 +25,17 @@ application {
 }
 
 repositories {
+    maven {
+        url = uri("https://sopra-gitlab.cs.tu-dortmund.de/api/v4/projects/2347/packages/maven")
+        credentials(HttpHeaderCredentials::class) {
+            name = "Private-Token"
+            value = "glpat-hgGtbYdUceoyLL-zWveM"
+        }
+        authentication {
+            create<HttpHeaderAuthentication>("header")
+        }
+    }
+
     mavenCentral()
     sonatypeSnapshots()
     sopraPackageRegistry()
@@ -35,6 +46,7 @@ dependencies {
     implementation(group = "tools.aqua", name = "bgw-gui", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-common", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-client", version = bgwVersion)
+    implementation(group = "edu.udo.cs.sopra", name = "ntf", version = "1.0")
 }
 
 /* This is how you can add the HowToPlay.pdf to the distribution zip file */

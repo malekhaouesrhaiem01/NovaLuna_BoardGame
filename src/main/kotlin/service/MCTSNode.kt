@@ -1,6 +1,8 @@
 package service
 
 import entity.*
+import kotlin.math.ln
+import kotlin.math.sqrt
 
 /**
  * Represents a single node in the Monte Carlo Search Tree.
@@ -55,8 +57,16 @@ class MCTSNode(
      * @return `true` if the game is over in this state; `false` otherwise.
      */
     fun isTerminal(): Boolean {
-        // TODO: Implement this by delegating to a method in your NovaLunaGame entity,
-        return false // Placeholder
+        // A player has placed all their tokens. We check this for ALL players, not just the active one.
+        if (gameState.players.any { it.tokenCount < 1 }) {
+            return true
+        }
+
+        // The tile track and draw pile are both empty, so no more moves can be made.
+        if (gameState.tileTrack.isEmpty() && gameState.drawPile.isEmpty()) {
+            return true
+        }
+        return false
     }
 
     /**
@@ -82,7 +92,23 @@ class MCTSNode(
      */
     fun selectBestChild(explorationConstant: Double = 1.41): MCTSNode? {
         if (children.isEmpty()) return null
-        // TODO: Calculate UCT value for each child and return the one with the maximum value.
-        return children.firstOrNull() // Placeholder
+
+        val parentVisits = visits.toDouble()
+        if (parentVisits == 0.0) return children.random()
+
+        val playerId = gameState.activePlayer  // Spieler, für den wir die Bewertung machen
+
+        return children.maxByOrNull { child ->
+            val childVisits = child.visits.toDouble()
+            val playerScore = child.scores[playerId] ?: 0.0
+
+            if (childVisits == 0.0) {
+                Double.MAX_VALUE
+            } else {
+                val exploitation = playerScore / childVisits
+                val exploration = explorationConstant * sqrt(ln(parentVisits) / childVisits)
+                exploitation + exploration
+            }
+        }
     }
 }

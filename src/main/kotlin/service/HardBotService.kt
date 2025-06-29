@@ -52,7 +52,7 @@ class HardBotService(private val rootService: RootService) : AbstractRefreshingS
         val bestMove = findBestMoveInternal(rootState, timeLimitMillis)
 
         // TODO: Execute the found move using the PlayerActionService.
-        println("HardBot selected move: Place tile ${bestMove.tile.id} at ${bestMove.position}")
+        println("HardBot selected move: Place tile ${bestMove.tile?.id} at ${bestMove.position}")
     }
 
     /**
