@@ -227,7 +227,7 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
         val occupied = mutableListOf<Coordinate>()
         for (tile in player.tiles)
         {
-            if(tile.position != null)
+            if(tile!!.position != null)
             {
                 occupied.add(tile.position!!)
             }
@@ -283,106 +283,98 @@ class GameService(private val rootService: RootService) : AbstractRefreshingServ
     fun updateTasks(): Unit {
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running."}
-        val editTask : MutableMap<Tile, List<Boolean>> = mutableMapOf()
+        val renewTask = mutableListOf<MutableList<Pair<Map<TileColour, Int>, Boolean>>>()
 
-        // For every Tile update the remaining Task that need to be solved
-        // Iterate through every Tile in Players Hand
-        for(tile in game.players[game.activePlayer].tiles){
-            val booleanList = mutableListOf<Boolean>()
-            // Access every Task of the current Tile
-            for(task in tile.tasks){
-                // In case the Task is Empty nothing should happen else check for the surrounding Tiles
-                if (!task.first.isEmpty()) {
-                    val visitedTiles  =  mutableListOf<Tile>()
-                    val colorMap = mutableMapOf<entity.TileColour, Int>()
-                    // Get Surrounding Tiles and count the amount of colors it has as neighbours and store it in the Map colorMap
-                    checkSurroundingTiles(tile,  visitedTiles, colorMap)
+        //Iterate through every Tile in Players hand
+        for (tile in game.players[game.activePlayer].tiles){
+            val editTask : MutableMap<Map<TileColour, Int>, List<Boolean>> = mutableMapOf()
+            val visitedTiles = mutableListOf<Tile>()
+            val colorMap = mutableMapOf<TileColour, Int>()
+            if (tile != null){
+                // Check for the number of the colors that are neighbours of that Tile
+                checkSurroundingTiles(tile, visitedTiles, colorMap)
 
-                    // Mark new Task that are fulfilled by removing them from the Task list of the Tile
-                    var solvedTask = false
-                    // For every (Task, Boolean) Pair
-                    for(tupleTask in tile.tasks){
-                        // Take the first Item in the Pair (the TAsk)
-                        val task = tupleTask.first
-                        // Iterate through every color in the Map
-                        for (key in task.keys){
-                            // Try to match every colors needed amount, to the amount of the existing color neighbours(colorMap)
-                            try {
-                                if(task[key]!! > colorMap[key]!!){
-                                    solvedTask = false
-                                    break
+                //For every Task check if its completed
+                for (taskPair in tile.tasks){
+                    val booleanList = mutableListOf<Boolean>()
+
+                    // Get the Task from the Task Pair
+                    val task = taskPair.first
+                    if (task.isNotEmpty()){
+                        for(color in task.keys){
+                            if (colorMap.contains(color)){
+                                if(task[color]!! > colorMap[color]!! ){
+                                    booleanList.add(false)
                                 } else {
-                                    solvedTask = true
+                                    booleanList.add(true)
                                 }
-                            } catch (_ : Exception){}
+                            } else {
+                                booleanList.add(false)
+                            }
                         }
-                        // For every Task that is successfully completed, add true or false in the Boolean List
-                        booleanList.add(solvedTask)
+                        editTask.put(task, booleanList)
                     }
                 }
-            }
-           editTask.put(tile, booleanList)
-        }
-
-        markTask(editTask)
-    }
-
-    private fun markTask(editTask: MutableMap<Tile, List<Boolean>>) {
-
-        //For every Tile in editTask (The Tile and the List of boolean to know which task is finished)
-        for(tile in editTask.keys) {
-            val updateTask :  MutableList<Pair<Map<TileColour, Int>, Boolean>> = mutableListOf()
-            val booleanList = editTask[tile]!!
-            // If the boolean List isn't empty then there are Task to be updated
-            if (booleanList.isNotEmpty()){
-                var i = 0
-
-                // For every Task Pair created a new task Pair with the new Boolean value for each Task
-                for (task in tile.tasks){
-                    updateTask.add(Pair(task.first, booleanList[i]))
-                    i++
-                }
-                // Set the new Task List for the Tile
-                tile.tasks = updateTask
+                tile.tasks = createPairs(editTask)
             }
         }
     }
 
-    private fun checkSurroundingTiles(tile :Tile, visitedTiles : MutableList<Tile>, colorMap : MutableMap<entity.TileColour, Int>) {
+    fun createPairs(editTask:  MutableMap<Map<TileColour, Int>, List<Boolean>>) :   MutableList<Pair<Map<TileColour, Int>, Boolean>> {
+        val pairList = mutableListOf<Pair<Map<TileColour, Int> , Boolean>>()
+        for(task in editTask.keys){
+            val booleanList = editTask[task]
+            if (booleanList!!.contains(false)){
+                pairList.add(Pair(task, false))
+            } else {
+                pairList.add(Pair(task, true))
+            }
+        }
+        return pairList
+    }
+
+    private fun checkSurroundingTiles(tile :Tile, visitedTiles : MutableList<Tile>, colorMap : MutableMap<TileColour, Int>) {
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
         val coordinate = tile.position
         val neighbors = mutableListOf<Tile>()
+        visitedTiles.add(tile)
 
         // Get neighbour Tile
-        // refTile == reference Tile
-        for(refTile in game.players[game.activePlayer].tiles){
-            try {
-                when (refTile.position) {
-                    Coordinate(coordinate!!.xCoord + 1, coordinate.yCoord) -> neighbors.add(refTile)
-                    Coordinate(coordinate.xCoord - 1, coordinate.yCoord) -> neighbors.add(refTile)
-                    Coordinate(coordinate.xCoord, coordinate.yCoord + 1) -> neighbors.add(refTile)
-                    Coordinate(coordinate.xCoord, coordinate.yCoord - 1) -> neighbors.add(refTile)
-                }
-            } catch (_ : NullPointerException){}
+        // neighbourTile
+        for(neighbourTile in game.players[game.activePlayer].tiles){
+            if (neighbourTile != null){
+                try {
+                    when (neighbourTile.position) {
+                        Coordinate(coordinate!!.xCoord + 1, coordinate.yCoord) -> neighbors.add(neighbourTile)
+                        Coordinate(coordinate.xCoord - 1, coordinate.yCoord) -> neighbors.add(neighbourTile)
+                        Coordinate(coordinate.xCoord, coordinate.yCoord + 1) -> neighbors.add(neighbourTile)
+                        Coordinate(coordinate.xCoord, coordinate.yCoord - 1) -> neighbors.add(neighbourTile)
+                    }
+                } catch (_ : NullPointerException){}
+            }
         }
 
-        // neighbor == neighbor Tile
-        for(neighbor in neighbors){
-            if(!colorMap.containsKey(neighbor.tileColour)){
-                colorMap.put(neighbor.tileColour, 1)
-            } else {
-                // Store the different colors and the amount the Tile has as a neighbour
-                val temp = colorMap[neighbor.tileColour]
-                colorMap[neighbor.tileColour] = temp!! + 1
+        for(neighborTile in neighbors){
+            if (!visitedTiles.contains(neighborTile)){
+                if (!colorMap.contains(neighborTile.tileColour)){
+                    colorMap.put(neighborTile.tileColour, 1)
+                } else {
+                    val temp = colorMap[neighborTile.tileColour]!!
+                    colorMap.replace(neighborTile.tileColour, temp, temp + 1)
+                }
             }
-
-            //Checks for a sequence of the same color
-            if(tile.tileColour == neighbor.tileColour && neighbors.contains(neighbor) && !visitedTiles.contains(neighbor)){
-                visitedTiles.add(tile)
-                visitedTiles.add(neighbor)
-                checkSurroundingTiles(neighbor, visitedTiles, colorMap)
+            if(neighborTile.tileColour == tile.tileColour){
+                var counter = 0
+                for (visited in visitedTiles){
+                   if (visited == neighborTile){
+                       counter++
+                   }
+                }
+                if (counter < 2){
+                    checkSurroundingTiles(neighborTile, visitedTiles, colorMap)
+                }
             }
         }
     }

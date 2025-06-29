@@ -49,14 +49,14 @@ class UpdateTasksTest {
             Coordinate(2,0),
         )
 
-        for(i in 1 ..  currentPlayerHand.size - 1){
-            currentPlayerHand[i].position = cords[i]
+        for(i in 0 ..  currentPlayerHand.size - 1){
+            currentPlayerHand[i]!!.position = cords[i]
         }
         game.tileTrack.clear()
         rootService.gameService.updateTasks()
 
 
-        assertEquals(true, currentPlayerHand[1].tasks[1].second)
+        assertEquals(true, currentPlayerHand[1]!!.tasks[0].second)
 
 
     }
