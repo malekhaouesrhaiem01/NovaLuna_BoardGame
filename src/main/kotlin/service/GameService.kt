@@ -4,6 +4,7 @@ import entity.NovaLunaGame
 import entity.Player
 import entity.Move
 import entity.Tile
+import entity.TileColour
 import tools.aqua.bgw.util.Coordinate
 
 open class GameService(private val rootService: RootService) : AbstractRefreshingService() {

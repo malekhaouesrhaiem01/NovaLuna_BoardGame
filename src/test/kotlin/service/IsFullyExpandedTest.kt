@@ -14,8 +14,8 @@ class IsFullyExpandedTest {
     }
 
     private val tileList:MutableList<Tile?> = mutableListOf()
-    private val tileColourList: List<Map<TileColour, Int>> = listOf(
-        mapOf(TileColour.RED to 3, TileColour.BLUE to 2))
+    private val tileColourList: List<Pair<Map<TileColour, Int>, Boolean>> = listOf(Pair(
+        mapOf(TileColour.RED to 3, TileColour.BLUE to 2), false))
     private val pos: Coordinate = Coordinate(0,0)
     private val player1 = Player("Alice", 18,0,
         false, PlayerType.HUMAN, PlayerColour.BLACK, tileList, 1)

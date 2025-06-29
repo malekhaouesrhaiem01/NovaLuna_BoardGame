@@ -326,7 +326,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         tileGridPane[0,0] = circleTL
 
         for ((index, task) in tile.tasks.withIndex()) {
-            val taskPane = createTask(task)
+            val taskPane = createTask(task.first)
 
             val xy = when(index) {
                 0 -> Pair(1, 0)
