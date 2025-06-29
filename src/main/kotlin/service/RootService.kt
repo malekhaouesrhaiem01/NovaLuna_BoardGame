@@ -9,9 +9,9 @@ import entity.NovaLunaGame
  */
 class RootService{
     /** The connected [GameService] for this rootService */
-    val gameService = GameService(this)
+    var gameService = GameService(this)
     /** The connected [PlayerActionService] for this rootService */
-    val playerActionService = PlayerActionService(this)
+    var playerActionService = PlayerActionService(this)
     /** The connected [TileLoader] for this rootService */
     val tileLoader = TileLoader()
 
