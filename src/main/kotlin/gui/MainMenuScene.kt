@@ -90,7 +90,7 @@ class MainMenuScene (private val rootService: RootService) : MenuScene(1920, 108
         }
     )
 
-    private val hostButton = Button(
+    val hostButton = Button(
         text = "Host Game",
         width = 326,
         height = 100,
@@ -102,7 +102,7 @@ class MainMenuScene (private val rootService: RootService) : MenuScene(1920, 108
         }
     )
 
-    private val joinButton = Button(
+    val joinButton = Button(
         text = "Join Game",
         width = 326,
         height = 100,

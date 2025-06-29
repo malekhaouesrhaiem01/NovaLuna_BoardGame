@@ -4,36 +4,62 @@ import service.Refreshable
 import service.RootService
 import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
+import tools.aqua.bgw.components.uicomponents.Label
 import tools.aqua.bgw.components.uicomponents.TextField
 import tools.aqua.bgw.components.uicomponents.UIComponent
+import tools.aqua.bgw.core.Alignment
 import tools.aqua.bgw.core.Color
 import tools.aqua.bgw.core.MenuScene
+import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 
 class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
-    val joinGameSceneTwo = JoinGameSceneTwo(rootService)
+    //val joinGameSceneTwo = JoinGameSceneTwo(rootService)
 
     /**
      * Container pane for centering all UI components.
      */
     private val contentPane = Pane<UIComponent>(
-        width = 600,
-        height = 500,
-        posX = 660,
-        posY = 290,
+        width = 1920,
+        height = 1080,
+        posX = 0,
+        posY = 0,
+        visual = ImageVisual("back_image.png")
+    )
+
+    private val labelNovaLuna = Label(
+        posX = 706,
+        posY = 62,
+        width = 509,
+        height = 94,
+        text = "Nova Luna",
+        alignment = Alignment.TOP_CENTER,
+        font = Font(96, Color(0x000000), "Aldrich")
+    )
+
+    private val backToken = Label(
+        posX = 684,
+        posY = 217,
+        width = 553,
+        height = 785,
+        visual = ColorVisual(Color(0xEEC07E)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
     )
 
     private val sessionInput = TextField(
         prompt = "Session ID",
         width = 400,
-        height = 60,
-        posX = 100,
-        posY = 20,
-        font = Font(18, Color.WHITE),
-        visual = ColorVisual(Color(0x49585D))
+        height = 90,
+        posX = 760,
+        posY = 267,
+        font = Font(48, Color.WHITE,"Space Grotesk" ),
+        visual = ColorVisual(Color(0xC1780C)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
     )
 
     /**
@@ -42,60 +68,72 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
     private val playerInput = TextField(
         prompt = "Player Name",
         width = 400,
-        height = 60,
-        posX = 100,
-        posY = 100,
-        font = Font(18, Color.WHITE),
-        visual = ColorVisual(Color(0x49585D))
+        height = 90,
+        posX = 760,
+        posY = 377,
+        font = Font(48, Color.WHITE,"Space Grotesk" ),
+        visual = ColorVisual(Color(0xC1780C)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
     )
 
     private val urlInput = TextField(
         prompt = "URL",
         width = 400,
-        height = 60,
-        posX = 100,
-        posY = 180,
-        font = Font(18, Color.WHITE),
-        visual = ColorVisual(Color(0x49585D))
+        height = 90,
+        posX = 760,
+        posY = 487,
+        font = Font(48, Color.WHITE,"Space Grotesk" ),
+        visual = ColorVisual(Color(0xC1780C)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
     )
 
     val easyButton = Button(
         text = "easy",
-        width = 90,
-        height = 50,
-        posX = 200,
-        posY = 260,
-        font = Font(18, Color.WHITE),
-        visual = ColorVisual(Color(0xd53032))
+        width = 180,
+        height = 90,
+        posX = 760,
+        posY = 607,
+        font = Font(48, Color.WHITE,"Space Grotesk" ),
+        visual = ColorVisual(Color(0xC1780C)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
     )
     val hardButton = Button(
         text = "hard",
-        width = 90,
-        height = 50,
-        posX = 306,
-        posY = 260,
-        font = Font(18, Color.WHITE),
-        visual = ColorVisual(Color(0xd53032))
+        width = 180,
+        height = 90,
+        posX = 975,
+        posY = 607,
+        font = Font(48, Color.WHITE,"Space Grotesk" ),
+        visual = ColorVisual(Color(0xC1780C)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
     )
 
     val joinButton = Button(
         text = "join",
-        width = 200,
-        height = 50,
-        posX = 200,
-        posY = 340,
-        font = Font(18, Color.WHITE),
-        visual = ColorVisual(Color(0xd53032))
+        width = 400,
+        height = 90,
+        posX = 760,
+        posY = 727,
+        font = Font(48, Color.WHITE,"Space Grotesk" ),
+        visual = ColorVisual(Color(0xC1780C)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
     )
 
     val backButton = Button(
         text = "back",
-        width = 200,
-        height = 50,
-        posX = 200,
-        posY = 410,
-        font = Font(18, Color.WHITE),
-        visual = ColorVisual(Color(0x48a43f))
+        width = 400,
+        height = 90,
+        posX = 760,
+        posY = 847,
+        font = Font(48, Color.WHITE,"Space Grotesk" ),
+        visual = ColorVisual(Color(0xC1780C)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
     )
 
     init {
@@ -103,6 +141,6 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         background = ImageVisual("OfflineMenu.png")
 
         addComponents(contentPane)
-        contentPane.addAll( backButton, joinButton, sessionInput, playerInput, urlInput, easyButton, hardButton)
+        contentPane.addAll(backToken, backButton, joinButton, sessionInput, playerInput, urlInput, easyButton, hardButton, labelNovaLuna )
     }
 }

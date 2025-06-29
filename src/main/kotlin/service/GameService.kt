@@ -173,10 +173,11 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
     * Triggers [refreshAfterGameEnd] to update the UI with the winner name and players  scores  .
     * @throws IllegalStateException if no game is currently active or the game is already ended
     */
-    fun endGame(){
+    fun endGame(winner: Player){
         // Passiert hier irgendwas auf Entity-Ebene?
         // Eigentlich muss doch nur auf GUI Ebene die Anzahl der Tokens
         // der einzelnen Spieler angezeigt werden
+        onAllRefreshables { refreshAfterGameEnd(winner) }
         onAllRefreshables { refreshAfterRageQuit() }
         rootService.currentGame = null
     }
