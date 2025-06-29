@@ -83,7 +83,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         if(game.players[game.activePlayer].tokenCount < 1){
             return true
         }
-        else if(game.tileTrack.size == 0 && game.drawPile.size == 0){
+        else if(game.tileTrack.isEmpty() && game.drawPile.isEmpty()){
             return true
         }
 
@@ -112,6 +112,16 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
+        var checkAutoRefill = true
+        for (tile in game.tileTrack){
+            if (tile != null) {
+                checkAutoRefill = false
+                break
+            }
+        }
+        if (checkAutoRefill) {
+            rootService.playerActionService.refillWheel()
+        }
         // create at the beginning of the turn as a new NovaLunaGame with a deep copy
         val newState = game.clone()
         // set state at the beginning of the turn as the previousState from the new NovaLunaGame
@@ -256,7 +266,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         {
             if(tile?.position != null)
             {
-                occupied.add(tile?.position!!)
+                occupied.add(tile.position!!)
             }
         }
 
@@ -306,7 +316,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      *
      * @sample updateTasks()
      */
-    fun updateTasks(): Unit {
+    fun updateTasks() {
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running."}
 
@@ -522,7 +532,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         //Update Meeple Position and Remove Tile from that Position
         game.meeplePosition = newMeeplePos
+        val index = game.tileTrack.indexOf(selectedTile)
         game.tileTrack.remove(selectedTile)
+        game.tileTrack.add(index,null)
         selectedTile.moonTrackPosition = null
 
 
