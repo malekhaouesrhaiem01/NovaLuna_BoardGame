@@ -49,6 +49,16 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
             style.borderRadius = BorderRadius(15)
         }
     )
+    val visualOff = ColorVisual(Color(193, 120, 12)).apply {
+        style.borderRadius = BorderRadius(15)
+        transparency = 0.5
+    }
+    val visualOn = ColorVisual(Color.GREEN).apply {
+        style.borderRadius = BorderRadius(15)
+        transparency = 0.5
+    }
+
+    var whichPlayer = 0 // 0 = human, 1 = easy, 2 = hard
 
     private val sessionInput = TextField(
         prompt = "Session ID",
@@ -76,6 +86,7 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
             style.borderRadius = BorderRadius(15)
         }
     )
+    val playerName = playerInput.text
 
     private val urlInput = TextField(
         prompt = "URL",
@@ -137,8 +148,40 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
     )
 
     init {
-        // Set the background image for the main menu
-        background = ImageVisual("OfflineMenu.png")
+
+        easyButton.onMouseClicked = {
+            when (whichPlayer) {
+                1 -> {
+                    easyButton.visual = visualOff
+                    whichPlayer = 0
+                }
+                else -> {
+                    easyButton.visual = visualOn
+                    hardButton.visual = visualOff
+                    whichPlayer = 1
+                }
+            }
+        }
+
+        hardButton.onMouseClicked = {
+            when (whichPlayer) {
+                2 -> {
+                    hardButton.visual = visualOff
+                    whichPlayer = 0
+                }
+                else -> {
+                    hardButton.visual = visualOn
+                    easyButton.visual = visualOff
+                    whichPlayer = 2
+                }
+            }
+        }
+
+        joinButton.onMouseClicked = {
+            val name = playerInput.text
+            val joinGameSceneTwo = JoinGameSceneTwo(rootService, name)
+            NovaApplication.showMenuScene(joinGameSceneTwo)
+        }
 
         addComponents(contentPane)
         contentPane.addAll(backToken, backButton, joinButton, sessionInput, playerInput, urlInput, easyButton, hardButton, labelNovaLuna )

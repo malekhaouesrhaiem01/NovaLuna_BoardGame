@@ -4,29 +4,17 @@ import entity.NovaLunaGame
 import entity.Player
 import entity.Tile
 import entity.TileColour
-import org.w3c.dom.Text
 import service.Refreshable
 import service.RootService
 import tools.aqua.bgw.components.ComponentView
-import tools.aqua.bgw.components.container.LinearLayout
-import tools.aqua.bgw.components.gamecomponentviews.GameComponentView
-import tools.aqua.bgw.components.layoutviews.CameraPane
-import tools.aqua.bgw.components.layoutviews.GridPane
-import tools.aqua.bgw.components.layoutviews.LayoutView
-import tools.aqua.bgw.components.layoutviews.Pane
+import tools.aqua.bgw.components.layoutviews.*
 import tools.aqua.bgw.components.uicomponents.*
-import tools.aqua.bgw.core.Alignment
-import tools.aqua.bgw.core.BoardGameScene
-import tools.aqua.bgw.core.Color
-import tools.aqua.bgw.style.BorderRadius
-import tools.aqua.bgw.style.Cursor
-import tools.aqua.bgw.util.Coordinate
-import tools.aqua.bgw.util.Font
-import tools.aqua.bgw.visual.ColorVisual
-import tools.aqua.bgw.visual.CompoundVisual
-import tools.aqua.bgw.visual.ImageVisual
-import tools.aqua.bgw.visual.Visual
-import kotlin.random.Random
+import tools.aqua.bgw.core.BoardGameApplication.Companion.runOnGUIThread
+import tools.aqua.bgw.core.*
+import tools.aqua.bgw.style.*
+import tools.aqua.bgw.util.*
+import tools.aqua.bgw.visual.*
+import java.util.*
 
 class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080), Refreshable {
 
@@ -67,7 +55,16 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         text = "undo",
         font = Font(36, Color.BLACK,"Space Grotesk" ),
         visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
-    )
+    ).apply {
+        onMouseClicked = {
+            val current = rootService.currentGame
+            if (current?.previousState == null) {
+                showError("Nothing to undo!")
+            } else {
+                rootService.gameService.undo()
+            }
+        }
+    }
 
     val redoButton = Button(
         posX = 224,
@@ -77,7 +74,17 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         text = "redo",
         font = Font(36, Color.BLACK,"Space Grotesk" ),
         visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
-    )
+    ).apply {
+        onMouseClicked = {
+            val current = rootService.currentGame
+            if (current?.nextState == null) {
+                showError("Nothing to redo!")
+            } else {
+                rootService.gameService.redo()
+            }
+        }
+
+    }
 
     val endTurnButton = Button(
         posX = 1515,
@@ -89,8 +96,11 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
     ).apply {
         onMouseClicked = {
-            if (!isAlreadyPlayed) throw IllegalStateException("First, you have to make a move")
-            rootService.gameService.endTurn()
+            if (!isAlreadyPlayed) {
+                showError("First, you have to make a move")
+            }else{
+                rootService.gameService.endTurn()
+            }
         }
     }
 
@@ -154,7 +164,21 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         isVisible = false
     }
 
-
+    /**
+     * Label used to display validation errors.
+     * It becomes visible with the error text and hides after a delay.
+     */
+    private val errorLabel = Label(
+        text = "",
+        width = 700,
+        height = 100,
+        posX = width / 2 - 350,
+        posY = height / 2 - 50,
+        font = Font(30, Color.WHITE),
+        visual = ColorVisual(Color(200,50,50,230))
+    ).apply {
+        isVisible = false
+    }
 
     init {
 
@@ -162,7 +186,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
         contentPane.addAll(moonWheel, undoButton, redoButton, endTurnButton,rageQuitButton,drawStackLabel, drawPile, cameraPaneStack)
 
-        addComponents(contentPane, playersHand)
+        addComponents(contentPane, playersHand, errorLabel)
 
     }
 
@@ -742,4 +766,47 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
+    /**
+     * Shows the given error message in [errorLabel] and hides it after 4 seconds.
+     *
+     * @param message The error message to display.
+     */
+    private fun showError(message: String) {
+        errorLabel.text = message
+        errorLabel.isVisible = true
+
+        // Versteckt das Label nach 4.000 ms
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                runOnGUIThread {
+                    errorLabel.isVisible = false
+                }
+            }
+        }, 4000)
+    }
+
+    override fun refreshAfterUndo() {
+        // clear everything …
+        clearMoonWheel()
+        clearPlayersDisplay()
+        playersHand.isVisible = false
+        // und baue dann die Szene neu auf …
+        val game = rootService.currentGame ?: return
+        fullMoonWheel(game)
+        addCurrentPlayer(game)
+        addPlayers(game)
+        drawPile.text = game.drawPile.size.toString()
+    }
+
+    override fun refreshAfterRedo() {
+        // analog zu refreshAfterUndo()
+        clearMoonWheel()
+        clearPlayersDisplay()
+        playersHand.isVisible = false
+        val game = rootService.currentGame ?: return
+        fullMoonWheel(game)
+        addCurrentPlayer(game)
+        addPlayers(game)
+        drawPile.text = game.drawPile.size.toString()
+    }
 }
