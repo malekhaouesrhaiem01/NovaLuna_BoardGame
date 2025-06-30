@@ -79,4 +79,22 @@ class GetAvailableTilesTest
         val expected = listOf(5,7)
         assertEquals(expected,rootService.gameService.getAvailableTiles())
     }
+
+    /**
+     * Tests that the function works correctly
+     * if the range of the next three tiles goes over the top middle.
+     */
+    @Test
+    fun testCircularTileTrack(){
+        val game = rootService.currentGame!!
+        game.meeplePosition = 8
+
+        for(i in 1 until game.tileTrack.size)
+        {
+            if(i != 5 && i != 7 && i != 6 && i != 9) game.tileTrack[i] = null
+        }
+
+        val expected = listOf(9,5,6)
+        assertEquals(expected,rootService.gameService.getAvailableTiles())
+    }
 }
