@@ -173,6 +173,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         game.activePlayer =  game.players.indexOf(currentPlayer)
 
         onAllRefreshables { refreshAfterEndTurn() }
+
+        startTurn()
     }
 
     /**
@@ -525,9 +527,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
 
         val currentPlayer =  game.players[game.activePlayer]
-        val newMeeplePos = selectedTile?.moonTrackPosition
+        val newMeeplePos = game.tileTrack.indexOf(selectedTile)
         checkNotNull(newMeeplePos)
-        val stepsForPlayer =  selectedTile.time
+        val stepsForPlayer =  selectedTile?.time
 
 
         //Update Meeple Position and Remove Tile from that Position
@@ -535,11 +537,13 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val index = game.tileTrack.indexOf(selectedTile)
         game.tileTrack.remove(selectedTile)
         game.tileTrack.add(index,null)
-        selectedTile.moonTrackPosition = null
+        selectedTile?.moonTrackPosition = null
 
 
+        if (stepsForPlayer != null){
 
-        currentPlayer.moonTrackPosition += stepsForPlayer
+            currentPlayer.moonTrackPosition += stepsForPlayer
+        }
         //changes the height of the currentPlayer, for the case two Players are at the same Position
         for(player in game.players){
             /* For Every Player that's already in that moonTrackposition, add 1 additional height for the currentPlayer

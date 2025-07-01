@@ -91,6 +91,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         onMouseClicked = {
             if (!isAlreadyPlayed) throw IllegalStateException("First, you have to make a move")
             rootService.gameService.endTurn()
+            endTurn()
         }
     }
 
