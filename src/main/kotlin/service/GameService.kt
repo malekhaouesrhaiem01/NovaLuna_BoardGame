@@ -348,7 +348,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
                             if (colorMap.contains(color)){
 
                                 // then check if Task in is higher than colorMap Int, for the corresponding color
-                                if(task[color]!! > colorMap[color]!! ){
+                                if(task.getValue(color) > colorMap.getValue(color)){
 
                                     // add false since Task isn't completed
                                     booleanList.add(false)
