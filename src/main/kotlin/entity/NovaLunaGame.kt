@@ -5,11 +5,10 @@ package entity
  *
  * @property activePlayer The currently active Player.
  * @property meeplePosition The position of the moon marker in the tile ring.
- * @property beginningOrder The initial turn oder of the players.
  * @property simulationSpeed Speed modifier for the bot?
  * @property players List of players participating in the game.
  * @property drawPile The stack of remaining tiles to be drawn.
- * @property tileTrack The current circual track of visible tiles.
+ * @property tileTrack The current circular track of visible tiles.
  * @property previousState The previous game state, used for undo function.
  * @property nextState The next game state, used for redo function.
  */

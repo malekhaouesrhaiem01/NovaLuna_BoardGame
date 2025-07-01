@@ -35,7 +35,6 @@ class UpdateTasksTest {
         val currentPlayerHand = rootService.currentGame?.players?.first()?.tiles!!
         rootService.currentGame?.players?.first()?.tiles?.addAll(tiles.take(10))
 
-        val testabg = tiles.first()
         val cords = listOf(
             Coordinate( 1, 0),
             Coordinate(0, 1),

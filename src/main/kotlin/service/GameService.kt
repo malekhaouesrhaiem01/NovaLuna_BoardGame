@@ -358,13 +358,12 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         //Iterate through every Tile in Players hand
         for (tile in game.players[game.activePlayer].tiles){
-            val editTask : MutableMap<Map<TileColour, Int>, List<Boolean>> = mutableMapOf()
             val visitedTiles = mutableListOf<Tile>()
             val colorMap = mutableMapOf<TileColour, Int>()
             if (tile != null){
                 // Check for the number of the colors that are neighbours of that Tile
                 checkSurroundingTiles(tile, visitedTiles, colorMap)
-
+                val pairList = mutableListOf<Pair<Map<TileColour, Int> , Boolean>>()
                 //For every Task check if its completed
                 for (taskPair in tile.tasks){
                     val booleanList = mutableListOf<Boolean>()
@@ -374,10 +373,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
                     // If Task is not Empty
                     if (task.isNotEmpty()){
-
                         // Check for every color in the Task
                         for(color in task.keys){
-
                             // If the colorMap contains it, If yes
                             if (colorMap.contains(color)){
 
@@ -395,29 +392,53 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
                                 booleanList.add(false)
                             }
                         }
+                        pairList.add(createPair(task, booleanList))
 
-                        editTask.put(task, booleanList)
+                    } else {
+                        pairList.add(Pair(task, false))
                     }
                 }
                 // Set Updated Task List for the Tile
-                tile.tasks = createPairs(editTask)
+                tile.tasks = pairList
             }
+        }
+
+        updateTokens()
+    }
+
+    private fun updateTokens(){
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game is currently running." }
+        var count = 0
+        for(tile in game.players[game.activePlayer].tiles){
+            for(task in tile?.tasks!!){
+                if (task.second){
+                    count++
+                }
+            }
+        }
+        if (true){ //Firstgame
+            when(game.players.size){
+                2 -> game.players[game.activePlayer].tokenCount = 16 - count
+                3 -> game.players[game.activePlayer].tokenCount = 18 - count
+                4 -> game.players[game.activePlayer].tokenCount = 21 - count
+            }
+        } else{
+            game.players[game.activePlayer].tokenCount = 21 - count
+        }
+        if (game.players[game.activePlayer].tokenCount < 0){
+            game.players[game.activePlayer].tokenCount = 0
         }
     }
 
-    private fun createPairs(editTask:  MutableMap<Map<TileColour, Int>, List<Boolean>>) :   MutableList<Pair<Map<TileColour, Int>, Boolean>> {
-        val pairList = mutableListOf<Pair<Map<TileColour, Int> , Boolean>>()
+    private fun createPair(task : Map<TileColour, Int> , booleanList: List<Boolean>) :  Pair<Map<TileColour, Int>, Boolean> {
 
-        // For Every Task, Create new Pairs for the Task with updated Boolean completion value
-        for(task in editTask.keys){
-            val booleanList = editTask[task]
-            if (booleanList!!.contains(false)){
-                pairList.add(Pair(task, false))
-            } else {
-                pairList.add(Pair(task, true))
-            }
+        // Return a Pair with True if Boolean List contains no false inside else return false
+        return if (booleanList.contains(false)){
+            Pair(task, false)
+        } else {
+            Pair(task, true)
         }
-        return pairList
     }
 
     private fun checkSurroundingTiles(tile :Tile, visitedTiles : MutableList<Tile>, colorMap : MutableMap<TileColour, Int>) {
