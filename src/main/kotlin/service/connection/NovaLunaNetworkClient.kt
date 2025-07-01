@@ -1,12 +1,18 @@
-package service
+package service.connection
 
+import service.connection.NovaLunaNetworkService
 import service.message.InitMessage
 import service.message.TurnMessage
 import tools.aqua.bgw.net.client.BoardGameClient
 import tools.aqua.bgw.net.client.NetworkLogging
 import tools.aqua.bgw.net.common.annotations.GameActionReceiver
 import tools.aqua.bgw.net.common.notification.PlayerJoinedNotification
-import tools.aqua.bgw.net.common.response.*
+import tools.aqua.bgw.net.common.response.CreateGameResponse
+import tools.aqua.bgw.net.common.response.CreateGameResponseStatus
+import tools.aqua.bgw.net.common.response.GameActionResponse
+import tools.aqua.bgw.net.common.response.GameActionResponseStatus
+import tools.aqua.bgw.net.common.response.JoinGameResponse
+import tools.aqua.bgw.net.common.response.JoinGameResponseStatus
 
 class NovaLunaNetworkClient(
     playerName: String,

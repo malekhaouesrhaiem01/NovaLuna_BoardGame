@@ -1,15 +1,18 @@
-package service
+package service.bot
 
 import entity.PlayerType
+import service.AbstractRefreshingService
+import service.RootService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.swing.SwingUtilities
+
 /**
  * Service to handle the easy bot's logic.
  * The bot selects a move randomly from all available legal moves.
  *
- * @property rootService A reference to the [RootService] to access other services like
- * [GameService] and [PlayerActionService].
+ * @property rootService A reference to the [service.RootService] to access other services like
+ * [service.GameService] and [service.PlayerActionService].
  */
 class EasyBotService(private val rootService: RootService) : AbstractRefreshingService() {
 
@@ -20,11 +23,11 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
      *
      * Preconditions:
      * - A game must be in progress (`rootService.currentGame != null`).
-     * - The currently active player must be an [PlayerType.EASYBOT].
+     * - The currently active player must be an [entity.PlayerType.EASYBOT].
      * - There must be at least one possible move for the bot.
      *
      * Postconditions:
-     * - A valid move has been executed via the [PlayerActionService].
+     * - A valid move has been executed via the [service.PlayerActionService].
      * - The game state in [entity.NovaLunaGame] has been updated (a tile was placed, the meeple was moved, tasks may have been completed).
      * - It is now the next player's turn.
      *
@@ -67,4 +70,3 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
         }, waitTime, TimeUnit.SECONDS)
     }
 }
-

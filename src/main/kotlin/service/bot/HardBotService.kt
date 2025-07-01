@@ -1,8 +1,10 @@
-package service
+package service.bot
 
 import entity.Move
 import entity.NovaLunaGame
-import entity.PlayerType // Needed for preconditions
+import entity.PlayerType
+import service.AbstractRefreshingService
+import service.RootService
 
 /**
  * Service for the hard bot, which uses a Monte Carlo Tree Search (MCTS) algorithm
@@ -10,7 +12,7 @@ import entity.PlayerType // Needed for preconditions
  * It executes the four phases (Selection, Expansion, Simulation, Backpropagation) in a loop
  * to find the best move for a given game state within a time limit.
  *
- * @property rootService A reference to the [RootService] to access other services.
+ * @property rootService A reference to the [service.RootService] to access other services.
  */
 class HardBotService(private val rootService: RootService) : AbstractRefreshingService() {
 
@@ -21,10 +23,10 @@ class HardBotService(private val rootService: RootService) : AbstractRefreshingS
      *
      * Preconditions:
      * - A game must be in progress (`rootService.currentGame != null`).
-     * - The currently active player must be a [PlayerType.HARDBOT].
+     * - The currently active player must be a [entity.PlayerType.HARDBOT].
      *
      * Postconditions:
-     * - The best found move has been executed via the [PlayerActionService].
+     * - The best found move has been executed via the [service.PlayerActionService].
      * - The game state in [entity.NovaLunaGame] has been updated.
      * - It is now the next player's turn.
      * - The total execution time of this method, including the MCTS search, did not exceed 10 seconds.
@@ -62,7 +64,7 @@ class HardBotService(private val rootService: RootService) : AbstractRefreshingS
      *
      * @param rootState The starting game state for the search (should be a deep copy of the actual game state).
      * @param timeLimitMillis The maximum time in milliseconds for the search to run.
-     * @return The best [Move] identified by the MCTS algorithm.
+     * @return The best [entity.Move] identified by the MCTS algorithm.
      * @throws IllegalStateException if no suitable move could be found (e.g., if the game is already over or no moves are possible).
      */
     private fun findBestMoveInternal(rootState: NovaLunaGame, timeLimitMillis: Long): Move {

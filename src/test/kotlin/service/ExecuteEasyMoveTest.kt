@@ -1,6 +1,7 @@
 package service
 
 import entity.*
+import service.bot.EasyBotService
 import kotlin.test.*
 import tools.aqua.bgw.util.Coordinate
 import java.util.concurrent.CountDownLatch

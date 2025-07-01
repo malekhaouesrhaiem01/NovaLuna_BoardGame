@@ -1,6 +1,8 @@
 package service
 
 import entity.NovaLunaGame
+import service.bot.EasyBotService
+import service.bot.HardBotService
 
 
 /**
@@ -15,9 +17,9 @@ class RootService{
     /** The connected [TileLoader] for this rootService */
     val tileLoader = TileLoader()
 
-    /** The connected [EasyBotService] for this rootService */
+    /** The connected [service.bot.EasyBotService] for this rootService */
     val easyBotService = EasyBotService(this)
-    /** The connected [HardBotService] for this rootService */
+    /** The connected [service.bot.HardBotService] for this rootService */
     val hardBotService = HardBotService(this)
 
     /**

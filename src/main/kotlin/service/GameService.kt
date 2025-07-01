@@ -440,7 +440,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
     /**
      * Gets all valid moves for the active player in a *specific game state*.
-     * This version is used by MCTS in [HardBotService] to explore hypothetical scenarios.
+     * This version is used by MCTS in [service.bot.HardBotService] to explore hypothetical scenarios.
      *
      * @param game The hypothetical [NovaLunaGame] state to analyze.
      * @return A list of all valid [Move] objects for the active player in the given state.

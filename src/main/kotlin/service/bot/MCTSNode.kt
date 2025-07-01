@@ -1,6 +1,7 @@
-package service
+package service.bot
 
-import entity.*
+import entity.Move
+import entity.NovaLunaGame
 import kotlin.math.ln
 import kotlin.math.sqrt
 
@@ -9,12 +10,12 @@ import kotlin.math.sqrt
  * Each node stores a specific game state and the statistics gathered from simulations
  * that have passed through it.
  *
- * @param gameState The [NovaLunaGame] instance that this node represents. This should be
+ * @param gameState The [entity.NovaLunaGame] instance that this node represents. This should be
  *   a deep copy of the game state to ensure the MCTS does not alter the actual game.
  * @param parent The parent node in the tree. This is `null` for the root node of the search tree.
- * @param moveThatLedHere The [Move] that was applied to the parent's state to reach this state.
+ * @param moveThatLedHere The [entity.Move] that was applied to the parent's state to reach this state.
  *   This is `null` for the root node.
- * @param untriedMoves A mutable list of [Move]s that are possible from this node's state
+ * @param untriedMoves A mutable list of [entity.Move]s that are possible from this node's state
  *   but have not yet been used to create a child node (i.e., not yet expanded).
  */
 class MCTSNode(

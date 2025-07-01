@@ -1,5 +1,7 @@
-package service
+package service.connection
 
+import service.AbstractRefreshingService
+import service.RootService
 import service.message.InitMessage
 import service.message.TurnMessage
 
