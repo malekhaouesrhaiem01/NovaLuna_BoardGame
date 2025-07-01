@@ -49,12 +49,17 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
                 showMenuScene(mainMenuScene)
             }
         }
-        joinGameSceneTwo = JoinGameSceneTwo(rootService).apply {
-
+        joinGameSceneTwo = JoinGameSceneTwo(rootService, playerName = joinGameSceneOne.playerName).apply {
+            exitButton.onMouseClicked = {
+                showMenuScene(mainMenuScene)
+            }
         }
         hostGameSceneOne = HostGameSceneOne(rootService).apply {
             nextButton.onMouseClicked = {
                 showMenuScene(hostGameSceneTwo)
+            }
+            backButton.onMouseClicked = {
+                showMenuScene(mainMenuScene)
             }
         }
         resultMenuScene = ResultMenuScene(rootService).apply{
@@ -94,6 +99,7 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
                     }
                 }
             }
+
         }
 
         rootService.addRefreshables(

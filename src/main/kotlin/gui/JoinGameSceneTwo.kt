@@ -1,29 +1,63 @@
 package gui
 
-import service.Refreshable
-import service.RootService
+import service.*
 import tools.aqua.bgw.components.layoutviews.Pane
-import tools.aqua.bgw.components.uicomponents.UIComponent
-import tools.aqua.bgw.core.MenuScene
-import tools.aqua.bgw.visual.ImageVisual
+import tools.aqua.bgw.components.uicomponents.*
+import tools.aqua.bgw.core.*
+import tools.aqua.bgw.style.BorderRadius
+import tools.aqua.bgw.util.Font
+import tools.aqua.bgw.visual.*
 
-class JoinGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
+class JoinGameSceneTwo (private val rootService: RootService,
+                        private val playerName: String) : MenuScene(1920, 1080), Refreshable {
 
     /**
      * Container pane for centering all UI components.
      */
     private val contentPane = Pane<UIComponent>(
-        width = 600,
-        height = 500,
-        posX = 660,
-        posY = 290,
+        width = 1920,
+        height = 1080,
+        posX = 0,
+        posY = 0,
+        visual = ImageVisual("back_image.png")
     )
 
+    private val nameLabel = Label(
+        text = "Welcome, $playerName!",
+    )
+
+    private val waitLabel = Label(
+        text = "Wait for others",
+        width = 600,
+        height = 100,
+        posX = 660,
+        posY = 450,
+        alignment = Alignment.CENTER,
+        font = Font(48, Color.BLACK, "Space Grotesk"),
+        visual = ColorVisual(Color(0xEEC07E)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
+    )
+
+    val exitButton = Button(
+        text = "Exit",
+        width = 326,
+        height = 100,
+        posX = 797,
+        posY = 600,
+        font = Font(48, Color.WHITE, "Space Grotesk"),
+        visual = ColorVisual(Color(0x331F01)).apply {
+            style.borderRadius = BorderRadius(30)
+        }
+    ).apply {
+        onMouseClicked = {
+            NovaApplication.exit()
+        }
+    }
+
     init {
-        // Set the background image for the main menu
-        background = ImageVisual("OfflineMenu.png")
 
         addComponents(contentPane)
-        contentPane.addAll()
+        contentPane.addAll(nameLabel, waitLabel, exitButton)
     }
 }
