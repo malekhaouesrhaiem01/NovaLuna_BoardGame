@@ -10,6 +10,8 @@ import tools.aqua.bgw.components.uicomponents.*
 import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.*
 import tools.aqua.bgw.visual.*
+import java.util.Timer
+import java.util.TimerTask
 
 /**
  *
@@ -118,9 +120,9 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
             style.borderRadius = BorderRadius(15)
         }
     ).apply { onMouseClicked = {
-            selectColor(0)
-            selectColorPane.isVisible = true
-        }
+        selectColor(0)
+        selectColorPane.isVisible = true
+    }
     }
 
     private val firstEasyButton = Button(
@@ -429,6 +431,28 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
         }
     }
 
+
+    private val errorLabel = Label(
+        text = "",
+        width = 800,
+        height = 80,
+        posX = width / 2 - 300,
+        posY = 700,
+        font = Font(50, Color.RED, "Space Grotesk"),
+        visual = ColorVisual(Color(0xFFF0F0)).apply { style.borderRadius = BorderRadius(10) }
+    ).apply { isVisible = false }
+
+    private fun showError(message: String) {
+        errorLabel.text = message
+        errorLabel.isVisible = true
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                errorLabel.isVisible = false
+            }
+        }, 3000)
+    }
+
+
     private val startButton = Button(
         text = "Start",
         width = 241,
@@ -440,7 +464,8 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
             style.borderRadius = BorderRadius(15)
         }
     ).apply {
-        onMouseClicked = {
+        onMouseClicked = onMouseClicked@{
+            errorLabel.isVisible = false
 
             val playersStartGame = mutableListOf<Player>()
 
@@ -458,55 +483,41 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
             val onlineMode = false
             val moonTrackPosition = 0
 
-            for (player in players){
+            for (player in players) {
                 val name = player.defaultInput.text
                 if (name.isEmpty()) {
-                    throw IllegalArgumentException("Name cannot be empty")
+                    showError("Please enter a name for all players!")
+                    return@onMouseClicked
                 }
 
                 val playerType = when (player.whichPlayer) {
-                    0 -> {
-                        PlayerType.HUMAN
-                    }
+                    0 -> PlayerType.HUMAN
+                    1 -> PlayerType.EASYBOT
+                    else -> PlayerType.HARDBOT
+                }
 
-                    1 -> {
-                        PlayerType.EASYBOT
-                    }
-
+                val playerColour = when (player.color) {
+                    0 -> PlayerColour.BLACK
+                    1 -> PlayerColour.WHITE
+                    2 -> PlayerColour.BLUE
+                    3 -> PlayerColour.ORANGE
                     else -> {
-                        PlayerType.HARDBOT
+                        showError("Please select a color for all players!")
+                        return@onMouseClicked
                     }
                 }
 
-                val playerColor = when (player.color) {
-                    0 -> {
-                        PlayerColour.BLACK
-                    }
-
-                    1 -> {
-                        PlayerColour.WHITE
-                    }
-
-                    2 -> {
-                        PlayerColour.BLUE
-                    }
-
-                    3 -> {
-                        PlayerColour.ORANGE
-                    }
-
-                    else -> {
-                        throw IllegalArgumentException("Color must be selected")
-                    }
-                }
-
-                playersStartGame.add(Player(playerName = name,
-                                            tokenCount = tokenCount,
-                                            moonTrackPosition = moonTrackPosition,
-                                            onlineMode = onlineMode,
-                                            playerType = playerType,
-                                            playerColour = playerColor,
-                                            height = height))
+                playersStartGame.add(
+                    Player(
+                        playerName = name,
+                        tokenCount = tokenCount,
+                        moonTrackPosition = moonTrackPosition,
+                        onlineMode = onlineMode,
+                        playerType = playerType,
+                        playerColour = playerColour,
+                        height = height
+                    )
+                )
             }
             rootService.gameService.startNewGame(playersStartGame, actualSpeed, ifRandom)
         }
@@ -517,9 +528,9 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
     init {
         selectColorPane.addAll(colorSelectLabel, noneColor, blackColor, whiteColor, blueColor, orangeColor )
         contentPane.addAll(orderToken, playersToken, colorsToken, botsToken,
-                           firstOderToken, firstDefaultInput,firstColorButton, firstEasyButton, firstHardButton,
-                           secondOderToken, secondDefaultInput,secondColorButton, secondEasyButton, secondHardButton,
-                           addButton, randomButton, backButton,speedButton, speedUp, speedDown,firstGame,startButton)
+            firstOderToken, firstDefaultInput,firstColorButton, firstEasyButton, firstHardButton,
+            secondOderToken, secondDefaultInput,secondColorButton, secondEasyButton, secondHardButton,
+            addButton, randomButton, backButton,speedButton, speedUp, speedDown,firstGame,startButton, errorLabel)
         addComponents(contentPane, selectColorPane)
 
     }
