@@ -1,11 +1,15 @@
 package service
 
+import entity.Move
 import entity.Player
 import entity.PlayerColour
 import entity.PlayerType
-import kotlin.test.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-class StartTurnTest {
+class GetPossibleMovesForCurrentPlayerTest {
+
     private lateinit var  rootService: RootService
 
     /**
@@ -16,16 +20,14 @@ class StartTurnTest {
     {
         rootService = RootService()
         val players = listOf(
-            Player(
-                "Player1",
+            Player("Player1",
                 18,
                 0,
                 false,
                 PlayerType.HUMAN,
                 PlayerColour.WHITE,
                 mutableListOf(),
-                1
-            ),
+                1),
             Player("Player2",
                 18,
                 0,
@@ -39,16 +41,20 @@ class StartTurnTest {
     }
 
     @Test
-    fun testStartTurn(){
+    fun testForRightMoves(){
         val game = rootService.currentGame!!
 
-        game.tileTrack.fill(null)
-        rootService.gameService.startTurn()
+        val expectedTiles = rootService.gameService.getAvailableTiles().map{game.tileTrack[it]}
+        val expectedPositions = rootService.gameService.getPossiblePosition()
 
-        assert(game.nextState == rootService.currentGame)
+        val expectedMoves = mutableListOf<Move>()
+        for(tile in expectedTiles){
+            for (coord in expectedPositions){
+                expectedMoves.add(Move(tile, coord))
+            }
+        }
 
-        assert(game.tileTrack.contains(null))
-
-
+        assertEquals(expectedMoves, rootService.gameService.getPossibleMovesForCurrentPlayer())
     }
+
 }

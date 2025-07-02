@@ -249,13 +249,13 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      *
      * @sample getAvailableTiles()
      */
-    fun getAvailableTiles(): List<Int?>
+    fun getAvailableTiles(): List<Int>
     {
         val game = rootService.currentGame
         checkNotNull(game)
 
         val track = game.tileTrack
-        val result = mutableListOf<Int?>()
+        val result = mutableListOf<Int>()
 
         var pos = game.meeplePosition
         var checked = 0
@@ -502,27 +502,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      */
     open fun getPossibleMovesForCurrentPlayer(): List<Move> {
         val game = rootService.currentGame ?: throw IllegalStateException("No game in progress.")
-        // list of the tiles that a player can select
-        val possibleTiles = mutableListOf<Tile?>()
-        // when there are at most three tiles left, the tileTrack list can be used
-        // if there are more tiles left, the next three have to be computed
-        if(game.tileTrack.size <= 3){
-            possibleTiles.addAll(game.tileTrack)
-        }
-        else{
-            // Tile Track as a circular list
-            val circTileTrack = game.tileTrack + game.tileTrack
-            // index of the first position in the tile track after the meeple
-            var index = game.meeplePosition + 1
-            // go through every position in tileTrack after the meeple to seek the next three tiles
-            while(possibleTiles.size < 3){
-                if(circTileTrack[index] != null){
-                    possibleTiles.add(circTileTrack[index])
-                }
-                index += 1
-            }
 
-        }
+        // list of the tiles that a player can select
+        val possibleTiles = getAvailableTiles().map{ game.tileTrack[it] }
         // List with all possible coordinates where a tile can be placed
         val possibleCoords = getPossiblePosition()
 
@@ -555,15 +537,14 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      * @param selectedTile The tile that the current player just took from the moon wheel.
      * @throws IllegalStateException if no game is currently running or Tile that is not on the Tile Track is selected.
      */
-    fun moveMeepleAndPlayer(selectedTile: Tile?) {
+    fun moveMeepleAndPlayer(selectedTile: Tile) {
         val game =  rootService.currentGame
         checkNotNull(game)
 
 
         val currentPlayer =  game.players[game.activePlayer]
         val newMeeplePos = game.tileTrack.indexOf(selectedTile)
-        checkNotNull(newMeeplePos)
-        val stepsForPlayer =  selectedTile?.time
+        val stepsForPlayer =  selectedTile.time
 
 
         //Update Meeple Position and Remove Tile from that Position
@@ -571,13 +552,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val index = game.tileTrack.indexOf(selectedTile)
         game.tileTrack.remove(selectedTile)
         game.tileTrack.add(index,null)
-        selectedTile?.moonTrackPosition = null
+        selectedTile.moonTrackPosition = null
 
+        currentPlayer.moonTrackPosition += stepsForPlayer
 
-        if (stepsForPlayer != null){
-
-            currentPlayer.moonTrackPosition += stepsForPlayer
-        }
         //changes the height of the currentPlayer, for the case two Players are at the same Position
         for(player in game.players){
             /* For Every Player that's already in that moonTrackposition, add 1 additional height for the currentPlayer
