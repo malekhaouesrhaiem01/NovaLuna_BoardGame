@@ -57,16 +57,15 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
             // For now, we treat it as an unexpected state as per KDoc.
             throw IllegalStateException("EASYBOT's turn, but no moves are available.")
         }
+        // 2. Select a random move
+        val randomMove = possibleMoves.random()
+        println("EasyBot selected move: Place tile ${randomMove.tile?.id} at ${randomMove.position}")
+        // 3. Execute the move
+        playerActionService.playTile(randomMove)
         scheduler.schedule({
-            // 2. Select a random move
-            val randomMove = possibleMoves.random()
-            println("EasyBot selected move: Place tile ${randomMove.tile?.id} at ${randomMove.position}")
-
-            // 3. Execute the move
             SwingUtilities.invokeLater {
-                playerActionService.playTile(randomMove)
+                gameService.endTurn()
             }
-
         }, waitTime, TimeUnit.SECONDS)
     }
 }

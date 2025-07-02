@@ -3,18 +3,14 @@ package service
 import entity.Player
 import entity.PlayerColour
 import entity.PlayerType
-import kotlin.test.*
+import org.junit.jupiter.api.Test
+import kotlin.test.assertNull
 
-class StartTurnTest {
-    private lateinit var  rootService: RootService
+class EndGameTest {
 
-    /**
-     * setup for a two player Game before each test
-     */
-    @BeforeTest
-    fun setUp()
-    {
-        rootService = RootService()
+    @Test
+    fun testStartGame(){
+        val rootService = RootService()
         val players = listOf(
             Player(
                 "Player1",
@@ -36,19 +32,9 @@ class StartTurnTest {
                 1)
         )
         rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false)
-    }
-
-    @Test
-    fun testStartTurn(){
         val game = rootService.currentGame!!
+        rootService.gameService.endGame(game.players.first())
 
-        game.tileTrack.fill(null)
-        rootService.gameService.startTurn()
-
-        assert(game.nextState == rootService.currentGame)
-
-        assert(game.tileTrack.contains(null))
-
-
+        assertNull(rootService.currentGame)
     }
 }
