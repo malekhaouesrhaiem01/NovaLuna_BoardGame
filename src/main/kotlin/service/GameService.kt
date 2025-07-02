@@ -10,8 +10,8 @@ import tools.aqua.bgw.util.Coordinate
 open class GameService(private val rootService: RootService) : AbstractRefreshingService() {
     /**
      * Starts a new Nova Luna game with the given players and simulation speed.
-     * the game state + drawpile + tile track are initialized.
-     * Triggers [refreshAfterGameStarted] to update the UI with the initial game state.
+     * the game state + drawPile + tile track are initialized.
+     * Triggers [gui.NovaApplication.refreshAfterStartGame] to update the UI with the initial game state.
      * @param players The list of players participating in the game (2 to 4 players).
      * @param simulationSpeed The speed of the game simulation (0 to 10)
      * @throws IllegalStateException If a game is already running.
@@ -58,7 +58,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         rootService.currentGame = game
 
-        onAllRefreshables { refreshAfterStartGame() }
+        onAllRefreshables { refreshAfterStartGame()}
     }
 
     /**
@@ -142,7 +142,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
     /**
      * The method [endTurn] ends the current Players turn,
      * as well as changing the current Player to the Player next in line.
-     * Calls up the refreshables to update the GUI Scenery.
+     * Calls up the refreshable to update the GUI Scenery.
      *
      * Preconditions:
      * - Game must be started
@@ -174,7 +174,18 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         onAllRefreshables { refreshAfterEndTurn() }
 
-        startTurn()
+        if(checkEndGame()){
+            var winner = game.players[0]
+            for (player in game.players){
+                if (player.tokenCount < winner.tokenCount){
+                    winner = player
+                }
+            }
+            endGame(winner)
+        } else {
+            startTurn()
+        }
+
     }
 
     /**
@@ -312,7 +323,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         //Die Liste, welche returned wird.
         val possible = mutableListOf<Coordinate>()
 
-        // Alle Nachbar Coodinates der bereits belegten Tiles
+        // Alle Nachbar Coordinates der bereits belegten Tiles
         for (pos in occupied)
         {
             val neighbors = listOf(
@@ -469,7 +480,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         for(neighborTile in neighbors){
 
             // Check if visited. If not then add 1 count to color as neighbour
-            if (!visitedTiles.contains(neighborTile)){
+           if (!visitedTiles.contains(neighborTile)){
                 if (!colorMap.contains(neighborTile.tileColour)){
                     colorMap.put(neighborTile.tileColour, 1)
                 } else {
@@ -477,19 +488,39 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
                     colorMap.replace(neighborTile.tileColour, temp, temp + 1)
                 }
             }
+            visitedTiles.add(neighborTile)
+            checkForSequence(neighborTile, visitedTiles, colorMap)
+        }
+    }
 
-            // If Color of the neighbour is the same as the color of the current Tile
-            if(neighborTile.tileColour == tile.tileColour){
-                var counter = 0
-                for (visited in visitedTiles){
-                   if (visited == neighborTile){
-                       counter++
-                   }
-                }
-                // Check if Tile has been visited before, by the second visit there is no need to check for its neighbours
-                if (counter < 2){
-                    checkSurroundingTiles(neighborTile, visitedTiles, colorMap)
-                }
+    private fun checkForSequence(tile :Tile, visitedTiles : MutableList<Tile>, colorMap : MutableMap<TileColour, Int>){
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game is currently running."}
+
+        val neighbors = mutableListOf<Tile>()
+        val coordinate = tile.position
+        visitedTiles.add(tile)
+
+        // Get neighbour Tile
+        // neighbourTile
+        for(neighbourTile in game.players[game.activePlayer].tiles){
+            if (neighbourTile != null){
+                try {
+                    when (neighbourTile.position) {
+                        Coordinate(coordinate!!.xCoord - 1, coordinate.yCoord) -> neighbors.add(neighbourTile)
+                        Coordinate(coordinate.xCoord + 1, coordinate.yCoord) -> neighbors.add(neighbourTile)
+                        Coordinate(coordinate.xCoord, coordinate.yCoord + 1) -> neighbors.add(neighbourTile)
+                        Coordinate(coordinate.xCoord, coordinate.yCoord - 1) -> neighbors.add(neighbourTile)
+                    }
+                } catch (_ : NullPointerException){}
+            }
+        }
+
+        for(neighborTile in neighbors){
+            if(neighborTile.tileColour == tile.tileColour && !visitedTiles.contains(neighborTile)){
+                val temp = colorMap[neighborTile.tileColour]!!
+                colorMap.replace(neighborTile.tileColour, temp, temp + 1)
+                checkForSequence(neighborTile, visitedTiles, colorMap)
             }
         }
     }
@@ -549,8 +580,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         val possibleMoves = mutableListOf<Move>()
         for(tile in possibleTiles){
-            for (coord in possibleCoords){
-                possibleMoves.add(Move(tile, coord))
+            for (cord in possibleCoords){
+                possibleMoves.add(Move(tile, cord))
             }
         }
 
@@ -612,6 +643,6 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         // remove 1 height, because we add 1 height for every Player arriving in a new Position
         currentPlayer.height -= 1
 
-        // onAllRefreshables { refreshAfterMoveMeepleAndPlayer() }
+        // onAllRefreshable { refreshAfterMoveMeepleAndPlayer() }
     }
 }
