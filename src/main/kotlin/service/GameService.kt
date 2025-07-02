@@ -428,7 +428,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
                 }
             }
         }
-        if (true){ //Firstgame
+        if (true){ //Firstgame == true
             when(game.players.size){
                 2 -> game.players[game.activePlayer].tokenCount = 16 - count
                 3 -> game.players[game.activePlayer].tokenCount = 18 - count
@@ -489,6 +489,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
                 }
             }
             visitedTiles.add(neighborTile)
+
             checkForSequence(neighborTile, visitedTiles, colorMap)
         }
     }
