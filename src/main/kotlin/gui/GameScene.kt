@@ -43,7 +43,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         posY = 125,
         width = 700,
         height = 700,
-        visual = ImageVisual(path = "MoonWheel.png")
+        visual = ImageVisual(path = "moonWheel.png")
     )
 
     val undoButton = Button(
@@ -327,6 +327,8 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     override fun refreshAfterRefill() {
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
         clearMoonWheel()
+        checkIfHuman(game)
+
         fullMoonWheel(game)
         updateDrawStack(game)
         drawPile.text = game.drawPile.size.toString()
