@@ -64,6 +64,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     /** Host side: called on each new guest join notification */
     internal fun onPlayerJoined(notification: PlayerJoinedNotification) {
         currentSessionPlayers.add(notification.sender)
+        onAllRefreshables { refreshAfterPlayerJoined() }
         updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
     }
 
@@ -169,9 +170,15 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         require(playersStartGame.size in 2..4) {
             "Player count must be between 2 and 4, but was ${playersStartGame.size}"
         }
+        // 2) Annotate onlineMode: local player offline (false), others online (true)
+        val annotatedPlayers = playersStartGame.map { p ->
+            p.copy( onlineMode = (p.playerName != client?.playerName)
+            )
+        }
+
 
         // 2) Delegate into GameService
-        rootService.gameService.startNewGame(playersStartGame, 10, randomOrder)
+        rootService.gameService.startNewGame(annotatedPlayers, 10, randomOrder)
         val game = rootService.currentGame ?: error("GameService failed to initialize the game state")
 
         // 3) Build the InitMessage from the initialized game
@@ -219,23 +226,19 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             else -> 21
         } else 21
 
-        // 3) Rebuild the Player list, putting myPlayerType for *this* client
+
+        // 3) Rebuild the Player list, annotating onlineMode per slot
         val localPlayers = message.players.map { dto ->
-            // If dto.name matches our own name, use the toggle
-            val type = if (dto.name == client?.playerName) {
-                myPlayerType
-            } else {
-                PlayerType.HUMAN //other players online shoudl be treated like humans (not 100% sure)
-            }
+            val isLocal = dto.name == client?.playerName
             Player(
-                playerName = dto.name,
-                tokenCount = tokenCount,
+                playerName        = dto.name,
+                tokenCount        = tokenCount,
                 moonTrackPosition = 0,
-                onlineMode = true,
-                playerType = type,
-                playerColour = PlayerColour.valueOf(dto.color.name),
-                tiles = mutableListOf(),
-                height = 0    // will be set by GameService
+                onlineMode        = !isLocal,  // local=false, remote=true
+                playerType        = if (isLocal) myPlayerType else PlayerType.HUMAN,
+                playerColour      = PlayerColour.valueOf(dto.color.name),
+                tiles             = mutableListOf(),
+                height            = 0
             )
         }
 
