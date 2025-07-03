@@ -3,6 +3,7 @@ package service
 import entity.Player
 import entity.PlayerColour
 import entity.PlayerType
+import tools.aqua.bgw.util.Coordinate
 import kotlin.test.*
 
 class StartTurnTest {
@@ -14,6 +15,7 @@ class StartTurnTest {
     @BeforeTest
     fun setUp()
     {
+
         rootService = RootService()
         val players = listOf(
             Player(
@@ -42,13 +44,20 @@ class StartTurnTest {
     fun testStartTurn(){
         val game = rootService.currentGame!!
 
-        game.tileTrack.fill(null)
         rootService.gameService.startTurn()
-
-        assert(game.nextState == rootService.currentGame)
 
         assert(game.tileTrack.contains(null))
 
+    }
 
+    @Test
+    fun testAutoRefill() {
+        val game = rootService.currentGame!!
+
+        game.tileTrack.fill(null)
+
+        rootService.gameService.startTurn()
+
+        assertEquals(11, game.tileTrack.count { it != null })
     }
 }

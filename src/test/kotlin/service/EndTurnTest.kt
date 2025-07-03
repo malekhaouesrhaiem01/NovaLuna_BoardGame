@@ -78,4 +78,20 @@ class EndTurnTest {
 
         assertEquals(2, game.activePlayer)
     }
+
+
+    @Test
+    fun testEndTurnEndsGameNoTokens(){
+        val game = rootService.currentGame!!
+
+        game.players[0].tokenCount = 7
+        game.players[1].tokenCount = 10
+        game.players[2].tokenCount = 0
+
+        game.activePlayer = 2
+
+        rootService.gameService.endTurn()
+
+        assertEquals(null, rootService.currentGame)
+    }
 }

@@ -6,6 +6,7 @@ import entity.Move
 import entity.Tile
 import entity.TileColour
 import tools.aqua.bgw.util.Coordinate
+import java.util.Objects.isNull
 
 open class GameService(private val rootService: RootService) : AbstractRefreshingService() {
     /**
@@ -80,14 +81,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         val game = checkNotNull(rootService.currentGame)
 
-        if(game.players[game.activePlayer].tokenCount < 1){
-            return true
-        }
-        else if(game.tileTrack.isEmpty() && game.drawPile.isEmpty()){
-            return true
-        }
-
-        return false
+        return game.players[game.activePlayer].tokenCount < 1 ||
+                game.tileTrack.isEmpty() && game.drawPile.isEmpty()
     }
 
     /**
@@ -160,6 +155,12 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game)
 
+        if(checkEndGame()){
+            val winner = game.players[game.activePlayer]
+
+            endGame(winner)
+        }
+
         var currentPlayer = game.players.first()
         for (player in game.players){
             if(player.moonTrackPosition < currentPlayer.moonTrackPosition){
@@ -172,15 +173,6 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
         game.activePlayer =  game.players.indexOf(currentPlayer)
 
-        if(checkEndGame()){
-            var winner = game.players[0]
-            for (player in game.players){
-                if (player.tokenCount < winner.tokenCount){
-                    winner = player
-                }
-            }
-            endGame(winner)
-        }
         
         onAllRefreshables { refreshAfterEndTurn() }
 

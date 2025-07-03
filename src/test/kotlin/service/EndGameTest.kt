@@ -9,8 +9,10 @@ import kotlin.test.assertNull
 class EndGameTest {
 
     @Test
-    fun testStartGame(){
+    fun testEndGame(){
         val rootService = RootService()
+        assertNull(rootService.gameService.checkEndGame())
+
         val players = listOf(
             Player(
                 "Player1",
