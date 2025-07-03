@@ -205,6 +205,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         updateConnectionState(nextState)
         client?.sendGameActionMessage(initMsg) ?: error("Network client not initialized")
+        onAllRefreshables { refreshAfterStartGame() }
     }
 
 
