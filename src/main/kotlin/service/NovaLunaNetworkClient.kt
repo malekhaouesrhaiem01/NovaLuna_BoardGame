@@ -1,8 +1,5 @@
-package service.connection
+package service
 
-import service.connection.NovaLunaNetworkService
-import service.message.InitMessage
-import service.message.TurnMessage
 import tools.aqua.bgw.net.client.BoardGameClient
 import tools.aqua.bgw.net.client.NetworkLogging
 import tools.aqua.bgw.net.common.annotations.GameActionReceiver
@@ -13,6 +10,8 @@ import tools.aqua.bgw.net.common.response.GameActionResponse
 import tools.aqua.bgw.net.common.response.GameActionResponseStatus
 import tools.aqua.bgw.net.common.response.JoinGameResponse
 import tools.aqua.bgw.net.common.response.JoinGameResponseStatus
+import edu.udo.cs.sopra.ntf.messages.InitMessage
+import edu.udo.cs.sopra.ntf.messages.TurnMessage
 
 class NovaLunaNetworkClient(
     playerName: String,
@@ -31,7 +30,8 @@ class NovaLunaNetworkClient(
 
         if (response.status == CreateGameResponseStatus.SUCCESS) {
             sessionID = response.sessionID
-            networkService.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
+            // forward into the service (which itself updates the state)
+            networkService.onCreateGameResponse(response, playerName)
         } else {
             disconnectAndError("CreateGame failed: ${response.status}")
         }
@@ -45,7 +45,8 @@ class NovaLunaNetworkClient(
         if (response.status == JoinGameResponseStatus.SUCCESS) {
             sessionID = response.sessionID
             otherPlayerName = response.opponents.firstOrNull()
-            networkService.updateConnectionState(ConnectionState.WAITING_FOR_INIT)
+            // forward into the service (which itself updates the state)
+            networkService.onJoinGameResponse(response, playerName)
         } else {
             disconnectAndError("JoinGame failed: ${response.status}")
         }
@@ -57,7 +58,8 @@ class NovaLunaNetworkClient(
         }
 
         otherPlayerName = notification.sender
-        networkService.startNewHostedGame(playerName, notification.sender)
+        // only update the lobby list , not auto start
+        networkService.onPlayerJoined(notification)
     }
 
     override fun onGameActionResponse(response: GameActionResponse) {

@@ -1,4 +1,4 @@
-package service.connection
+package service
 
 /**
  * Enum representing all possible network and gameplay states for Nova Luna.

@@ -14,6 +14,7 @@ import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
+import entity.PlayerType
 
 class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
@@ -176,6 +177,32 @@ class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
                     whichPlayer = 2
                 }
             }
+        }
+
+        nextButton.onMouseClicked = {
+            val name      = playerInput.text
+            val sessionID = sessionInput.text
+            val secret    = "neumond25"  // add a TextField if you need a separate secret field
+
+            // 1) Record host’s player type (human/easy/hard) in the service
+            rootService.networkService.myPlayerType = when (whichPlayer) {
+                1    -> PlayerType.EASYBOT
+                2    -> PlayerType.HARDBOT
+                else -> PlayerType.HUMAN
+            }
+
+            // 2) (Optional) If you let host pick a color here, record it too:
+            // rootService.networkService.myPlayerColour = ...
+
+            // 3) Tell the service to host a game on the server
+            rootService.networkService.hostGame(
+                secret     = secret,
+                playerName = name,
+                sessionID  = sessionID
+            )
+
+            // 4) Navigate to the lobby scene where you wait for guests
+            NovaApplication.showMenuScene(hostGameSceneTwo)
         }
 
         addComponents(contentPane)
