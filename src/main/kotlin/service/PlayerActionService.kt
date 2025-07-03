@@ -34,18 +34,16 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         // check if tasks are now fulfilled
         rootService.gameService.updateTasks()
 
-        onAllRefreshables { refreshAfterTilePlayed() }
+        // check if game conditions are fulfilled to end the game
+        // if not just refresh after a tile ist played
+        if(rootService.gameService.checkEndGame()){
+            rootService.gameService.endGame(game.players[game.activePlayer])
 
-        // end the game if all tokens are placed
-        // ! Passiert das in update tasks? !
-        // if(rootService.gameService.checkEndGame()){
-        //     rootService.gameService.endGame()
-        // }
-
-        // endTurn über Button in der GUI
-
-
-
+            onAllRefreshables { refreshAfterGameEnd(game.players[game.activePlayer]) }
+        }
+        else{
+            onAllRefreshables { refreshAfterTilePlayed() }
+        }
     }
 
 
