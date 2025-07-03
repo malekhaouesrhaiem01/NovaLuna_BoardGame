@@ -1,11 +1,9 @@
 package gui
 
-import entity.NovaLunaGame
-import entity.Player
-import entity.Tile
-import entity.TileColour
+import entity.*
 import service.Refreshable
 import service.RootService
+import tools.aqua.bgw.animation.DelayAnimation
 import tools.aqua.bgw.components.ComponentView
 import tools.aqua.bgw.components.layoutviews.*
 import tools.aqua.bgw.components.uicomponents.*
@@ -23,6 +21,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     var chosenTile: Pair<ComponentView, Int>? = null
     var playerComponents: MutableList<ComponentView> = mutableListOf()
     var isAlreadyPlayed: Boolean = false
+    var ifHuman: Boolean? = null
 
     data class TileGUI(
 
@@ -115,7 +114,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     ).apply {
     }
 
-    val drawStackLabel = Label(
+    val drawStackLabel = Button(
         posX = 1515,
         posY = 35,
         width = 307,
@@ -123,25 +122,86 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         text = "Draw Pile Tiles",
         font = Font(48, Color.BLACK,"Space Grotesk" ),
         visual = ColorVisual(Color(0xFFCC81)).apply { style.borderRadius = BorderRadius(10); transparency = 0.84 }
-    )
+    ).apply { onMouseClicked = {overlayPaneDrawStack.isVisible = true} }
+
+
 
     val gridPaneStack = GridPane<ComponentView>(
-        rows = 23,
-        columns = 3,
+        posX = 960,
+        posY = 540,
+        rows = 4,
+        columns = 17,
         spacing = 5,
-        layoutFromCenter = false
+        layoutFromCenter = true
     )
 
-    val cameraPaneStack = CameraPane(
-        posX = 1510,
-        posY = 110,
-        width = 350,
-        height = 700,
-        target = gridPaneStack
+    val overlayPaneDrawStack = Pane<ComponentView>(
+        width = 1920,
+        height = 1080,
+        posX = 0,
+        posY = 0,
+        visual = ColorVisual(Color(0xF8E8CB))
     ).apply {
-        interactive = true
+        isVisible = false
+        add(gridPaneStack)
+
+        val backButton = Button(
+            posX = 839.5,
+            posY = 780,
+            width = 241,
+            height = 75,
+            text = "back",
+            alignment = Alignment.CENTER,
+            font = Font(48, Color(0x000000), "Space Grotesk"),
+            visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
+        ).apply {
+            onMouseClicked = { hideDrawStack()}
+        }
+
+        add(backButton)
+    }
+    val playerNameForNextPlayerPane = Label(
+        posX = 710,
+        posY = 448,
+        width = 500,
+        height = 120,
+        text = "",
+        alignment = Alignment.CENTER,
+        font = Font(48, Color.BLACK,"Space Grotesk" ),
+        visual = ColorVisual(Color(0xD39130)).apply { style.borderRadius = BorderRadius(10) }
+    )
+
+    val nextPlayerPane = Pane<ComponentView>(
+        width = 1920,
+        height = 1080,
+        posX = 0,
+        posY = 0,
+        visual = ColorVisual(Color(0x8B570C)).apply { transparency = 0.5; style.borderRadius = BorderRadius(10)  }
+    ).apply {
+
+        isVisible = false
+
+        val back = Label(
+            width = 800,
+            height = 500,
+            posX = 560,
+            posY = 290,
+            visual = ColorVisual(Color(0xFFCC81)).apply { style.borderRadius = BorderRadius(10);style.borderRadius = BorderRadius(10)   }
+        )
+
+        val text = Label(
+            posX = 820,
+            posY = 333,
+            width = 281,
+            height = 61,
+            text = "Next Player:",
+            font = Font(48, Color.BLACK,"Space Grotesk" )
+        )
+
+        addAll(back, text, playerNameForNextPlayerPane)
 
     }
+
 
     val drawPile = Button(
         posX = 955 - 75,
@@ -152,7 +212,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         visual = ImageVisual("tileBack.png")
     ).apply {
         onMouseClicked = {
-            rootService.playerActionService.refillWheel()
+            if(!isAlreadyPlayed){
+                rootService.playerActionService.refillWheel()
+            }
         }
     }
 
@@ -184,35 +246,69 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
         setCoordinatesForTheMoonWheel()
 
-        contentPane.addAll(moonWheel, undoButton, redoButton, endTurnButton,rageQuitButton,drawStackLabel, drawPile, cameraPaneStack)
+        contentPane.addAll(moonWheel, undoButton, redoButton, endTurnButton,rageQuitButton,drawStackLabel, drawPile)
 
-        addComponents(contentPane, playersHand, errorLabel)
+        addComponents(contentPane, playersHand, overlayPaneDrawStack, nextPlayerPane, errorLabel)
 
     }
 
     override fun refreshAfterStartGame() {
 
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
+        checkIfHuman(game)
         fullMoonWheel(game)
         addCurrentPlayer(game)
         addPlayers(game)
-        //updateDrawStack(game)
+        updateDrawStack(game)
         drawPile.text = game.drawPile.size.toString()
+
+
+        if(!ifHuman!!){
+            if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
+                rootService.easyBotService.executeEasyMove()
+            }
+        }
+
 
     }
 
     override fun refreshAfterStartTurn(){
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
+        checkIfHuman(game)
         fullMoonWheel(game)
         addCurrentPlayer(game)
         addPlayers(game)
+
+        if(!ifHuman!!){
+            if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
+                rootService.easyBotService.executeEasyMove()
+            }
+        }
+
+
     }
 
     override fun refreshAfterEndTurn() {
         chosenTile = null
         isAlreadyPlayed = false
+        ifHuman = null
         clearMoonWheel()
         clearPlayersDisplay()
+
+        val game = rootService.currentGame
+        checkNotNull(game)
+        playerNameForNextPlayerPane.text = game.players[game.activePlayer].playerName
+        nextPlayerPane.isVisible = true
+
+        playAnimation(
+            DelayAnimation(duration = 2000).apply {
+                onFinished = {
+                    nextPlayerPane.isVisible = false
+                    rootService.gameService.startTurn()
+                }
+            },
+        )
+
     }
 
     override fun refreshAfterTilePlayed(){
@@ -232,8 +328,15 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
         clearMoonWheel()
         fullMoonWheel(game)
-        //updateDrawStack(game)
+        updateDrawStack(game)
         drawPile.text = game.drawPile.size.toString()
+    }
+
+    override fun refreshAfterGameEnd(winner: Player) {
+        chosenTile = null
+        isAlreadyPlayed = false
+        clearMoonWheel()
+        clearPlayersDisplay()
     }
 
     fun clearPlayersDisplay(){
@@ -267,7 +370,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
                     posY = tileCoordinates[i].second.toDouble()
                 }
 
-                val toAdd: ComponentView = if (i in availableTiles.filterNotNull() && !isAlreadyPlayed) {
+                val toAdd: ComponentView = if (i in availableTiles.filterNotNull() && !isAlreadyPlayed && ifHuman!!) {
                     tileLabel.apply {
                         posX = 5.0
                         posY = 5.0
@@ -442,8 +545,8 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
         for( (index, tile) in game.drawPile.withIndex()){
 
-            val column = index % 3
-            val row = index / 3
+            val column = index % 17
+            val row = index / 17
 
             gridPaneStack[column,row] = tile?.let { createTile(it) }
 
@@ -490,7 +593,6 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             font = Font(36, Color(0x000000), "Space Grotesk"),
             visual = ColorVisual(Color(0xFFCC81)).apply { style.borderRadius = BorderRadius(10) }
         )
-
         val back =  Button(
             posX = 61,
             posY = 955,
@@ -610,7 +712,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             spacing = 5
         ).apply {
             placeTiles(this, player, offsetX, offsetY)
-            if (!isAlreadyPlayed) {
+            if (!isAlreadyPlayed && ifHuman!!) {
                 placePossiblePositions(this, validPositions, offsetX, offsetY)
             }
 
@@ -641,9 +743,13 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
                 visual = ColorVisual(Color.GREEN).apply { transparency = 0.7 }
             ).apply {
                 onMouseClicked = {
-                    if (chosenTile == null) throw IllegalStateException("Please, first select a Tile from the MoonWheel")
-                    rootService.playerActionService.playTile(chosenTile!!.second, coord)
-                    isAlreadyPlayed = true
+                    if (chosenTile == null){
+                        showError("First, you have to select a tile")
+                    }
+                    else{
+                        isAlreadyPlayed = true
+                        rootService.playerActionService.playTile(chosenTile!!.second, coord)
+                    }
                 }
             }
 
@@ -722,49 +828,20 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         tileCoordinates.add(Pair(695, 80))
     }
 
-    fun endTurn(){
-        val overlayPane = Pane<ComponentView>(
-            width = 1920,
-            height = 1080,
-            posX = 0,
-            posY = 0,
-            visual = ColorVisual(Color(0x8B570C)).apply { transparency = 0.5; style.borderRadius = BorderRadius(10)  }
-        )
 
-        val back = Label(
-            width = 800,
-            height = 500,
-            posX = 560,
-            posY = 290,
-            visual = ColorVisual(Color(0xFFCC81)).apply { style.borderRadius = BorderRadius(10);style.borderRadius = BorderRadius(10)   }
-        )
-
-        val text = Label(
-            posX = 820,
-            posY = 333,
-            width = 281,
-            height = 61,
-            text = "Next Player:",
-            font = Font(48, Color.BLACK,"Space Grotesk" )
-        )
-
-        val playerName = Label(
-            posX = 710,
-            posY = 448,
-            width = 500,
-            height = 120,
-            text = "Player1",
-            alignment = Alignment.CENTER,
-            font = Font(48, Color.BLACK,"Space Grotesk" ),
-            visual = ColorVisual(Color(0xD39130)).apply { style.borderRadius = BorderRadius(10) }
-        )
-
-        overlayPane.addAll(back,text,playerName)
-        contentPane.addAll(overlayPane)
-        Thread.sleep(2000)
-        contentPane.remove(overlayPane)
-
+    fun checkIfHuman(game: NovaLunaGame) {
+        val isHuman = game.players[game.activePlayer].playerType == PlayerType.HUMAN
+        undoButton.isVisible = isHuman
+        redoButton.isVisible = isHuman
+        endTurnButton.isVisible = isHuman
+        rageQuitButton.isVisible = isHuman
+        ifHuman = isHuman
     }
+
+    fun hideDrawStack(){
+        overlayPaneDrawStack.isVisible = false
+    }
+
 
     /**
      * Shows the given error message in [errorLabel] and hides it after 4 seconds.

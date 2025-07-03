@@ -172,8 +172,6 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
         game.activePlayer =  game.players.indexOf(currentPlayer)
 
-        onAllRefreshables { refreshAfterEndTurn() }
-
         if(checkEndGame()){
             var winner = game.players[0]
             for (player in game.players){
@@ -182,9 +180,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
                 }
             }
             endGame(winner)
-        } else {
-            startTurn()
         }
+        
+        onAllRefreshables { refreshAfterEndTurn() }
+
 
     }
 

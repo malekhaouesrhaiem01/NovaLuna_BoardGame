@@ -530,8 +530,8 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
         contentPane.addAll(orderToken, playersToken, colorsToken, botsToken,
             firstOderToken, firstDefaultInput,firstColorButton, firstEasyButton, firstHardButton,
             secondOderToken, secondDefaultInput,secondColorButton, secondEasyButton, secondHardButton,
-            addButton, randomButton, backButton,speedButton, speedUp, speedDown,firstGame,startButton, errorLabel)
-        addComponents(contentPane, selectColorPane)
+            addButton, randomButton, backButton,speedButton, speedUp, speedDown,firstGame,startButton)
+        addComponents(contentPane, selectColorPane, errorLabel)
 
     }
 
