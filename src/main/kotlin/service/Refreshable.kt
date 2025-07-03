@@ -28,6 +28,8 @@ interface Refreshable{
      *
      * @param state the information to show
      */
-    fun refreshConnectionState(state: ConnectionState) {}
+    fun refreshConnectionState(state: ConnectionState) {
+    }
 
+    fun refreshAfterPlayerJoined() {}
 }
