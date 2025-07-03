@@ -1,8 +1,8 @@
-package service.connection
+package service
 
 /**
  * Enum representing all possible network and gameplay states for Nova Luna.
- * Used by [NovaLunaNetworkService] to control the connection and game lifecycle.
+ * Used by [NetworkService] to control the connection and game lifecycle.
  */
 enum class ConnectionState {
 

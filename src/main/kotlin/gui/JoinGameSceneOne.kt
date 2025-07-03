@@ -1,5 +1,6 @@
 package gui
 
+import service.NetworkService
 import service.Refreshable
 import service.RootService
 import tools.aqua.bgw.components.layoutviews.Pane
@@ -14,6 +15,7 @@ import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
+import entity.PlayerType
 
 class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
@@ -178,7 +180,25 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         }
 
         joinButton.onMouseClicked = {
-            val name = playerInput.text
+            val name      = playerInput.text
+            val sessionId = sessionInput.text
+            val secret    = "neumond25"
+
+            rootService.networkService.myPlayerType = when (whichPlayer) {
+                1    -> PlayerType.EASYBOT
+                2    -> PlayerType.HARDBOT
+                else -> PlayerType.HUMAN
+            }
+
+            // 2) Perform the network join
+            rootService.networkService.joinGame(
+                secret = secret,
+                name = name,
+                sessionID  = sessionId
+            )
+
+
+
             val joinGameSceneTwo = JoinGameSceneTwo(rootService, name)
             NovaApplication.showMenuScene(joinGameSceneTwo)
         }

@@ -10,6 +10,10 @@ import service.bot.HardBotService
  * This class acts as a central hub for every other service within the application.
  */
 class RootService{
+
+
+    /** The connected [GameService] for this rootService */
+    val networkService = NetworkService(this)
     /** The connected [GameService] for this rootService */
     var gameService = GameService(this)
     /** The connected [PlayerActionService] for this rootService */

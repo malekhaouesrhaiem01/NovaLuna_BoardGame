@@ -23,4 +23,11 @@ interface Refreshable{
     fun refreshAfterRageQuit() {}
     fun refreshAfterGameEnd(winner : Player){}
     // fun refreshAfterMoveMeepleAndPlayer()
+    /**
+     * refreshes the network connection status with the given information
+     *
+     * @param state the information to show
+     */
+    fun refreshConnectionState(state: ConnectionState) {}
+
 }
