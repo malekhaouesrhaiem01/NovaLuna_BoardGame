@@ -16,7 +16,7 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
     private lateinit var offlineMenuScene: OfflineMenuScene
     private lateinit var joinGameSceneOne: JoinGameSceneOne
     private lateinit var joinGameSceneTwo: JoinGameSceneTwo
-    private lateinit var hostGameSceneOne: HostGameSceneOne
+    lateinit var hostGameSceneOne: HostGameSceneOne
     private lateinit var hostGameSceneTwo: HostGameSceneTwo
     private val resultMenuScene: ResultMenuScene
 
@@ -42,9 +42,6 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
             }
         }
         joinGameSceneOne = JoinGameSceneOne(rootService).apply {
-            joinButton.onMouseClicked = {
-                showMenuScene(joinGameSceneTwo)
-            }
             backButton.onMouseClicked = {
                 showMenuScene(mainMenuScene)
             }
@@ -55,9 +52,7 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
             }
         }
         hostGameSceneOne = HostGameSceneOne(rootService).apply {
-            nextButton.onMouseClicked = {
-                showMenuScene(hostGameSceneTwo)
-            }
+
             backButton.onMouseClicked = {
                 showMenuScene(mainMenuScene)
             }

@@ -85,6 +85,21 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
+    val saveGameButton = Button(
+        posX = 78,
+        posY = 874,
+        width = 250,
+        height = 60,
+        text = "save game",
+        font = Font(48, Color.BLACK,"Space Grotesk" ),
+        visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
+    ).apply {
+        onMouseClicked = {
+            //hier fehlt die Logik zum Speichern des Spiels
+            showError("Game saved successfully!")
+        }
+    }
+
     val endTurnButton = Button(
         posX = 1515,
         posY = 833,
@@ -246,7 +261,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
         setCoordinatesForTheMoonWheel()
 
-        contentPane.addAll(moonWheel, undoButton, redoButton, endTurnButton,rageQuitButton,drawStackLabel, drawPile)
+        contentPane.addAll(moonWheel, undoButton, redoButton, endTurnButton,rageQuitButton,drawStackLabel, drawPile, saveGameButton)
 
         addComponents(contentPane, playersHand, overlayPaneDrawStack, nextPlayerPane, errorLabel)
 

@@ -1,7 +1,6 @@
 package gui
 
-import service.Refreshable
-import service.RootService
+import service.*
 import tools.aqua.bgw.components.layoutviews.Pane
 import tools.aqua.bgw.components.uicomponents.Button
 import tools.aqua.bgw.components.uicomponents.Label
@@ -15,6 +14,7 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import entity.PlayerType
+import java.util.*
 
 class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
@@ -148,6 +148,26 @@ class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         }
     )
 
+    private val errorLabel = Label(
+        text = "",
+        width = 800,
+        height = 80,
+        posX = width / 2 - 400,
+        posY = 600,
+        font = Font(50, Color.RED, "Space Grotesk"),
+        visual = ColorVisual(Color(0xFFF0F0)).apply { style.borderRadius = BorderRadius(10) }
+    ).apply { isVisible = false }
+
+    private fun showError(message: String) {
+        errorLabel.text = message
+        errorLabel.isVisible = true
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                errorLabel.isVisible = false
+            }
+        }, 3000)
+    }
+
     init {
         // Set the background image for the main menu
         background = ImageVisual("OfflineMenu.png")
@@ -179,10 +199,15 @@ class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
             }
         }
 
-        nextButton.onMouseClicked = {
+        nextButton.onMouseClicked = onMouseClicked@ {
             val name      = playerInput.text
             val sessionID = sessionInput.text
             val secret    = "neumond25"  // add a TextField if you need a separate secret field
+
+            if (name.isBlank()) {
+                showError("Please enter a host name!")
+                return@onMouseClicked
+            }
 
             // 1) Record host’s player type (human/easy/hard) in the service
             rootService.networkService.myPlayerType = when (whichPlayer) {
@@ -206,6 +231,7 @@ class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         }
 
         addComponents(contentPane)
-        contentPane.addAll( backToken, nextButton, sessionInput, playerInput, urlInput, easyButton, hardButton, labelNovaLuna, backButton)
+        contentPane.addAll( backToken, nextButton, sessionInput, playerInput, urlInput, easyButton, hardButton, labelNovaLuna, backButton, errorLabel)
     }
+
 }

@@ -1,21 +1,14 @@
 package gui
 
-import service.NetworkService
-import service.Refreshable
-import service.RootService
+import service.*
 import tools.aqua.bgw.components.layoutviews.Pane
-import tools.aqua.bgw.components.uicomponents.Button
-import tools.aqua.bgw.components.uicomponents.Label
-import tools.aqua.bgw.components.uicomponents.TextField
-import tools.aqua.bgw.components.uicomponents.UIComponent
-import tools.aqua.bgw.core.Alignment
-import tools.aqua.bgw.core.Color
-import tools.aqua.bgw.core.MenuScene
+import tools.aqua.bgw.components.uicomponents.*
+import tools.aqua.bgw.core.*
 import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
-import tools.aqua.bgw.visual.ColorVisual
-import tools.aqua.bgw.visual.ImageVisual
+import tools.aqua.bgw.visual.*
 import entity.PlayerType
+import java.util.*
 
 class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
@@ -149,6 +142,26 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         }
     )
 
+    private val errorLabel = Label(
+        text = "",
+        width = 800,
+        height = 80,
+        posX = width / 2 - 400,
+        posY = 600,
+        font = Font(50, Color.RED, "Space Grotesk"),
+        visual = ColorVisual(Color(0xFFF0F0)).apply { style.borderRadius = BorderRadius(10) }
+    ).apply { isVisible = false }
+
+    private fun showError(message: String) {
+        errorLabel.text = message
+        errorLabel.isVisible = true
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                errorLabel.isVisible = false
+            }
+        }, 3000)
+    }
+
     init {
 
         easyButton.onMouseClicked = {
@@ -179,10 +192,23 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
             }
         }
 
-        joinButton.onMouseClicked = {
+        joinButton.onMouseClicked = onMouseClicked@ {
             val name      = playerInput.text
             val sessionId = sessionInput.text
             val secret    = "neumond25"
+
+            if (name.isEmpty()) {
+                showError("Please enter a name!")
+                return@onMouseClicked
+            }
+            if (sessionId.isEmpty()) {
+                showError("Please enter a session ID!")
+                return@onMouseClicked
+            }
+            if (urlInput.text.isEmpty()) {
+                showError("Please enter a URL!")
+                return@onMouseClicked
+            }
 
             rootService.networkService.myPlayerType = when (whichPlayer) {
                 1    -> PlayerType.EASYBOT
@@ -204,6 +230,6 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         }
 
         addComponents(contentPane)
-        contentPane.addAll(backToken, backButton, joinButton, sessionInput, playerInput, urlInput, easyButton, hardButton, labelNovaLuna )
+        contentPane.addAll(backToken, backButton, joinButton, sessionInput, playerInput, urlInput, easyButton, hardButton, labelNovaLuna, errorLabel)
     }
 }

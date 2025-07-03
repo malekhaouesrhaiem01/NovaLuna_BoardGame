@@ -24,6 +24,15 @@ class JoinGameSceneTwo (private val rootService: RootService,
 
     private val nameLabel = Label(
         text = "Welcome, $playerName!",
+        width = 600,
+        height = 100,
+        posX = 660,
+        posY = 330,
+        alignment = Alignment.CENTER,
+        font = Font(48, Color.BLACK, "Space Grotesk"),
+        visual = ColorVisual(Color(0xFFD28E)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
     )
 
     private val waitLabel = Label(
@@ -60,4 +69,5 @@ class JoinGameSceneTwo (private val rootService: RootService,
         addComponents(contentPane)
         contentPane.addAll(nameLabel, waitLabel, exitButton)
     }
+
 }
