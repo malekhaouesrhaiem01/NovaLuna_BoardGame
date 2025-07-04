@@ -25,7 +25,7 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
     init {
         // Register all components that need refresh callbacks
 
-        mainMenuScene = MainMenuScene(rootService).apply {
+        mainMenuScene = MainMenuScene().apply {
             offlineButton.onMouseClicked = {
                 showMenuScene(offlineMenuScene)
             }
