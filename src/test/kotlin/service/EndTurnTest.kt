@@ -49,7 +49,10 @@ class EndTurnTest {
         )
         rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false, false)
     }
-
+    /**
+     * Verifies `endTurn()` correctly selects the next player based on moon track position
+     * when no players share the same position.
+     */
     @Test
     fun testNoPlayerOnSamePosition(){
         val game = rootService.currentGame!!
@@ -62,7 +65,10 @@ class EndTurnTest {
 
         assertEquals(2, game.activePlayer)
     }
-
+    /**
+     * Verifies that among players sharing the same moon track position,
+     * the one with the smaller height is chosen as the next active player.
+     */
     @Test
     fun testPlayerOnSamePosition(){
         val game = rootService.currentGame!!
@@ -79,7 +85,10 @@ class EndTurnTest {
         assertEquals(2, game.activePlayer)
     }
 
-
+    /**
+     * Verifies that the game ends when the active player has no more tokens.
+     * This simulates the winning condition being reached.
+     */
     @Test
     fun testEndTurnEndsGameNoTokens(){
         val game = rootService.currentGame!!

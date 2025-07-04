@@ -29,6 +29,7 @@ class NovaLunaNetworkClient(
         }
 
         if (response.status == CreateGameResponseStatus.SUCCESS) {
+            requireNotNull(response.sessionID) { "sessionID must not be null on SUCCESS" }
             sessionID = response.sessionID
             // forward into the service (which itself updates the state)
             networkService.onCreateGameResponse(response, playerName)

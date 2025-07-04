@@ -6,9 +6,17 @@ import entity.PlayerType
 import entity.Tile
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
-
+/**
+ * Test class for the `startNewGame()` method in [GameService].
+ *
+ * This class verifies correct game initialization, input validation for player count and simulation speed,
+ * and that starting a new game while another is active throws the correct exception.
+ */
 class StartNewGameTest {
-
+    /**
+     * Verifies that starting a game with invalid configurations throws appropriate exceptions,
+     * and that valid initialization works only once per active game session.
+     */
     @Test
     fun teststartNewGame(){
         val rootService = RootService()
