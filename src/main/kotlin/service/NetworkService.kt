@@ -20,13 +20,6 @@ import tools.aqua.bgw.util.Coordinate
  */
 class NetworkService(private val rootService: RootService) : AbstractRefreshingService() {
 
-    companion object {
-        /** URL of the BGW-Net server for SoPra network games */
-        const val SERVER_ADDRESS = "sopra.cs.tu-dortmund.de:80/bgw-net/connect"
-
-        /** Game identifier registered with the server */
-        const val GAME_ID = "NovaLuna"
-    }
 
     /** What *this* client chose — HUMAN, EASYBOT, or HARDBOT */
     var myPlayerType: PlayerType = PlayerType.HUMAN
@@ -343,6 +336,14 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     fun updateConnectionState(newState: ConnectionState) {
         connectionState = newState
         onAllRefreshables { refreshConnectionState(newState) }
+    }
+
+    companion object {
+        /** URL of the BGW-Net server for SoPra network games */
+        const val SERVER_ADDRESS = "sopra.cs.tu-dortmund.de:80/bgw-net/connect"
+
+        /** Game identifier registered with the server */
+        const val GAME_ID = "NovaLuna"
     }
 }
 

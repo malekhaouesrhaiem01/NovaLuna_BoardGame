@@ -37,7 +37,7 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
     fun executeEasyMove() {
         // Get required services and the current game state
         val game = rootService.currentGame
-            ?: throw IllegalStateException("executeEasyMove called but no game is in progress.")
+        checkNotNull(game)
 
         val gameService = rootService.gameService
         val playerActionService = rootService.playerActionService

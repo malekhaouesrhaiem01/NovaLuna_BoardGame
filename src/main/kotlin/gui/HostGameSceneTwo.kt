@@ -236,16 +236,6 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
         visual = ColorVisual(Color(0xFFF0F0)).apply { style.borderRadius = BorderRadius(10) }
     ).apply { isVisible = false }
 
-    private fun showError(message: String) {
-        errorLabel.text = message
-        errorLabel.isVisible = true
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                errorLabel.isVisible = false
-            }
-        }, 3000)
-    }
-
     private val startButton = Button(
         text = "Start",
         width = 241,
@@ -323,6 +313,16 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
             }
             rootService.networkService.startNewHostedGame(playersStartGame, ifFirstGame, ifRandom)
         }
+    }
+
+    private fun showError(message: String) {
+        errorLabel.text = message
+        errorLabel.isVisible = true
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                errorLabel.isVisible = false
+            }
+        }, 3000)
     }
 
     // Build or rebuild the player UI when player list changes
@@ -406,5 +406,4 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
             else -> { }
         }
     }
-
 }

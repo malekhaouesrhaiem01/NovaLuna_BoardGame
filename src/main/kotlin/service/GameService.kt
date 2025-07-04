@@ -137,8 +137,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         onAllRefreshables { refreshAfterStartTurn() }
     }
 
-    fun saveForUndoRedo(game : NovaLunaGame) {
-    }
+    private fun saveForUndoRedo(game : NovaLunaGame) {}
 
     /**
      * The method [endTurn] ends the current Players turn,

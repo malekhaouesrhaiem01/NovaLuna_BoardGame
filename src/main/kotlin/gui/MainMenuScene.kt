@@ -13,7 +13,7 @@ import tools.aqua.bgw.visual.*
  * Implements [Refreshable] to react to service layer updates.
  *
  */
-class MainMenuScene () : MenuScene(1920, 1080,ImageVisual("back_image.png")), Refreshable {
+class MainMenuScene : MenuScene(1920, 1080,ImageVisual("back_image.png")), Refreshable {
 
 
     /**

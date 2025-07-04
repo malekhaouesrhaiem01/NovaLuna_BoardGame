@@ -351,7 +351,9 @@ class OfflineMenuScene (private val rootService: RootService) :
                 }
             }else{
                 ifRandom = true
-                visual = ColorVisual(Color(0x05D817)).apply { style.borderRadius = BorderRadius(15); transparency = 0.54}
+                visual = ColorVisual(Color(0x05D817)).apply {
+                    style.borderRadius = BorderRadius(15); transparency = 0.54
+                }
             }
         }
     }
@@ -453,17 +455,6 @@ class OfflineMenuScene (private val rootService: RootService) :
         visual = ColorVisual(Color(0xFFF0F0)).apply { style.borderRadius = BorderRadius(10) }
     ).apply { isVisible = false }
 
-    private fun showError(message: String) {
-        errorLabel.text = message
-        errorLabel.isVisible = true
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                errorLabel.isVisible = false
-            }
-        }, 3000)
-    }
-
-
     private val startButton = Button(
         text = "Start",
         width = 241,
@@ -530,20 +521,33 @@ class OfflineMenuScene (private val rootService: RootService) :
                     )
                 )
             }
-            rootService.gameService.startNewGame(playersStartGame, actualSpeed, ifRandom, ifFirstGame)
+            rootService.gameService.startNewGame(
+                playersStartGame,
+                actualSpeed,
+                ifRandom,
+                ifFirstGame
+            )
         }
     }
 
-
-
     init {
-        selectColorPane.addAll(colorSelectLabel, noneColor, blackColor, whiteColor, blueColor, orangeColor )
+        selectColorPane.addAll(colorSelectLabel, noneColor, blackColor, whiteColor, blueColor, orangeColor)
         contentPane.addAll(orderToken, playersToken, colorsToken, botsToken,
             firstOderToken, firstDefaultInput,firstColorButton, firstEasyButton, firstHardButton,
             secondOderToken, secondDefaultInput,secondColorButton, secondEasyButton, secondHardButton,
             addButton, randomButton, backButton,speedButton, speedUp, speedDown,firstGame,startButton)
         addComponents(contentPane, selectColorPane, errorLabel)
 
+    }
+
+    private fun showError(message: String) {
+        errorLabel.text = message
+        errorLabel.isVisible = true
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                errorLabel.isVisible = false
+            }
+        }, 3000)
     }
 
     private fun selectColor(i: Int){
@@ -729,9 +733,17 @@ class OfflineMenuScene (private val rootService: RootService) :
             onMouseClicked = { removePlayer(i)}
         }
 
-        contentPane.addAll(newOderToken, newDefaultInput, newColorButton, newEasyButton, newHardButton, removeButton)
+        contentPane.addAll(newOderToken, newDefaultInput,
+            newColorButton, newEasyButton, newHardButton, removeButton)
 
-        val newPlayer = PlayerGUI(newOderToken, newDefaultInput, newColorButton, newEasyButton, newHardButton, removeButton)
+        val newPlayer = PlayerGUI(
+            newOderToken,
+            newDefaultInput,
+            newColorButton,
+            newEasyButton,
+            newHardButton,
+            removeButton
+        )
 
         players.add(newPlayer)
 
