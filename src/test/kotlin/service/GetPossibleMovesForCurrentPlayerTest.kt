@@ -7,7 +7,12 @@ import entity.PlayerType
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
+/**
+ * Test class for the method `getPossibleMovesForCurrentPlayer()` in [GameService].
+ *
+ * This class checks whether the method correctly computes all valid combinations of tile and board position
+ * that the current player can play.
+ */
 class GetPossibleMovesForCurrentPlayerTest {
 
     private lateinit var  rootService: RootService
@@ -40,6 +45,10 @@ class GetPossibleMovesForCurrentPlayerTest {
         rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false, false)
     }
 
+    /**
+     * Tests that `getPossibleMovesForCurrentPlayer()` returns the correct list of [Move]s
+     * by combining every available tile with every legal board coordinate.
+     */
     @Test
     fun testForRightMoves(){
         val game = rootService.currentGame!!

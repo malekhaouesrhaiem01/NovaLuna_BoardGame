@@ -5,7 +5,12 @@ import entity.PlayerColour
 import entity.PlayerType
 import tools.aqua.bgw.util.Coordinate
 import kotlin.test.*
-
+/**
+ * Test class for the `updateTasks()` method in [GameService].
+ *
+ * The test simulates a complex player hand with multiple tiles placed around a central position
+ * and verifies whether task fulfillment is properly updated based on tile positions and neighbors.
+ */
 class UpdateTasksTest {
 
     /**
@@ -13,7 +18,9 @@ class UpdateTasksTest {
      * hence it is a late-initialized property.
      */
     private lateinit var rootService: RootService
-
+    /**
+     * Initializes a 4-player game with predefined settings before each test.
+     */
     @BeforeTest
     fun setUpGame() {
         rootService = RootService()
@@ -27,7 +34,14 @@ class UpdateTasksTest {
         rootService.gameService.startNewGame(players, 10, randomOrder = false, firstGame = false)
 
     }
-
+    /**
+     * Tests the `updateTasks()` method by:
+     * - Giving the current player 10 tiles from the tile track.
+     * - Positioning them in a pattern around the origin.
+     * - Calling `updateTasks()` to process task checks.
+     *
+     *
+     */
     @Test
     fun testUpdateTasks(){
         val game = rootService.currentGame
