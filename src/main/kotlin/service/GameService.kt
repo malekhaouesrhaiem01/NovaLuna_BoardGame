@@ -6,8 +6,13 @@ import entity.Move
 import entity.Tile
 import entity.TileColour
 import tools.aqua.bgw.util.Coordinate
-import java.util.Objects.isNull
 
+/**
+ * Service layer class that provides the logic for actions not
+ * directly related to a single Player
+ *
+ * @param rootService The [RootService] instance to access the other service methods and entity layer
+ */
 open class GameService(private val rootService: RootService) : AbstractRefreshingService() {
     /**
      * Starts a new Nova Luna game with the given players and simulation speed.
@@ -19,7 +24,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      * @throws IllegalArgumentException or if the simulation speed is greater than 10.
      * @throws IllegalArgumentException If the number of players is not between 2 and 4
      */
-    fun startNewGame(players : List<Player>, simulationSpeed : Int, randomOrder : Boolean = false, firstGame : Boolean) {
+    fun startNewGame(players : List<Player>, simulationSpeed : Int, randomOrder : Boolean = false, firstGame : Boolean){
 
         // überprüfe, ob Anzahl der Spieler passt (2 bis 4)
         require(players.size in 2..4) { "Spieleranzahl muss zwischen 2 und 4 sein." }
@@ -420,7 +425,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
                 }
             }
         }
-        if (true){ //Firstgame == true
+        if (game.firstGame){ //Firstgame == true
             when(game.players.size){
                 2 -> game.players[game.activePlayer].tokenCount = 16 - count
                 3 -> game.players[game.activePlayer].tokenCount = 18 - count
@@ -434,7 +439,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
     }
 
-    private fun createPair(task : Map<TileColour, Int> , booleanList: List<Boolean>) :  Pair<Map<TileColour, Int>, Boolean> {
+    private fun createPair(task : Map<TileColour, Int> , booleanList: List<Boolean>) :
+            Pair<Map<TileColour, Int>, Boolean> {
 
         // Return a Pair with True if Boolean List contains no false inside else return false
         return if (booleanList.contains(false)){
@@ -444,7 +450,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
     }
 
-    private fun checkSurroundingTiles(tile :Tile, visitedTiles : MutableList<Tile>, colorMap : MutableMap<TileColour, Int>) {
+    private fun checkSurroundingTiles(tile :Tile, visitedTiles : MutableList<Tile>,
+                                      colorMap : MutableMap<TileColour, Int>) {
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
@@ -603,8 +610,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         //changes the height of the currentPlayer, for the case two Players are at the same Position
         for(player in game.players){
-            /* For Every Player that's already in that moonTrackposition, add 1 additional height for the currentPlayer
-             * sind he came last. Therefore, if two Players are at the same position the currentPlayer would have a height
+            /* For Every Player that's already in that moonTrackposition,
+             * add 1 additional height for the currentPlayer since he came last.
+             * Therefore, if two Players are at the same position the currentPlayer would have a height
              * of two making him the Player next in Line.
              */
             if(player.moonTrackPosition == currentPlayer.moonTrackPosition){

@@ -65,14 +65,16 @@ class HardBotService(private val rootService: RootService) : AbstractRefreshingS
      * @param rootState The starting game state for the search (should be a deep copy of the actual game state).
      * @param timeLimitMillis The maximum time in milliseconds for the search to run.
      * @return The best [entity.Move] identified by the MCTS algorithm.
-     * @throws IllegalStateException if no suitable move could be found (e.g., if the game is already over or no moves are possible).
+     * @throws IllegalStateException if no suitable move could be found
+     *         (e.g., if the game is already over or no moves are possible).
      */
     private fun findBestMoveInternal(rootState: NovaLunaGame, timeLimitMillis: Long): Move {
         // Not finished yet
 
         val gameService = rootService.gameService
 
-        val initialPossibleMoves = gameService.getPossibleMovesForCurrentPlayer() // This assumes it uses rootService.currentGame
+        // This assumes it uses rootService.currentGame
+        val initialPossibleMoves = gameService.getPossibleMovesForCurrentPlayer()
 
         val rootNode = MCTSNode(
             gameState = rootState,
@@ -90,13 +92,16 @@ class HardBotService(private val rootService: RootService) : AbstractRefreshingS
             } else {
                 // If the promising node is terminal, just backpropagate its result.
                 // This means a winning/losing state was reached directly.
-                backpropagate(promisingNode, simulate(promisingNode.gameState)) // Simulate a terminal state to get results
+                // Simulate a terminal state to get results
+                backpropagate(promisingNode, simulate(promisingNode.gameState))
             }
         }
 
         // After the time is up, choose the best child of the root node based on visits/scores.
         val bestChild = rootNode.children.maxByOrNull { it.visits } // Or based on score, depending on strategy
-            ?: throw IllegalStateException("MCTS could not find a move within the time limit or no moves were possible.")
+            ?: throw IllegalStateException(
+                "MCTS could not find a move within the time limit or no moves were possible."
+            )
 
         return bestChild.moveThatLedHere
             ?: throw IllegalStateException("Best MCTS child node has no associated move.")

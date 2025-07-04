@@ -201,7 +201,8 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             height = 500,
             posX = 560,
             posY = 290,
-            visual = ColorVisual(Color(0xFFCC81)).apply { style.borderRadius = BorderRadius(10);style.borderRadius = BorderRadius(10)   }
+            visual = ColorVisual(Color(0xFFCC81)).apply {
+                style.borderRadius = BorderRadius(10);style.borderRadius = BorderRadius(10)}
         )
 
         val text = Label(
@@ -261,7 +262,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
         setCoordinatesForTheMoonWheel()
 
-        contentPane.addAll(moonWheel, undoButton, redoButton, endTurnButton,rageQuitButton,drawStackLabel, drawPile, saveGameButton)
+        contentPane.addAll(moonWheel, undoButton, redoButton,
+            endTurnButton, rageQuitButton, drawStackLabel,
+            drawPile, saveGameButton)
 
         addComponents(contentPane, playersHand, overlayPaneDrawStack, nextPlayerPane, errorLabel)
 

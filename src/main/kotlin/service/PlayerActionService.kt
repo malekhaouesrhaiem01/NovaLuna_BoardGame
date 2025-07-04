@@ -2,6 +2,12 @@ package service
 import entity.Move
 import tools.aqua.bgw.util.Coordinate
 
+/**
+ * Service layer class that provides the logic for the possible actions a Player in
+ * Nova Luna can take.
+ *
+ * @param rootService The [RootService] instance to access the other service methods and entity layer
+ */
 open class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
 
     /**

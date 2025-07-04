@@ -12,11 +12,12 @@ import tools.aqua.bgw.visual.*
 import java.util.*
 
 class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
-    //this needs to be called from the start button in the hostgame lobby (I am assuming it's similar to the offline lobby scene)
+    //this needs to be called from the start button in the hostgame lobby
+    //(I am assuming it's similar to the offline lobby scene)
     //rootService.networkService.startNewHostedGame(
     //playersStartGame,
     //ifFirstGame,
-   // ifRandom
+    //ifRandom
     //)
 
     private val availableColors = mutableListOf(true, true, true, true)
@@ -170,10 +171,14 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
         onMouseClicked = {
             if (ifRandom) {
                 ifRandom = false
-                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply { style.borderRadius = BorderRadius(15) }
+                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+                    style.borderRadius = BorderRadius(15)
+                }
             }else{
                 ifRandom = true
-                visual = ColorVisual(Color(0x05D817)).apply { style.borderRadius = BorderRadius(15); transparency = 0.54}
+                visual = ColorVisual(Color(0x05D817)).apply {
+                    style.borderRadius = BorderRadius(15); transparency = 0.54
+                }
             }
         }
     }
@@ -209,10 +214,14 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
         onMouseClicked = {
             if (ifFirstGame) {
                 ifFirstGame = false
-                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply { style.borderRadius = BorderRadius(15) }
+                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+                    style.borderRadius = BorderRadius(15)
+                }
             }else{
                 ifFirstGame = true
-                visual = ColorVisual(Color(0x05D817)).apply { style.borderRadius = BorderRadius(15); transparency = 0.54}
+                visual = ColorVisual(Color(0x05D817)).apply {
+                    style.borderRadius = BorderRadius(15); transparency = 0.54
+                }
             }
         }
     }
@@ -252,8 +261,12 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
     init {
         rootService.networkService.addRefreshable(this)
 
-        selectColorPane.addAll(colorSelectLabel, noneColor, blackColor, whiteColor, blueColor, orangeColor)
-        contentPane.addAll(orderToken, playersToken, colorsToken, randomButton, backButton, firstGame, startButton, errorLabel)
+        selectColorPane.addAll(colorSelectLabel, noneColor, blackColor,
+            whiteColor, blueColor, orangeColor)
+
+        contentPane.addAll(orderToken, playersToken,
+            colorsToken, randomButton, backButton, firstGame, startButton, errorLabel)
+
         addComponents(contentPane, selectColorPane)
 
         noneColor.onMouseClicked = { applyColor(4) }
@@ -373,7 +386,14 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
         gui.colorButton.apply {
             text = when (colorIdx) {0->"Black";1->"White";2->"Blue";3->"Orange";else->"NONE"}
             font = Font(48, if (colorIdx==1) Color.BLACK else Color.WHITE, "Space Grotesk")
-            visual = ColorVisual(when (colorIdx) {0->Color.BLACK;1->Color.WHITE;2->Color.BLUE;3->Color(0xFF8401);else->Color.GRAY}).apply { style.borderRadius = BorderRadius(15) }
+            visual = ColorVisual(
+                color = when (colorIdx) {
+                0->Color.BLACK
+                1->Color.WHITE
+                2->Color.BLUE
+                3->Color(0xFF8401)
+                else->Color.GRAY }
+            ).apply { style.borderRadius = BorderRadius(15) }
         }
         if (colorIdx < 4) availableColors[colorIdx] = false
         selectColorPane.isVisible = false

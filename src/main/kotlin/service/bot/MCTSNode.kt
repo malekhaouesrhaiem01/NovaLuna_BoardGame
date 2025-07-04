@@ -71,7 +71,8 @@ class MCTSNode(
     }
 
     /**
-     * Selects the best child node from this node's children based on the UCT (Upper Confidence Bound for Trees) formula.
+     * Selects the best child node from this node's children based on the UCT (Upper Confidence Bound for Trees)
+     * formula.
      * The UCT formula balances between exploitation (choosing children with high average rewards)
      * and exploration (choosing children that have not been visited often).
      *

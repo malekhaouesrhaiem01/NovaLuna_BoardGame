@@ -231,7 +231,9 @@ class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         }
 
         addComponents(contentPane)
-        contentPane.addAll( backToken, nextButton, sessionInput, playerInput, urlInput, easyButton, hardButton, labelNovaLuna, backButton, errorLabel)
+        contentPane.addAll( backToken, nextButton, sessionInput,
+            playerInput, urlInput, easyButton, hardButton,
+            labelNovaLuna, backButton, errorLabel)
     }
 
 }

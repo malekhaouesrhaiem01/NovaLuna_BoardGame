@@ -230,6 +230,8 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         }
 
         addComponents(contentPane)
-        contentPane.addAll(backToken, backButton, joinButton, sessionInput, playerInput, urlInput, easyButton, hardButton, labelNovaLuna, errorLabel)
+        contentPane.addAll(backToken, backButton, joinButton,
+            sessionInput, playerInput, urlInput, easyButton,
+            hardButton, labelNovaLuna, errorLabel)
     }
 }

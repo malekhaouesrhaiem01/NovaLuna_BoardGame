@@ -19,7 +19,8 @@ import java.util.TimerTask
  *
  * @param rootService Provides access to GameService for starting new game.
  */
-class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 1080, background = ImageVisual("back_image.png")), Refreshable {
+class OfflineMenuScene (private val rootService: RootService) :
+    MenuScene(1920,1080, background = ImageVisual("back_image.png")), Refreshable {
 
     private val availableColors = mutableListOf(true, true, true, true)
     private var ifRandom = false
@@ -305,8 +306,12 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
         var whichPlayer : Int = 0,
         var color : Int = 4
     )
-    private val player1 = PlayerGUI(firstOderToken, firstDefaultInput,firstColorButton, firstEasyButton, firstHardButton)
-    private val player2 = PlayerGUI(secondOderToken, secondDefaultInput,secondColorButton, secondEasyButton, secondHardButton)
+    private val player1 = PlayerGUI(firstOderToken, firstDefaultInput, firstColorButton,
+        firstEasyButton, firstHardButton)
+
+    private val player2 = PlayerGUI(secondOderToken, secondDefaultInput,
+        secondColorButton, secondEasyButton, secondHardButton)
+
     private val players = mutableListOf(player1, player2)
 
 
@@ -341,7 +346,9 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
         onMouseClicked = {
             if (ifRandom) {
                 ifRandom = false
-                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply { style.borderRadius = BorderRadius(15) }
+                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+                    style.borderRadius = BorderRadius(15)
+                }
             }else{
                 ifRandom = true
                 visual = ColorVisual(Color(0x05D817)).apply { style.borderRadius = BorderRadius(15); transparency = 0.54}
@@ -423,10 +430,14 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
         onMouseClicked = {
             if (ifFirstGame) {
                 ifFirstGame = false
-                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply { style.borderRadius = BorderRadius(15) }
+                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+                    style.borderRadius = BorderRadius(15)
+                }
             }else{
                 ifFirstGame = true
-                visual = ColorVisual(Color(0x05D817)).apply { style.borderRadius = BorderRadius(15); transparency = 0.54}
+                visual = ColorVisual(Color(0x05D817)).apply {
+                    style.borderRadius = BorderRadius(15); transparency = 0.54
+                }
             }
         }
     }
@@ -710,7 +721,8 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
             posX = 1732,
             posY = posY,
             visual = CompoundVisual(
-                ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply { style.borderRadius = BorderRadius(15) },
+                ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+                    style.borderRadius = BorderRadius(15)},
                 ImageVisual("remove.png")
             )
         ).apply {
