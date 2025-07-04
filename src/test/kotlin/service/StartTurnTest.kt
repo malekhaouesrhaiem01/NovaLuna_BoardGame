@@ -3,7 +3,6 @@ package service
 import entity.Player
 import entity.PlayerColour
 import entity.PlayerType
-import tools.aqua.bgw.util.Coordinate
 import kotlin.test.*
 
 class StartTurnTest {
@@ -37,7 +36,7 @@ class StartTurnTest {
                 mutableListOf(),
                 1)
         )
-        rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false)
+        rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false, false)
     }
 
     @Test

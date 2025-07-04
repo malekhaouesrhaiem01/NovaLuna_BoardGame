@@ -178,7 +178,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
 
         // 2) Delegate into GameService
-        rootService.gameService.startNewGame(annotatedPlayers, 10, randomOrder)
+        rootService.gameService.startNewGame(annotatedPlayers, 10, randomOrder, false)
         val game = rootService.currentGame ?: error("GameService failed to initialize the game state")
 
         // 3) Build the InitMessage from the initialized game
@@ -244,7 +244,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
 
         // 4) Delegate into game logic
-        rootService.gameService.startNewGame(localPlayers, 10, false)
+        rootService.gameService.startNewGame(localPlayers, 10, randomOrder = false, firstGame = false)
         val game = rootService.currentGame ?: error("GameService failed to initialize after InitMessage")
 
         // figure out who starts

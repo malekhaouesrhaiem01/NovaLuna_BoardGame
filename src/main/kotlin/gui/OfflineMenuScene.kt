@@ -519,7 +519,7 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
                     )
                 )
             }
-            rootService.gameService.startNewGame(playersStartGame, actualSpeed, ifRandom)
+            rootService.gameService.startNewGame(playersStartGame, actualSpeed, ifRandom, ifFirstGame)
         }
     }
 

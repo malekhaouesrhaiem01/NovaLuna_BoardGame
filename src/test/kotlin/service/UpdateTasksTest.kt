@@ -24,7 +24,7 @@ class UpdateTasksTest {
             (Player("David",18, 0, false, PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0)),
             Player("Charles", 18, 0, false, PlayerType.HUMAN, PlayerColour.BLUE, mutableListOf(), 0)
         )
-        rootService.gameService.startNewGame(players, 10)
+        rootService.gameService.startNewGame(players, 10, randomOrder = false, firstGame = false)
 
     }
 

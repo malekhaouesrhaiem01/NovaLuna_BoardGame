@@ -47,7 +47,7 @@ class EndTurnTest {
                 mutableListOf(),
                 0)
         )
-        rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false)
+        rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false, false)
     }
 
     @Test

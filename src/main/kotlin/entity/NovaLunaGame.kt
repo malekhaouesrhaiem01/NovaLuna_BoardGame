@@ -20,6 +20,7 @@ data class NovaLunaGame(var activePlayer: Int,
                         val tileTrack: MutableList<Tile?>,
                         var previousState: NovaLunaGame? = null,
                         var nextState: NovaLunaGame? = null,
+                        var firstGame: Boolean
 ) : Cloneable{
     public override fun clone(): NovaLunaGame {
         val copiedPlayers = players.map{ it.clone() }.toMutableList()
@@ -27,6 +28,6 @@ data class NovaLunaGame(var activePlayer: Int,
         val copiedTileTrack = tileTrack.map { it?.copy() }.toMutableList()
 
         return NovaLunaGame(this.activePlayer, this.meeplePosition, this.simulationSpeed,
-            copiedPlayers, copiedDrawPile, copiedTileTrack, previousState, null)
+            copiedPlayers, copiedDrawPile, copiedTileTrack, previousState, null, firstGame = this.firstGame)
     }
 }

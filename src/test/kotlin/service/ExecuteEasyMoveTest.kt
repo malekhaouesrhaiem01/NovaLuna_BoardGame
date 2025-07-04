@@ -49,7 +49,10 @@ class ExecuteEasyMoveTest {
     fun testExecuteEasyMoveRunsAndPlaysMove() {
         assertNull(rootService.currentGame)
         // Spiel mit EASYBOT starten
-        rootService.gameService.startNewGame(mutableListOf(easyBotPlayer, humanPlayer), 1)
+        rootService.gameService.startNewGame(mutableListOf(easyBotPlayer, humanPlayer), 1,
+            randomOrder = false,
+            firstGame = false
+        )
         val game = rootService.currentGame
         assertNotNull(game)
         game.activePlayer = 0 // EASYBOT am Zug
@@ -86,7 +89,10 @@ class ExecuteEasyMoveTest {
     @Test
     fun testExecuteEasyMoveThrowsIfNoPossibleMoves() {
         assertNull(rootService.currentGame)
-        rootService.gameService.startNewGame(mutableListOf(easyBotPlayer, humanPlayer), 1)
+        rootService.gameService.startNewGame(mutableListOf(easyBotPlayer, humanPlayer), 1,
+            randomOrder = false,
+            firstGame = false
+        )
         val game = rootService.currentGame
         assertNotNull(game)
         game.activePlayer = 0 // EASYBOT am Zug
@@ -108,7 +114,10 @@ class ExecuteEasyMoveTest {
     @Test
     fun testExecuteEasyMoveThrowsIfCurrentPlayerIsNotEasyBot() {
         assertNull(rootService.currentGame)
-        rootService.gameService.startNewGame(mutableListOf(humanPlayer, easyBotPlayer), 1)
+        rootService.gameService.startNewGame(mutableListOf(humanPlayer, easyBotPlayer), 1,
+            randomOrder = false,
+            firstGame = false
+        )
         val game = rootService.currentGame
         assertNotNull(game)
         game.activePlayer = 0 // Human am Zug (kein EASYBOT)
@@ -126,7 +135,10 @@ class ExecuteEasyMoveTest {
     @Test
     fun testExecuteEasyMoveWithDifferentSimulationSpeeds() {
         assertNull(rootService.currentGame)
-        rootService.gameService.startNewGame(mutableListOf(easyBotPlayer, humanPlayer), 1)
+        rootService.gameService.startNewGame(mutableListOf(easyBotPlayer, humanPlayer), 1,
+            randomOrder = false,
+            firstGame = false
+        )
         val game = rootService.currentGame
         assertNotNull(game)
         game.activePlayer = 0 // EASYBOT am Zug

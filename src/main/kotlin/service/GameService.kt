@@ -19,7 +19,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      * @throws IllegalArgumentException or if the simulation speed is greater than 10.
      * @throws IllegalArgumentException If the number of players is not between 2 and 4
      */
-    fun startNewGame(players : List<Player>, simulationSpeed : Int, randomOrder : Boolean = false) {
+    fun startNewGame(players : List<Player>, simulationSpeed : Int, randomOrder : Boolean = false, firstGame : Boolean) {
 
         // überprüfe, ob Anzahl der Spieler passt (2 bis 4)
         require(players.size in 2..4) { "Spieleranzahl muss zwischen 2 und 4 sein." }
@@ -54,7 +54,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             simulationSpeed = simulationSpeed,
             players = playersOrder.toMutableList(),
             drawPile = drawPile,
-            tileTrack = tileTrack
+            tileTrack = tileTrack,
+            firstGame = firstGame
         )
 
         rootService.currentGame = game

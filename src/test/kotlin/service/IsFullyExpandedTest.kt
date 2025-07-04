@@ -38,7 +38,7 @@ class IsFullyExpandedTest {
     @Test
     fun testIsFullyExpandedTrue() {
         assertNull(rootService.currentGame)
-        rootService.gameService.startNewGame(players, 1)
+        rootService.gameService.startNewGame(players, 1, randomOrder = false, firstGame = false)
         val gameState = rootService.currentGame
         assertNotNull(gameState)
 
@@ -53,7 +53,7 @@ class IsFullyExpandedTest {
     @Test
     fun testIsFullyExpandedFalse() {
         assertNull(rootService.currentGame)
-        rootService.gameService.startNewGame(players, 1)
+        rootService.gameService.startNewGame(players, 1, randomOrder = false, firstGame = false)
         val gameState = rootService.currentGame
         assertNotNull(gameState)
 

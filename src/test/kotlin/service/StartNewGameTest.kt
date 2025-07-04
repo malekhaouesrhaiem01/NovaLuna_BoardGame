@@ -20,15 +20,19 @@ class StartNewGameTest {
             false, PlayerType.HUMAN, PlayerColour.BLACK, tile, 1)
 
         assertThrows<IllegalArgumentException> { rootService.gameService.startNewGame(listOf(player1),
-            4, false)}
+            4, randomOrder = false, firstGame = false
+        )}
         assertThrows<IllegalArgumentException> {
             rootService.gameService.startNewGame(listOf(player1, player2),
-            13, false)}
+            13, randomOrder = false, firstGame = false
+            )}
 
         rootService.gameService.startNewGame(listOf(player1, player2),
-            5, true)
+            5, randomOrder = true, firstGame = false
+        )
         assertThrows<IllegalStateException> { (rootService.gameService.startNewGame(listOf(player1, player2),
-            5, false)) }
+            5, randomOrder = false, firstGame = false
+        )) }
 
 
     }
