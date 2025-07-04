@@ -49,7 +49,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             playersOrder = players.shuffled()
         }
         // setting heights according to beginning order
-        for (i in 0 until playersOrder.size - 1) {
+
+        for (i in 0 until playersOrder.size) {
             playersOrder[i].height = playersOrder.size - i
         }
 
@@ -178,6 +179,15 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
         game.activePlayer =  game.players.indexOf(currentPlayer)
 
+        if(checkEndGame()){
+            var winner = game.players[0]
+            for (player in game.players){
+                if (player.tokenCount < winner.tokenCount){
+                    winner = player
+                }
+            }
+            endGame(winner)
+        }
         
         onAllRefreshables { refreshAfterEndTurn() }
 
