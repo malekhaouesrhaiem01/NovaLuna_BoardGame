@@ -21,6 +21,7 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
     private val resultMenuScene: ResultMenuScene
 
     private var gameScene = GameScene(rootService)
+    private var onlineGameScene = OnlineGameScene(rootService)
 
     init {
         // Register all components that need refresh callbacks
@@ -104,10 +105,12 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
             joinGameSceneOne,
             joinGameSceneTwo,
             resultMenuScene,
-            gameScene
+            gameScene,
+            onlineGameScene
         )
 
-        this.showGameScene(gameScene)
+        this.showGameScene(onlineGameScene)
+        //this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene)
 
     }
