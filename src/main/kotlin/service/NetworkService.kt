@@ -10,10 +10,10 @@ import entity.Player
 import entity.PlayerColour
 import entity.PlayerType
 import tools.aqua.bgw.util.Coordinate
-
+import service.TileLoader
 
 /**
- * Service layer class that realizes the necessary logic for sending and receiving Nova Luna network messages.
+ * Service layer class that realizes the necessary logic for sending and receiving Nova Luna network messages.
  * Bridges between the [NovaLunaNetworkClient] and the other services.
  *
  * @param rootService The [RootService] instance to access game logic and the entity layer
@@ -43,11 +43,21 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     var connectionState: ConnectionState = ConnectionState.DISCONNECTED
         private set
 
+    /**
+     * Publicly expose the sessionID of the current lobby (set on create or join).
+     */
+    var currentSessionID: String? = null
+        private set
+
+    // Add this method to NetworkService.kt
+    fun getClientForTesting(): NovaLunaNetworkClient? = client
+
     /** Host side: called when createGame() succeeds */
     internal fun onCreateGameResponse(response: CreateGameResponse, hostName: String) {
         // clear any prior data & add the host as first entry
         currentSessionPlayers.clear()
         currentSessionPlayers.add(hostName)
+        currentSessionID = response.sessionID
         updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
     }
 
@@ -58,6 +68,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         currentSessionPlayers.addAll(response.opponents)
         // then ourselves
         currentSessionPlayers.add(guestName)
+        currentSessionID = response.sessionID
         updateConnectionState(ConnectionState.WAITING_FOR_INIT)
     }
 
@@ -65,7 +76,6 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     internal fun onPlayerJoined(notification: PlayerJoinedNotification) {
         currentSessionPlayers.add(notification.sender)
         onAllRefreshables { refreshAfterPlayerJoined() }
-        updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
     }
 
     internal fun disconnectAndError() {
@@ -148,6 +158,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             if (isOpen) disconnect()
         }
         client = null
+        currentSessionID = null // Clear session ID on disconnect
+        currentSessionPlayers.clear() // Clear player list on disconnect
         updateConnectionState(ConnectionState.DISCONNECTED)
     }
 
@@ -158,31 +170,40 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      * @param playersStartGame Fully initialized Player objects
      *                         (name, tokenCount, colour, type, tiles, height=0)
      * @param isFirstGame      Flag that determines if it's a first game
-     * @param randomOrder      From your “random” toggle in the UI
+     * @param randomOrder      From your "random" toggle in the UI
      */
     fun startNewHostedGame(
         playersStartGame: List<Player>, isFirstGame: Boolean, randomOrder: Boolean
     ) {
-        // 1) Validate we’re in the lobby
+        // 1) Validate we're in the lobby
         check(connectionState == ConnectionState.WAITING_FOR_GUESTS) {
             "Not prepared to start a new hosted game (state=$connectionState)"
         }
         require(playersStartGame.size in 2..4) {
             "Player count must be between 2 and 4, but was ${playersStartGame.size}"
         }
+
         // 2) Annotate onlineMode: local player offline (false), others online (true)
         val annotatedPlayers = playersStartGame.map { p ->
-            p.copy( onlineMode = (p.playerName != client?.playerName)
-            )
+            p.copy(onlineMode = (p.playerName != client?.playerName))
         }
 
-
-        // 2) Delegate into GameService
+        // 3) Delegate into GameService (host still uses regular startNewGame to shuffle)
         rootService.gameService.startNewGame(annotatedPlayers, 10, randomOrder)
         val game = rootService.currentGame ?: error("GameService failed to initialize the game state")
 
-        // 3) Build the InitMessage from the initialized game
-        val drawPileIds = game.drawPile.filterNotNull().map { it.id }
+// 4) Build and send the InitMessage using the ACTUAL shuffled tile order
+        val drawPileIds = mutableListOf<Int>()
+
+// Get the actual tile order from the game (tileTrack + drawPile)
+// Skip index 0 of tileTrack (it's null for meeple)
+        for (i in 1 until game.tileTrack.size) {
+            game.tileTrack[i]?.let { drawPileIds.add(it.id) }
+        }
+// Add all tiles from drawPile
+        game.drawPile.forEach { tile ->
+            tile?.let { drawPileIds.add(it.id) }
+        }
         val netPlayers = game.players.map { p ->
             edu.udo.cs.sopra.ntf.subtypes.Player(
                 name = p.playerName, color = edu.udo.cs.sopra.ntf.subtypes.Color.valueOf(p.playerColour.name)
@@ -192,19 +213,21 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             drawPile = drawPileIds, isFirstGame = isFirstGame, players = netPlayers
         )
 
-        // Who does the game say is up first?
+        // 5) Send the InitMessage first, before determining states
+        client?.sendGameActionMessage(initMsg) ?: error("Network client not initialized")
+
+        // 6) Who does the game say is up first?
         val firstIndex = game.activePlayer
 
-        // Which slot in my local list is me?
+        // 7) Which slot in my local list is me?
         val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
         require(myIndex >= 0) { "Local player not found in game.players" }
 
-        // If you’re that slot, it’s your turn, otherwise wait:
+        // 8) If you're that slot, it's your turn, otherwise wait:
         val nextState = if (myIndex == firstIndex) ConnectionState.PLAYING_MY_TURN
         else ConnectionState.WAITING_FOR_OPPONENT
 
         updateConnectionState(nextState)
-        client?.sendGameActionMessage(initMsg) ?: error("Network client not initialized")
         onAllRefreshables { refreshAfterStartGame() }
     }
 
@@ -214,10 +237,15 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      * Should reconstruct the local game state and transition into WAITING_FOR_OPPONENT.
      */
     fun startNewJoinedGame(message: InitMessage) {
-        // 1) Must be waiting for the host’s init
+
+        println("DEBUG: startNewJoinedGame called, current state: $connectionState")
+
+        // 1) Must be waiting for the host's init
         check(connectionState == ConnectionState.WAITING_FOR_INIT) {
             "Not waiting for init (state=$connectionState)"
         }
+
+        println("DEBUG: State check passed, building players...")
 
         // 2) Compute token counts exactly as in the offline
         val playerCount = message.players.size
@@ -226,7 +254,6 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             4 -> 16
             else -> 21
         } else 21
-
 
         // 3) Rebuild the Player list, annotating onlineMode per slot
         val localPlayers = message.players.map { dto ->
@@ -244,27 +271,27 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
 
         // 4) Delegate into game logic
-        rootService.gameService.startNewGame(localPlayers, 10, false)
+        rootService.gameService.startNetworkGame(localPlayers, 10, message.drawPile, message.isFirstGame)
         val game = rootService.currentGame ?: error("GameService failed to initialize after InitMessage")
 
-        // figure out who starts
+        // 5) Figure out who starts
         val firstIndex = game.activePlayer
         val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
         require(myIndex >= 0) { "Local player not found in game.players" }
 
-        // transition into the correct state
+        // 6) Transition into the correct state
         val nextState = if (myIndex == firstIndex) ConnectionState.PLAYING_MY_TURN
         else ConnectionState.WAITING_FOR_OPPONENT
+        println("DEBUG: About to transition to state: $nextState")
 
         updateConnectionState(nextState)
-        onAllRefreshables { refreshAfterStartGame() }
+        println("DEBUG: State transition completed, new state: $connectionState")
 
-        updateConnectionState(ConnectionState.WAITING_FOR_OPPONENT)
         onAllRefreshables { refreshAfterStartGame() }
     }
 
     /**
-     * Send the active‐player’s turn to the opponent.
+     * Send the active‐player's turn to the opponent.
      *
      * @param tileId       tileId The ID of the tile selected by the player. This corresponds to the ID in the CSV file,
      * @param x            The X-coordinate where the tile is placed.
@@ -272,7 +299,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      * @param refillTrack  true indicates that the player has done a refill Action
      */
     fun sendTurnMessage(tileId: Int, x: Int, y: Int, refillTrack: Boolean) {
-        // 1) Only send if it’s actually our turn
+        // 1) Only send if it's actually our turn
         check(connectionState == ConnectionState.PLAYING_MY_TURN) {
             "Cannot send turn when not in PLAYING_MY_TURN (state=$connectionState)"
         }
@@ -285,13 +312,10 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         // 3) Send the message over BGW-Net
         client?.sendGameActionMessage(turnMsg) ?: error("Network client is not initialized")
 
-        // 4) Switch to waiting for the opponent’s move
+        // 4) Switch to waiting for the opponent's move
         updateConnectionState(ConnectionState.WAITING_FOR_OPPONENT)
 
-        //rootService.networkService.sendTurnMessage(
-        //  tile.id, rowIndex, colIndex, shouldRefillTrack
-        //)
-        // -->> this to be called whenever you apply a local move (human or bot)
+        rootService.gameService.endTurn()
     }
 
     /**
@@ -299,7 +323,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      * Applies their move locally and hands control back to us.
      */
     fun receiveTurnMessage(message: TurnMessage) {
-        // 1) Only valid when we’re waiting for the opponent
+        // 1) Only valid when we're waiting for the opponent
         check(connectionState == ConnectionState.WAITING_FOR_OPPONENT) {
             "Not expecting an opponent move in state=$connectionState"
         }
@@ -325,16 +349,33 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             rootService.playerActionService.refillWheel()
         }
 
-        //Who’s up next?
+        rootService.gameService.endTurn()
+
+
+        // DEBUG: Print player positions
+        println("DEBUG: After opponent's move:")
+        game.players.forEachIndexed { index, player ->
+            println("  Player $index (${player.playerName}): moonPos=${player.moonTrackPosition}, height=${player.height}")
+        }
+        println("  Active player index: ${game.activePlayer}")
+
+        // 6) Who's up next?
         val nextActive = game.activePlayer          // index in game.players
         val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
         require(myIndex >= 0) { "Local player not found in game.players" }
 
-        //Set the correct state
+        println("DEBUG: My index: $myIndex, Next active: $nextActive")
+
+
+        // 7) Set the correct state
         val nextState = if (myIndex == nextActive) ConnectionState.PLAYING_MY_TURN
         else ConnectionState.WAITING_FOR_OPPONENT
 
+        println("DEBUG: Transitioning to: $nextState")
+
         updateConnectionState(nextState)
+
+
     }
 
     /**
@@ -345,4 +386,3 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         onAllRefreshables { refreshConnectionState(newState) }
     }
 }
-

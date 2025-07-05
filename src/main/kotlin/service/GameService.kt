@@ -62,6 +62,62 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
     }
 
     /**
+     * Starts a new Nova Luna game for network play with a predefined tile order.
+     * Used by NetworkService to ensure all players have the same tile arrangement.
+     *
+     * @param players The list of players
+     * @param simulationSpeed The simulation speed
+     * @param tileIds The exact order of tile IDs to use (no shuffling)
+     * @param isFirstGame Whether this is the first game (affects token count)
+     */
+    fun startNetworkGame(players: List<Player>, simulationSpeed: Int, tileIds: List<Int>, isFirstGame: Boolean) {
+        require(players.size in 2..4) { "Spieleranzahl muss zwischen 2 und 4 sein." }
+        require(simulationSpeed < 11) { "SimulationSpeed darf maximal 10 sein" }
+
+        if (rootService.currentGame != null) {
+            throw IllegalStateException("A game is already running.")
+        }
+
+        // Convert tile IDs to actual tiles in the exact order provided
+        val allTiles = rootService.tileLoader.readTiles().filterNotNull()
+        val drawPile: MutableList<Tile?> = tileIds.map { id ->
+            allTiles.find { it.id == id } ?: error("Tile with ID $id not found")
+        }.toMutableList<Tile?>()  // Explicitly specify nullable type
+
+        // Initialize tileTrack with first 11 tiles
+        val tileTrack: MutableList<Tile?> = drawPile.take(11).toMutableList()
+        drawPile.subList(0, 11).clear()
+        tileTrack.add(0, null) // Meeple position
+
+        // Set player heights based on order
+        for (i in 0 until players.size - 1) {
+            players[i].height = players.size - i
+        }
+
+        // Determine token count based on first game rules
+        val tokenCount = if (isFirstGame) when (players.size) {
+            3 -> 18
+            4 -> 16
+            else -> 21
+        } else 21
+
+        // Update player token counts
+        players.forEach { it.tokenCount = tokenCount }
+
+        val game = NovaLunaGame(
+            activePlayer = 0,
+            meeplePosition = 0,
+            simulationSpeed = simulationSpeed,
+            players = players.toMutableList(),
+            drawPile = drawPile,
+            tileTrack = tileTrack
+        )
+
+        rootService.currentGame = game
+        onAllRefreshables { refreshAfterStartGame() }
+    }
+
+    /**
      * Checks if one of the two conditions for ending the game are fulfilled.
      * 1. A player has placed all his tokens
      * 2. All tiles are laid out so no tile can be played anymore
@@ -111,6 +167,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
     fun startTurn(){
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
+
+        // Reset the refill flag for the new turn
+        game.refilledThisTurn = false
 
         var checkAutoRefill = true
         for (tile in game.tileTrack){

@@ -22,6 +22,10 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         // Get the selected tile from the tile track
         val selectedTile = game.tileTrack[tileTrackIndex]
         checkNotNull(selectedTile)
+
+        // store the tile ID before moving the tile (for sendTurnMessage below)
+        val tileId = selectedTile.id
+
         // add the selected tile to the list of tiles of the current player
         game.players[game.activePlayer].tiles.add(selectedTile)
         // add the coordinates where the tile is placed to the tile
@@ -33,6 +37,16 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
 
         // check if tasks are now fulfilled
         rootService.gameService.updateTasks()
+
+        // Send network message if it's a network game and it's our turn
+        if (rootService.networkService.connectionState == ConnectionState.PLAYING_MY_TURN) {
+            rootService.networkService.sendTurnMessage(
+                tileId = tileId,
+                x = position.xCoord.toInt(),
+                y = position.yCoord.toInt(),
+                refillTrack = game.refilledThisTurn
+            )
+        }
 
         // check if game conditions are fulfilled to end the game
         // if not just refresh after a tile ist played
@@ -202,6 +216,9 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
             }
             index = (index + 1) % game.tileTrack.size
         }
+
+        // Mark that refill happened this turn
+        game.refilledThisTurn = true
 
         onAllRefreshables { refreshAfterRefill() }
     }
