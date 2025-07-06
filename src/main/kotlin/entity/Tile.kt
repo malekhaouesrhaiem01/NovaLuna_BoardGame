@@ -20,3 +20,4 @@ data class Tile(val id : Int,
                 var position: Coordinate? = null,
                 var moonTrackPosition: Int?
 )
+

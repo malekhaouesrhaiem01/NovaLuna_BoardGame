@@ -36,7 +36,7 @@ class GetPossiblePositionTest
                 mutableListOf(),
                 1)
         )
-        rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false)
+        rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false, false)
     }
 
     /**

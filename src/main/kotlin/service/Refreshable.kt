@@ -13,14 +13,50 @@ import entity.Player
  * @see AbstractRefreshingService
  */
 interface Refreshable{
+    /**
+     * perform refreshes that are necessary after a Players Turn starts
+     */
     fun refreshAfterStartTurn() {}
+
+    /**
+     * perform refreshes that are necessary after a Players Turn ends
+     */
     fun refreshAfterEndTurn() {}
+
+    /**
+     * perform refreshes that are necessary after a Game is started
+     */
     fun refreshAfterStartGame() {}
+
+    /**
+     * preform refreshes that are necessary after a Tile is played
+     */
     fun refreshAfterTilePlayed() {}
+
+    /**
+     * perform refreshes that are necessary after the gameState is undone
+     */
     fun refreshAfterUndo() {}
+
+    /**
+     * perform refreshes that are necessary after the gameState is redone
+     */
     fun refreshAfterRedo() {}
+
+    /**
+     * preform refreshes that are necessary after the moonWheel has been refilled
+     */
     fun refreshAfterRefill() {}
+
+    /**
+     * perform refresh that are necessary after a player ragequits (leaves mid-game)
+     */
     fun refreshAfterRageQuit() {}
+
+    /**
+     * perform refreshes that are necessary after a NovaLuna Game ends
+     * @param winner The winner of the NovaLuna Game
+     */
     fun refreshAfterGameEnd(winner : Player){}
     // fun refreshAfterMoveMeepleAndPlayer()
     /**
@@ -28,8 +64,10 @@ interface Refreshable{
      *
      * @param state the information to show
      */
-    fun refreshConnectionState(state: ConnectionState) {
-    }
+    fun refreshConnectionState(state: ConnectionState) {}
 
+    /**
+     * perform refreshes that are necessary after a Player joins the Game
+     */
     fun refreshAfterPlayerJoined() {}
 }

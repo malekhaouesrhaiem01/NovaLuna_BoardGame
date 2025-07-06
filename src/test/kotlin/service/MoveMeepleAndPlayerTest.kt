@@ -4,7 +4,12 @@ import entity.Player
 import entity.PlayerColour
 import entity.PlayerType
 import kotlin.test.*
-
+/**
+ * Test class for the method `moveMeepleAndPlayer()` in [GameService].
+ *
+ * This class verifies that both the meeple (on the tile track) and the current player's moon track position
+ * are updated correctly after a tile is selected and taken.
+ */
 class MoveMeepleAndPlayerTest {
     private lateinit var  rootService: RootService
 
@@ -35,9 +40,14 @@ class MoveMeepleAndPlayerTest {
                 mutableListOf(),
                 1)
         )
-        rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false)
+        rootService.gameService.startNewGame(players, simulationSpeed = 3, randomOrder = false, false)
     }
-
+    /**
+     * Tests that `moveMeepleAndPlayer()`:
+     * - removes the selected tile from the tile track,
+     * - clears the tile's moon track position,
+     * - and increases the active player's moon track position by the tile's time cost.
+     */
     @Test
     fun testMoveMeepleAndPlayer(){
         val game = rootService.currentGame!!

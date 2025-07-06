@@ -38,7 +38,7 @@ class SelectBestChildTest {
     @Test
     fun testSelectBestChild() {
         assertNull(rootService.currentGame)
-        rootService.gameService.startNewGame(players, 1)
+        rootService.gameService.startNewGame(players, 1, randomOrder = false, firstGame = false)
         val gameState = rootService.currentGame
         assertNotNull(gameState)
 
@@ -73,7 +73,7 @@ class SelectBestChildTest {
     @Test
     fun testSelectBestChildTwoChildrenSameScoreAndVisits() {
         assertNull(rootService.currentGame)
-        rootService.gameService.startNewGame(players, 1)
+        rootService.gameService.startNewGame(players, 1, randomOrder = false, firstGame = false)
         val gameState = rootService.currentGame
         assertNotNull(gameState)
 
@@ -308,7 +308,7 @@ class SelectBestChildTest {
         val bestChild = parentNode.selectBestChild(explorationConstant = 0.0)
 
         // Da Exploration 0 ist, wird Kind mit höherem Durchschnitt gewählt (beide gleich)
-        // In diesem Fall sollte eines der beiden Kinder gewählt werden
+        // in diesem Fall sollte eines der beiden Kinder gewählt werden
         assertTrue(bestChild == child1 || bestChild == child2)
     }
 

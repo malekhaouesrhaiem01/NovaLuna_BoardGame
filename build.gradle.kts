@@ -43,6 +43,9 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test-junit5"))
+    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
     implementation(group = "tools.aqua", name = "bgw-gui", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-common", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-client", version = bgwVersion)
@@ -51,7 +54,10 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 
 
+
 }
+
+
 
 /* This is how you can add the HowToPlay.pdf to the distribution zip file */
 addFileToDistribution(file("HowToPlay.pdf"))
@@ -69,4 +75,6 @@ ignoreClassesInCoverageReport("") // Add any class you want to ignore here
 tasks.clean {
     delete.add("public")
 }
-
+tasks.test {
+    useJUnitPlatform()
+}

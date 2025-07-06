@@ -19,7 +19,8 @@ import java.util.TimerTask
  *
  * @param rootService Provides access to GameService for starting new game.
  */
-class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 1080, background = ImageVisual("back_image.png")), Refreshable {
+class OfflineMenuScene (private val rootService: RootService) :
+    MenuScene(1920,1080, background = ImageVisual("back_image.png")), Refreshable {
 
     private val availableColors = mutableListOf(true, true, true, true)
     private var ifRandom = false
@@ -305,8 +306,12 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
         var whichPlayer : Int = 0,
         var color : Int = 4
     )
-    private val player1 = PlayerGUI(firstOderToken, firstDefaultInput,firstColorButton, firstEasyButton, firstHardButton)
-    private val player2 = PlayerGUI(secondOderToken, secondDefaultInput,secondColorButton, secondEasyButton, secondHardButton)
+    private val player1 = PlayerGUI(firstOderToken, firstDefaultInput, firstColorButton,
+        firstEasyButton, firstHardButton)
+
+    private val player2 = PlayerGUI(secondOderToken, secondDefaultInput,
+        secondColorButton, secondEasyButton, secondHardButton)
+
     private val players = mutableListOf(player1, player2)
 
 
@@ -341,10 +346,14 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
         onMouseClicked = {
             if (ifRandom) {
                 ifRandom = false
-                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply { style.borderRadius = BorderRadius(15) }
+                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+                    style.borderRadius = BorderRadius(15)
+                }
             }else{
                 ifRandom = true
-                visual = ColorVisual(Color(0x05D817)).apply { style.borderRadius = BorderRadius(15); transparency = 0.54}
+                visual = ColorVisual(Color(0x05D817)).apply {
+                    style.borderRadius = BorderRadius(15); transparency = 0.54
+                }
             }
         }
     }
@@ -423,10 +432,14 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
         onMouseClicked = {
             if (ifFirstGame) {
                 ifFirstGame = false
-                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply { style.borderRadius = BorderRadius(15) }
+                visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+                    style.borderRadius = BorderRadius(15)
+                }
             }else{
                 ifFirstGame = true
-                visual = ColorVisual(Color(0x05D817)).apply { style.borderRadius = BorderRadius(15); transparency = 0.54}
+                visual = ColorVisual(Color(0x05D817)).apply {
+                    style.borderRadius = BorderRadius(15); transparency = 0.54
+                }
             }
         }
     }
@@ -441,17 +454,6 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
         font = Font(50, Color.RED, "Space Grotesk"),
         visual = ColorVisual(Color(0xFFF0F0)).apply { style.borderRadius = BorderRadius(10) }
     ).apply { isVisible = false }
-
-    private fun showError(message: String) {
-        errorLabel.text = message
-        errorLabel.isVisible = true
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                errorLabel.isVisible = false
-            }
-        }, 3000)
-    }
-
 
     private val startButton = Button(
         text = "Start",
@@ -519,20 +521,33 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
                     )
                 )
             }
-            rootService.gameService.startNewGame(playersStartGame, actualSpeed, ifRandom)
+            rootService.gameService.startNewGame(
+                playersStartGame,
+                actualSpeed,
+                ifRandom,
+                ifFirstGame
+            )
         }
     }
 
-
-
     init {
-        selectColorPane.addAll(colorSelectLabel, noneColor, blackColor, whiteColor, blueColor, orangeColor )
+        selectColorPane.addAll(colorSelectLabel, noneColor, blackColor, whiteColor, blueColor, orangeColor)
         contentPane.addAll(orderToken, playersToken, colorsToken, botsToken,
             firstOderToken, firstDefaultInput,firstColorButton, firstEasyButton, firstHardButton,
             secondOderToken, secondDefaultInput,secondColorButton, secondEasyButton, secondHardButton,
             addButton, randomButton, backButton,speedButton, speedUp, speedDown,firstGame,startButton)
         addComponents(contentPane, selectColorPane, errorLabel)
 
+    }
+
+    private fun showError(message: String) {
+        errorLabel.text = message
+        errorLabel.isVisible = true
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                errorLabel.isVisible = false
+            }
+        }, 3000)
     }
 
     private fun selectColor(i: Int){
@@ -710,16 +725,25 @@ class OfflineMenuScene (private val rootService: RootService) : MenuScene(1920, 
             posX = 1732,
             posY = posY,
             visual = CompoundVisual(
-                ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply { style.borderRadius = BorderRadius(15) },
+                ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+                    style.borderRadius = BorderRadius(15)},
                 ImageVisual("remove.png")
             )
         ).apply {
             onMouseClicked = { removePlayer(i)}
         }
 
-        contentPane.addAll(newOderToken, newDefaultInput, newColorButton, newEasyButton, newHardButton, removeButton)
+        contentPane.addAll(newOderToken, newDefaultInput,
+            newColorButton, newEasyButton, newHardButton, removeButton)
 
-        val newPlayer = PlayerGUI(newOderToken, newDefaultInput, newColorButton, newEasyButton, newHardButton, removeButton)
+        val newPlayer = PlayerGUI(
+            newOderToken,
+            newDefaultInput,
+            newColorButton,
+            newEasyButton,
+            newHardButton,
+            removeButton
+        )
 
         players.add(newPlayer)
 

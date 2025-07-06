@@ -17,7 +17,9 @@ import java.util.*
 class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080), Refreshable {
 
     val tileCoordinates: MutableList<Pair<Int, Int>> = mutableListOf()
+    val tokenCoordinates: MutableList<Pair<Int, Int>> = mutableListOf()
     val tilesOnTheMoonWheel: MutableList<TileGUI> = mutableListOf()
+    val tokensOnTheMoonWheel: MutableList<Label> = mutableListOf()
     var chosenTile: Pair<ComponentView, Int>? = null
     var playerComponents: MutableList<ComponentView> = mutableListOf()
     var isAlreadyPlayed: Boolean = false
@@ -201,7 +203,8 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             height = 500,
             posX = 560,
             posY = 290,
-            visual = ColorVisual(Color(0xFFCC81)).apply { style.borderRadius = BorderRadius(10);style.borderRadius = BorderRadius(10)   }
+            visual = ColorVisual(Color(0xFFCC81)).apply {
+                style.borderRadius = BorderRadius(10);style.borderRadius = BorderRadius(10)}
         )
 
         val text = Label(
@@ -260,8 +263,11 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     init {
 
         setCoordinatesForTheMoonWheel()
+        setTokenCoordinatesForTheMoonWheel()
 
-        contentPane.addAll(moonWheel, undoButton, redoButton, endTurnButton,rageQuitButton,drawStackLabel, drawPile, saveGameButton)
+        contentPane.addAll(moonWheel, undoButton, redoButton,
+            endTurnButton, rageQuitButton, drawStackLabel,
+            drawPile, saveGameButton)
 
         addComponents(contentPane, playersHand, overlayPaneDrawStack, nextPlayerPane, errorLabel)
 
@@ -272,6 +278,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
         checkIfHuman(game)
         fullMoonWheel(game)
+        setTokens(game)
         addCurrentPlayer(game)
         addPlayers(game)
         updateDrawStack(game)
@@ -291,6 +298,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
         checkIfHuman(game)
         fullMoonWheel(game)
+        setTokens(game)
         addCurrentPlayer(game)
         addPlayers(game)
 
@@ -332,6 +340,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
         fullMoonWheel(game)
+        setTokens(game)
         addCurrentPlayer(game)
         addPlayers(game)
 
@@ -443,6 +452,25 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         }
         return color
     }
+
+    fun getPlayerColor(playerColor : PlayerColour): Color{
+        val color = when(playerColor){
+            PlayerColour.WHITE -> {
+                Color.WHITE
+            }
+            PlayerColour.ORANGE -> {
+                Color.ORANGE
+            }
+            PlayerColour.BLUE -> {
+                Color.BLUE
+            }
+            else -> {
+                Color.BLACK
+            }
+        }
+        return color
+    }
+
 
     fun createTile(tile: Tile): Pane<ComponentView>{
         val color = getColor(tile.tileColour)
@@ -583,7 +611,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             height = 96,
             text = "${player.playerName} : ${player.tokenCount} tokens left",
             alignment = Alignment.CENTER,
-            font = Font(36, Color(0x000000), "Space Grotesk"),
+            font = Font(36, getPlayerColor(player.playerColour), "Space Grotesk"),
             visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
         ).apply {
             onMouseClicked = {
@@ -783,6 +811,29 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         for (tile in player.tiles){
 
             val tileLabel = createTile(tile!!)
+
+            for ((index, task) in tile.tasks.withIndex()){
+                if (task.second){
+
+                    val xy = when(index){
+                        0 -> 50 to 0
+                        1 -> 0 to 50
+                        else -> 50 to 50
+                    }
+
+                    val complited = Label(
+                        posX = xy.first,
+                        posY = xy.second,
+                        width = 50,
+                        height = 50,
+                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply { style.borderRadius = BorderRadius(100) }
+                    )
+
+                    tileLabel.add(complited)
+
+                }
+            }
+
             val x = tile.position!!.xCoord.toInt()
             val y = tile.position!!.yCoord.toInt()
 
@@ -811,7 +862,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
                 height = 199,
                 text = "${player.playerName} : ${player.tokenCount} tokens left",
                 alignment = Alignment.CENTER,
-                font = Font(36, Color(0x000000), "Space Grotesk"),
+                font = Font(36, getPlayerColor(player.playerColour), "Space Grotesk"),
                 visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
             ).apply {
                 onMouseClicked = {
@@ -843,6 +894,37 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         tileCoordinates.add(Pair(525, 420))
         tileCoordinates.add(Pair(555, 230))
         tileCoordinates.add(Pair(695, 80))
+    }
+
+    fun setTokenCoordinatesForTheMoonWheel(){
+
+        tokenCoordinates.add(937 to 233)
+        tokenCoordinates.add(995 to 242)
+        tokenCoordinates.add(1048 to 265)
+        tokenCoordinates.add(1093 to 301)
+        tokenCoordinates.add(1128 to 347)
+        tokenCoordinates.add(1149 to 401)
+        tokenCoordinates.add(1156 to 458)
+        tokenCoordinates.add(1148 to 514)
+        tokenCoordinates.add(1126 to 567)
+        tokenCoordinates.add(1091 to 612)
+        tokenCoordinates.add(1046 to 646)
+        tokenCoordinates.add(994 to 669)
+        tokenCoordinates.add(936 to 677)
+        tokenCoordinates.add(879 to 669)
+        tokenCoordinates.add(826 to 648)
+        tokenCoordinates.add(780 to 613)
+        tokenCoordinates.add(744 to 567)
+        tokenCoordinates.add(722 to 513)
+        tokenCoordinates.add(715 to 456)
+        tokenCoordinates.add(721 to 399)
+        tokenCoordinates.add(744 to 345)
+        tokenCoordinates.add(780 to 298)
+        tokenCoordinates.add(826 to 263)
+        tokenCoordinates.add(880 to 241)
+
+
+
     }
 
 
@@ -902,5 +984,35 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         addCurrentPlayer(game)
         addPlayers(game)
         drawPile.text = game.drawPile.size.toString()
+    }
+
+
+
+    fun setTokens(game: NovaLunaGame){
+
+        for (label in tokensOnTheMoonWheel){
+            contentPane.remove(label)
+        }
+        tokensOnTheMoonWheel.clear()
+
+        for (i in 0 until 4) {
+            for(player in game.players){
+                if (player.height - 1 == i){
+                    val pos = player.moonTrackPosition % 24
+
+                    val token = Label(
+                        posX = tokenCoordinates[pos].first,
+                        posY = tokenCoordinates[pos].second,
+                        height = 35,
+                        width = 35,
+                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply { style.borderRadius = BorderRadius(100) }
+                    )
+
+                    contentPane.add(token)
+                    tokensOnTheMoonWheel.add(token)
+                }
+            }
+        }
+
     }
 }

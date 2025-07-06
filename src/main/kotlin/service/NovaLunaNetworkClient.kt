@@ -13,7 +13,15 @@ import tools.aqua.bgw.net.common.response.JoinGameResponseStatus
 import edu.udo.cs.sopra.ntf.messages.InitMessage
 import edu.udo.cs.sopra.ntf.messages.TurnMessage
 import tools.aqua.bgw.core.BoardGameApplication
-
+/**
+ * This class handles all networking logic for the Nova Luna game by extending [BoardGameClient].
+ * It receives and processes game-related messages from the server and delegates actions to [NetworkService].
+ *
+ * @param playerName The name of the local player.
+ * @param host The hostname or IP of the server to connect to.
+ * @param secret A shared secret for authentication.
+ * @param networkService The associated [NetworkService] handling game logic integration.
+ */
 class NovaLunaNetworkClient(
     playerName: String,
     host: String,
@@ -23,6 +31,13 @@ class NovaLunaNetworkClient(
 
     var sessionID: String? = null
     var otherPlayerName: String? = null
+    /**
+     * Handles the server response after trying to create a game.
+     * If successful, stores the session ID and informs the [NetworkService].
+     * Otherwise, disconnects and throws an error.
+     *
+     * @param response The server's response to a create game request.
+     */
 
 
     // Add this flag to track if we're ready to receive messages
@@ -54,7 +69,13 @@ class NovaLunaNetworkClient(
             disconnectAndError("CreateGame failed: ${response.status}")
         }
     }
-
+    /**
+     * Handles the server response after trying to join a game.
+     * On success, sets session ID and opponent name, and informs the [NetworkService].
+     * On failure, disconnects and throws an error.
+     *
+     * @param response The server's response to a join game request.
+     */
     override fun onJoinGameResponse(response: JoinGameResponse) {
         check(networkService.connectionState == ConnectionState.WAITING_FOR_JOIN_CONFIRMATION) {
             "Unexpected JoinGameResponse"
@@ -69,7 +90,12 @@ class NovaLunaNetworkClient(
             disconnectAndError("JoinGame failed: ${response.status}")
         }
     }
-
+    /**
+     * Called when another player joins the game lobby.
+     * Updates the [otherPlayerName] and forwards the notification to the [NetworkService].
+     *
+     * @param notification The join notification sent by the server.
+     */
     override fun onPlayerJoined(notification: PlayerJoinedNotification) {
         // FIX: Allow both WAITING_FOR_GUESTS and WAITING_FOR_INIT states
         check(
@@ -80,7 +106,12 @@ class NovaLunaNetworkClient(
         otherPlayerName = notification.sender
         networkService.onPlayerJoined(notification )
     }
-
+    /**
+     * Handles a game action response from the server.
+     * If the action was not successful, disconnects and throws an error.
+     *
+     * @param response The response to a previous game action.
+     */
     override fun onGameActionResponse(response: GameActionResponse) {
         check(
             networkService.connectionState == ConnectionState.PLAYING_MY_TURN ||
@@ -91,6 +122,13 @@ class NovaLunaNetworkClient(
             disconnectAndError("GameAction failed: ${response.status}")
         }
     }
+    /**
+     * Receiver for the initial game state message from the host.
+     * Delegates handling to the [NetworkService].
+     *
+     * @param message The initial game setup message.
+     * @param sender The sender (host) of the message.
+     */
 
 
     @GameActionReceiver
@@ -122,7 +160,13 @@ class NovaLunaNetworkClient(
             e.printStackTrace()
         }
     }
-
+    /**
+     * Receiver for turn update messages from the host.
+     * Delegates the message to the [NetworkService].
+     *
+     * @param message The turn message sent by the host.
+     * @param sender The sender (host) of the message.
+     */
     @GameActionReceiver
     @Suppress("UNUSED_PARAMETER", "unused")
     fun onTurnReceived(message: TurnMessage, sender: String) {

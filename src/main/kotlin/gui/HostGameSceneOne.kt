@@ -158,16 +158,6 @@ class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         visual = ColorVisual(Color(0xFFF0F0)).apply { style.borderRadius = BorderRadius(10) }
     ).apply { isVisible = false }
 
-    private fun showError(message: String) {
-        errorLabel.text = message
-        errorLabel.isVisible = true
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                errorLabel.isVisible = false
-            }
-        }, 3000)
-    }
-
     init {
         // Set the background image for the main menu
         background = ImageVisual("OfflineMenu.png")
@@ -231,7 +221,18 @@ class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         }
 
         addComponents(contentPane)
-        contentPane.addAll( backToken, nextButton, sessionInput, playerInput, urlInput, easyButton, hardButton, labelNovaLuna, backButton, errorLabel)
+        contentPane.addAll( backToken, nextButton, sessionInput,
+            playerInput, urlInput, easyButton, hardButton,
+            labelNovaLuna, backButton, errorLabel)
     }
 
+    private fun showError(message: String) {
+        errorLabel.text = message
+        errorLabel.isVisible = true
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                errorLabel.isVisible = false
+            }
+        }, 3000)
+    }
 }

@@ -28,7 +28,8 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
      *
      * Postconditions:
      * - A valid move has been executed via the [service.PlayerActionService].
-     * - The game state in [entity.NovaLunaGame] has been updated (a tile was placed, the meeple was moved, tasks may have been completed).
+     * - The game state in [entity.NovaLunaGame] has been updated
+     *   (a tile was placed, the meeple was moved, tasks may have been completed).
      * - It is now the next player's turn.
      *
      * @throws IllegalStateException if any of the preconditions are violated.
@@ -36,7 +37,7 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
     fun executeEasyMove() {
         // Get required services and the current game state
         val game = rootService.currentGame
-            ?: throw IllegalStateException("executeEasyMove called but no game is in progress.")
+        checkNotNull(game)
 
         val gameService = rootService.gameService
         val playerActionService = rootService.playerActionService

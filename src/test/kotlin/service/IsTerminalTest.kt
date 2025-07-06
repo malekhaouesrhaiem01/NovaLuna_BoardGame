@@ -31,7 +31,7 @@ class IsTerminalTest {
     @Test
     fun testIsTerminalToken() {
         assertNull(rootService.currentGame)
-        rootService.gameService.startNewGame(players, 1)
+        rootService.gameService.startNewGame(players, 1, randomOrder = false, firstGame = false)
         val gameState = rootService.currentGame
         assertNotNull(gameState)
         // Test: Wenn alle Tokens eines Spielers verbraucht sind
@@ -50,7 +50,7 @@ class IsTerminalTest {
     @Test
     fun testIsTerminalPile() {
         assertNull(rootService.currentGame)
-        rootService.gameService.startNewGame(players, 1)
+        rootService.gameService.startNewGame(players, 1, randomOrder = false, firstGame = false)
         val gameState = rootService.currentGame
         assertNotNull(gameState)
         assertNotNull(gameState.players)
@@ -73,7 +73,7 @@ class IsTerminalTest {
     @Test
     fun testIsTerminalFalse() {
         assertNull(rootService.currentGame)
-        rootService.gameService.startNewGame(players, 1)
+        rootService.gameService.startNewGame(players, 1, randomOrder = false, firstGame = false)
         val gameState = rootService.currentGame
         assertNotNull(gameState)
         assertNotNull(gameState.players)
