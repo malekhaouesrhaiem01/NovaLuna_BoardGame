@@ -67,6 +67,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         rootService.currentGame = game
 
         onAllRefreshables { refreshAfterStartGame()}
+        startTurn()
     }
 
     /**
@@ -124,15 +125,13 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         if (checkAutoRefill) {
             rootService.playerActionService.refillWheel()
         }
-        // create at the beginning of the turn as a new NovaLunaGame with a deep copy
-        val newState = game.clone()
-        // set state at the beginning of the turn as the previousState from the new NovaLunaGame
-        newState.previousState = game
-        // set the new NovaLunaGame as the nextState of the original
-        game.nextState = newState
 
-        // replace the currentGame in the rootService with the new NovaLunaGame
-        rootService.currentGame = newState
+        val player = game.players[game.activePlayer]
+        if(player.playerType == entity.PlayerType.EASYBOT) {
+            rootService.easyBotService.executeEasyMove()
+        } else if(player.playerType == entity.PlayerType.HARDBOT) {
+            rootService.hardBotService.executeHardBotMove()
+        }
 
 
         onAllRefreshables { refreshAfterStartTurn() }
@@ -165,6 +164,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             val winner = game.players[game.activePlayer]
 
             endGame(winner)
+            return
         }
 
         var currentPlayer = game.players.first()
@@ -187,6 +187,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
                 }
             }
             endGame(winner)
+            return
         }
         
         onAllRefreshables { refreshAfterEndTurn() }
@@ -207,44 +208,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         // Eigentlich muss doch nur auf GUI Ebene die Anzahl der Tokens
         // der einzelnen Spieler angezeigt werden
         onAllRefreshables { refreshAfterGameEnd(winner) }
-        onAllRefreshables { refreshAfterRageQuit() }
         rootService.currentGame = null
     }
 
-    /**
-     * Steps one move back in the game history.
-     * @return true if undo was successful, false if there is no previous state.
-     */
-    fun undo(): Boolean {
-        val current = rootService.currentGame ?: return false
-        val prev = current.previousState ?: return false
-
-        // Set the game back to the previous snapshot
-        rootService.currentGame = prev
-
-        // Clear redo link on the now-current state to maintain proper history
-        prev.nextState = current
-
-        // Trigger a full refresh of the UI to show the undone state
-        onAllRefreshables { refreshAfterUndo() } // oder je nachdem, welcher Refresh angezeigt werden soll
-        return true
-    }
-
-    /**
-     * Steps one move forward in the game history (redo).
-     * @return true if redo was successful, false if there is no next state.
-     */
-    fun redo(): Boolean {
-        val current = rootService.currentGame ?: return false
-        val next = current.nextState ?: return false
-
-        // Set the game forward to the next snapshot
-        rootService.currentGame = next
-
-        // Trigger a full refresh of the UI to show the redone state
-        onAllRefreshables { refreshAfterRedo() }
-        return true
-    }
+    
 
     /**
      * Returns a list of the indices of the next three positions after the Meeple on the selection track.
@@ -311,6 +278,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
     {
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
+
         val player = game.players[game.activePlayer]
 
         //Liste mit allen Positionen die schon belegt sind
@@ -544,6 +512,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      */
     fun getPossibleMovesForState(game: NovaLunaGame): List<Move> {
         // TODO: Implement the same logic as getPossibleMovesForCurrentPlayer,
+        // but for the given game state instead of the current one.
 
         // Placeholder return
         return emptyList()
@@ -598,39 +567,41 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      * @param selectedTile The tile that the current player just took from the moon wheel.
      * @throws IllegalStateException if no game is currently running or Tile that is not on the Tile Track is selected.
      */
-    fun moveMeepleAndPlayer(selectedTile: Tile) {
-        val game =  rootService.currentGame
+    fun moveMeepleAndPlayer(selectedTile: Tile)
+    {
+        val game = rootService.currentGame
         checkNotNull(game)
 
-
-        val currentPlayer =  game.players[game.activePlayer]
+        val currentPlayer = game.players[game.activePlayer]
         val newMeeplePos = game.tileTrack.indexOf(selectedTile)
-        val stepsForPlayer =  selectedTile.time
+        val stepsForPlayer = selectedTile.time
 
 
         //Update Meeple Position and Remove Tile from that Position
         game.meeplePosition = newMeeplePos
         val index = game.tileTrack.indexOf(selectedTile)
         game.tileTrack.remove(selectedTile)
-        game.tileTrack.add(index,null)
+        game.tileTrack.add(index, null)
         selectedTile.moonTrackPosition = null
 
         currentPlayer.moonTrackPosition += stepsForPlayer
 
         //changes the height of the currentPlayer, for the case two Players are at the same Position
-        for(player in game.players){
+        for (player in game.players)
+        {
             /* For Every Player that's already in that moonTrackposition,
              * add 1 additional height for the currentPlayer since he came last.
              * Therefore, if two Players are at the same position the currentPlayer would have a height
              * of two making him the Player next in Line.
              */
-            if(player.moonTrackPosition == currentPlayer.moonTrackPosition){
+            if(player.moonTrackPosition == currentPlayer.moonTrackPosition)
+            {
                 currentPlayer.height++
             }
         }
         // remove 1 height, because we add 1 height for every Player arriving in a new Position
         currentPlayer.height -= 1
 
-        // onAllRefreshable { refreshAfterMoveMeepleAndPlayer() }
-    }
+        }
+
 }

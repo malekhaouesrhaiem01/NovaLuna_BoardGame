@@ -25,6 +25,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      */
     fun playTile(tileTrackIndex: Int, position: Coordinate) {
         val game = checkNotNull(rootService.currentGame)
+        game.previousState = game.clone()
         // Get the selected tile from the tile track
         val selectedTile = game.tileTrack[tileTrackIndex]
         checkNotNull(selectedTile)
@@ -64,6 +65,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      */
     open fun playTile(move: Move) {
         val game = checkNotNull(rootService.currentGame)
+        game.previousState = game.clone()
         // get the index of the selected tile in the [Move] object
         val tileIndex = game.tileTrack.indexOf(move.tile)
         // calls the main playTile function to play the selected move from the bot
@@ -94,10 +96,12 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      */
     fun undo() {
         val game = checkNotNull(rootService.currentGame)
-
-
-        rootService.currentGame = game.previousState
-
+        val prev = game.previousState
+        if(prev != null) {
+            prev.nextState = game
+            rootService.currentGame = prev
+            onAllRefreshables { refreshAfterUndo() }
+        }
     }
 
 
@@ -123,7 +127,12 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws NoSuchElementException If there’s nothing to redo.
      */
     fun redo() {
-        //Method implementation
+        val game = checkNotNull(rootService.currentGame)
+        val next = game.nextState
+        if(next != null) {
+            rootService.currentGame = next
+            onAllRefreshables { refreshAfterRedo() }
+        }
     }
 
     /**
@@ -212,4 +221,3 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         onAllRefreshables { refreshAfterRefill() }
     }
 }
-

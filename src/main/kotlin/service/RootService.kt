@@ -39,8 +39,6 @@ class RootService{
     private fun addRefreshable(newRefreshable: Refreshable) {
         gameService.addRefreshable(newRefreshable)
         playerActionService.addRefreshable(newRefreshable)
-        easyBotService.addRefreshable(newRefreshable)
-        hardBotService.addRefreshable(newRefreshable)
     }
 
     /**
