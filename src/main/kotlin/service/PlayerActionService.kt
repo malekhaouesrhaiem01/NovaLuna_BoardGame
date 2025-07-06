@@ -92,12 +92,19 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws IllegalStateException If no game is running.
      * @throws NoSuchElementException If there's no undo state to go back to.
      */
-    fun undo() {
-        val game = checkNotNull(rootService.currentGame)
+    fun undo(): Boolean {
+        val current = rootService.currentGame ?: return false
+        val prev = current.previousState ?: return false
 
+        // Set the game back to the previous snapshot
+        rootService.currentGame = prev
 
-        rootService.currentGame = game.previousState
+        // Clear redo link on the now-current state to maintain proper history
+        prev.nextState = current
 
+        // Trigger a full refresh of the UI to show the undone state
+        onAllRefreshables { refreshAfterUndo() } // oder je nachdem, welcher Refresh angezeigt werden soll
+        return true
     }
 
 
@@ -122,8 +129,16 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws IllegalStateException If no game is running.
      * @throws NoSuchElementException If there’s nothing to redo.
      */
-    fun redo() {
-        //Method implementation
+    fun redo(): Boolean {
+        val current = rootService.currentGame ?: return false
+        val next = current.nextState ?: return false
+
+        // Set the game forward to the next snapshot
+        rootService.currentGame = next
+
+        // Trigger a full refresh of the UI to show the redone state
+        onAllRefreshables { refreshAfterRedo() }
+        return true
     }
 
     /**

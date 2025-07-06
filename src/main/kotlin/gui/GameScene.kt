@@ -62,7 +62,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             if (current?.previousState == null) {
                 showError("Nothing to undo!")
             } else {
-                rootService.gameService.undo()
+                rootService.playerActionService.undo()
             }
         }
     }
@@ -81,7 +81,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             if (current?.nextState == null) {
                 showError("Nothing to redo!")
             } else {
-                rootService.gameService.redo()
+                rootService.playerActionService.redo()
             }
         }
 
@@ -285,13 +285,11 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         drawPile.text = game.drawPile.size.toString()
 
 
-        if(!ifHuman!!){
+        if(ifHuman != true){
             if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
                 rootService.easyBotService.executeEasyMove()
             }
         }
-
-
     }
 
     override fun refreshAfterStartTurn(){
@@ -302,7 +300,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         addCurrentPlayer(game)
         addPlayers(game)
 
-        if(!ifHuman!!){
+        if(ifHuman != true){
             if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
                 rootService.easyBotService.executeEasyMove()
             }
@@ -396,7 +394,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
                     posY = tileCoordinates[i].second.toDouble()
                 }
 
-                val toAdd: ComponentView = if (i in availableTiles.filterNotNull() && !isAlreadyPlayed && ifHuman!!) {
+                val toAdd: ComponentView = if (i in availableTiles.filterNotNull() && !isAlreadyPlayed && ifHuman == true) {
                     tileLabel.apply {
                         posX = 5.0
                         posY = 5.0
