@@ -21,6 +21,24 @@ import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import java.util.*
 
+
+/**
+ *  The Online GameScene for an online Game in NovaLuna.
+ *
+ *  Implements [Refreshable] to react to service layer updates.
+ *
+ *  @constructor Creates a new online GameScene with the specified rootService.
+ *
+ *  @param rootService The [RootService] that manages the game state.
+ *  @property tileCoordinates A List of Tile Coordinates
+ *  @property tokenCoordinates A List of Token Coordinates
+ *  @property tokensOnTheMoonWheel A List to display the tokens on the MoonWheel
+ *  @property tilesOnTheMoonWheel A List to store the Tiles on the MoonWheel
+ *  @property chosenTile The Tile chosen by the Player
+ *  @property playerComponents A List to Display the different Players tiles
+ *  @property isAlreadyPlayed Boolean to determine if a Player has Played a Tile
+ *
+ */
 class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920, 1080), Refreshable {
 
     val tileCoordinates: MutableList<Pair<Int, Int>> = mutableListOf()
@@ -77,10 +95,6 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                 showError("First, you have to make a move")
             }else{
                 rootService.gameService.endTurn()
-                println("🔴 MANUAL END TURN CLICKED")
-                println("   - Connection state: ${rootService.networkService.connectionState}")
-                println("   - Active player: ${rootService.currentGame?.activePlayer}")
-                println("   - refilledThisTurn: ${rootService.currentGame?.refilledThisTurn}")
             }
         }
     }
@@ -94,7 +108,9 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         height = 60,
         text = "Draw Pile Tiles",
         font = Font(48, Color.BLACK,"Space Grotesk" ),
-        visual = ColorVisual(Color(0xFFCC81)).apply { style.borderRadius = BorderRadius(10); transparency = 0.84 }
+        visual = ColorVisual(Color(0xFFCC81)).apply {
+            style.borderRadius = BorderRadius(10); transparency = 0.84
+        }
     ).apply { onMouseClicked = {overlayPaneDrawStack.isVisible = true} }
 
 
@@ -289,7 +305,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         clearPlayersDisplay()
     }
 
-    fun createLocalPlayerHand(game: NovaLunaGame){
+    private fun createLocalPlayerHand(game: NovaLunaGame){
 
         //  get the local player
         val localPlayer = game.players.firstOrNull { !it.onlineMode }
@@ -321,7 +337,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         contentPane.add(localPlayerButton)
     }
 
-    fun showLocalPlayerHand(player: Player){
+    private fun showLocalPlayerHand(player: Player){
 
         playersHand.clear()
 
@@ -356,7 +372,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    fun showWithPossiblePositions(player: Player){
+    private fun showWithPossiblePositions(player: Player){
 
         val game = rootService.currentGame
         checkNotNull(game){"Error in showWithPossiblePositions"}
@@ -407,7 +423,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
     }
 
 
-    fun createPlayersHands(game: NovaLunaGame){
+    private fun createPlayersHands(game: NovaLunaGame){
 
 
         val grid = GridPane<ComponentView>(
@@ -451,7 +467,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    fun showPlayerHand(player: Player){
+    private fun showPlayerHand(player: Player){
 
         playersHand.clear()
 
@@ -487,7 +503,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    fun showWithoutPossiblePositions(player: Player){
+    private fun showWithoutPossiblePositions(player: Player){
 
         val minX = player.tiles.minOfOrNull { it?.position!!.xCoord.toInt() } ?: 0
         val maxX = player.tiles.maxOfOrNull { it?.position!!.xCoord.toInt() } ?: 0
@@ -525,7 +541,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    fun updateMoonWheel(game: NovaLunaGame){
+    private fun updateMoonWheel(game: NovaLunaGame){
 
         // clear the MoonWheel
         for (tile in tilesOnTheMoonWheel){
@@ -550,10 +566,9 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                     posY = tileCoordinates[i].second.toDouble()
                 }
 
-                val toAdd: ComponentView = if (i in availableTiles.filterNotNull() && !isAlreadyPlayed && ifHuman && ifLocalPlayer) {
-                    tileLabel.apply {
-                        posX = 5.0
-                        posY = 5.0
+                val toAdd: ComponentView = if
+                        (i in availableTiles.filterNotNull() && !isAlreadyPlayed && ifHuman && ifLocalPlayer) {
+                    tileLabel.apply { posX = 5.0; posY = 5.0
                     }
 
                     Pane<ComponentView>(
@@ -589,7 +604,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         contentPane.add(meeple)
     }
 
-    fun getColor(tileColor : TileColour): Color{
+    private fun getColor(tileColor : TileColour): Color{
         val color = when(tileColor){
             TileColour.RED -> {
                 Color.RED
@@ -607,7 +622,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         return color
     }
 
-    fun getPlayerColor(playerColor : PlayerColour): Color{
+    private fun getPlayerColor(playerColor : PlayerColour): Color{
         val color = when(playerColor){
             PlayerColour.WHITE -> {
                 Color.WHITE
@@ -625,7 +640,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         return color
     }
 
-    fun createTile(tile: Tile): Pane<ComponentView>{
+    private fun createTile(tile: Tile): Pane<ComponentView>{
         val color = getColor(tile.tileColour)
 
         val tileGridPane = GridPane<ComponentView>(
@@ -672,7 +687,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         return tilePane
     }
 
-    fun createTask(task : Map<TileColour, Int>): Pane<ComponentView>{
+    private fun createTask(task : Map<TileColour, Int>): Pane<ComponentView>{
 
         val mainPane =  Pane<ComponentView>(
             width = 50, //61.5,
@@ -690,7 +705,11 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
             visual = ColorVisual(Color.WHITE).apply { style.borderRadius = BorderRadius(100) }
         )
 
-        val colorPositions = mutableListOf(Pair(0,0), Pair(1,0), Pair(0,1), Pair(1,1))
+        val colorPositions = mutableListOf(
+            Pair(0,0),
+            Pair(1,0),
+            Pair(0,1),
+            Pair(1,1))
         var currentColor = 0
 
         for ((key, value) in task) {
@@ -715,7 +734,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    fun setTile(tileLabel: ComponentView, idx: Int ){
+    private fun setTile(tileLabel: ComponentView, idx: Int ){
         if (chosenTile != null){
             if (chosenTile!!.first == tileLabel){
                 chosenTile = null
@@ -733,7 +752,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         }
     }
 
-    fun updateDrawStack(game: NovaLunaGame){
+    private fun updateDrawStack(game: NovaLunaGame){
         // clear the grid
         for(row in 0 until gridPaneDrawStack.rows){
             for(column in 0 until gridPaneDrawStack.columns){
@@ -755,7 +774,9 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    fun placePossiblePositions(grid: GridPane<ComponentView>, positions: List<Coordinate>, offsetX: Int, offsetY: Int){
+    private fun placePossiblePositions(grid: GridPane<ComponentView>,
+                                       positions: List<Coordinate>,
+                                       offsetX: Int, offsetY: Int){
 
         for ( coord in positions){
 
@@ -783,7 +804,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         }
     }
 
-    fun placeTiles(grid: GridPane<ComponentView>, player: Player, offsetX: Int, offsetY: Int){
+    private fun placeTiles(grid: GridPane<ComponentView>, player: Player, offsetX: Int, offsetY: Int){
 
         for (tile in player.tiles){
 
@@ -803,7 +824,9 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                         posY = xy.second,
                         width = 50,
                         height = 50,
-                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply { style.borderRadius = BorderRadius(100) }
+                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
+                            style.borderRadius = BorderRadius(100)
+                        }
                     )
 
                     tileLabel.add(complited)
@@ -818,12 +841,12 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         }
     }
 
-    fun hideDrawStack(){
+    private fun hideDrawStack(){
         overlayPaneDrawStack.isVisible = false
     }
 
 
-    fun checkIfHumanAndLocalPlayer(game: NovaLunaGame){
+    private fun checkIfHumanAndLocalPlayer(game: NovaLunaGame){
         val ifLocalPlayer = !game.players[game.activePlayer].onlineMode
         val ifHuman = game.players[game.activePlayer].playerType == PlayerType.HUMAN
 
@@ -866,7 +889,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         tileCoordinates.add(Pair(695, 80))
     }
 
-    fun setTokenCoordinatesForTheMoonWheel(){
+    private fun setTokenCoordinatesForTheMoonWheel(){
 
         tokenCoordinates.add(937 to 233)
         tokenCoordinates.add(995 to 242)
@@ -924,7 +947,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
 
 
-    fun clearPlayersDisplay(){
+    private fun clearPlayersDisplay(){
         for(player in playerComponents){
             contentPane.remove(player)
         }

@@ -279,7 +279,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
     * displaying player scores, and clearing the game state.
     *
     * This method is  called from [checkEndGame] when an end condition is met.
-    * Triggers [refreshAfterGameEnd] to update the UI with the winner name and players  scores  .
+    * Triggers [gui.NovaApplication.refreshAfterGameEnd] to update the UI with the winner name and players  scores  .
     * @throws IllegalStateException if no game is currently active or the game is already ended
     */
     fun endGame(winner: Player){
@@ -289,41 +289,6 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         onAllRefreshables { refreshAfterGameEnd(winner) }
         onAllRefreshables { refreshAfterRageQuit() }
         rootService.currentGame = null
-    }
-
-    /**
-     * Steps one move back in the game history.
-     * @return true if undo was successful, false if there is no previous state.
-     */
-    fun undo(): Boolean {
-        val current = rootService.currentGame ?: return false
-        val prev = current.previousState ?: return false
-
-        // Set the game back to the previous snapshot
-        rootService.currentGame = prev
-
-        // Clear redo link on the now-current state to maintain proper history
-        prev.nextState = current
-
-        // Trigger a full refresh of the UI to show the undone state
-        onAllRefreshables { refreshAfterUndo() } // oder je nachdem, welcher Refresh angezeigt werden soll
-        return true
-    }
-
-    /**
-     * Steps one move forward in the game history (redo).
-     * @return true if redo was successful, false if there is no next state.
-     */
-    fun redo(): Boolean {
-        val current = rootService.currentGame ?: return false
-        val next = current.nextState ?: return false
-
-        // Set the game forward to the next snapshot
-        rootService.currentGame = next
-
-        // Trigger a full refresh of the UI to show the redone state
-        onAllRefreshables { refreshAfterRedo() }
-        return true
     }
 
     /**
