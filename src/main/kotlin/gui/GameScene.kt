@@ -396,7 +396,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
                     posY = tileCoordinates[i].second.toDouble()
                 }
 
-                val toAdd: ComponentView = if (i in availableTiles.filterNotNull() && !isAlreadyPlayed && ifHuman!!) {
+                val toAdd: ComponentView = if (i in availableTiles.filterNotNull() && !isAlreadyPlayed && ifHuman ?: false) {
                     tileLabel.apply {
                         posX = 5.0
                         posY = 5.0

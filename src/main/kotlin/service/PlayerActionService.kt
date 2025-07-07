@@ -25,6 +25,9 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      */
     fun playTile(tileTrackIndex: Int, position: Coordinate) {
         val game = checkNotNull(rootService.currentGame)
+
+        println("   [playTile] START - ${game.players[game.activePlayer].playerName}")
+        println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
         // Get the selected tile from the tile track
         val selectedTile = game.tileTrack[tileTrackIndex]
         checkNotNull(selectedTile)
@@ -40,18 +43,26 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         // update position on the moon wheel of the token
         // and the position of the meeple on the tile track
         rootService.gameService.moveMeepleAndPlayer(selectedTile)
+        println("   [playTile] AFTER moveMeepleAndPlayer")
+        println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
 
         // check if tasks are now fulfilled
         rootService.gameService.updateTasks()
-
+        println("   [playTile] AFTER updateTasks")
+        println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
         // Send network message if it's a network game and it's our turn
         if (rootService.networkService.connectionState == ConnectionState.PLAYING_MY_TURN) {
+            println("    Sending network message...")
+
             rootService.networkService.sendTurnMessage(
                 tileId = tileId,
                 x = position.xCoord.toInt(),
                 y = position.yCoord.toInt(),
                 refillTrack = game.refilledThisTurn
             )
+            println("    Network message sent")
+            println("    NOT sending network message (state: ${rootService.networkService.connectionState})")
+
         }
 
         // check if game conditions are fulfilled to end the game
@@ -208,6 +219,11 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         val game = rootService.currentGame
         checkNotNull(game)
 
+        println("     REFILL: Starting refill")
+        println("   - Active player: ${game.activePlayer} (${game.players[game.activePlayer].playerName})")
+        println("   - Connection state: ${rootService.networkService.connectionState}")
+        println("   - Tiles before refill: ${game.tileTrack.count { it != null }}")
+
         val filled = game.tileTrack.count {it != null}
 
         if (filled > 2) return //falls mehr als 2 funktioniert es nicht.
@@ -223,8 +239,13 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
             index = (index + 1) % game.tileTrack.size
         }
 
+
+
         // Mark that refill happened this turn
         game.refilledThisTurn = true
+
+        println("   - Tiles after refill: ${game.tileTrack.count { it != null }}")
+        println("   - refilledThisTurn flag: ${game.refilledThisTurn}")
 
         onAllRefreshables { refreshAfterRefill() }
     }

@@ -351,6 +351,66 @@ class NovaLunaNetworkServiceTest {
 
     }
 
+    @Test
+    fun testRefillAndManualEndTurn() {
+        // Setup 3-player game
+        setupThreePlayerGame()
+
+        val hostGame = hostRoot.currentGame!!
+
+        // Play tiles until we need a refill (<=2 tiles)
+        while (hostGame.tileTrack.count { it != null } > 2) {
+            val activeService = when (hostGame.activePlayer) {
+                0 -> hostRoot.networkService
+                1 -> guestRoots[0].networkService
+                2 -> guestRoots[1].networkService
+                else -> error("Invalid player")
+            }
+
+            serviceWait(activeService, ConnectionState.PLAYING_MY_TURN)
+
+            val activeRoot = when (hostGame.activePlayer) {
+                0 -> hostRoot
+                1 -> guestRoots[0]
+                2 -> guestRoots[1]
+                else -> error("Invalid")
+            }
+
+            val idx = activeRoot.currentGame!!.tileTrack.indexOfFirst { it != null }
+            if (idx >= 0) {
+                activeRoot.playerActionService.playTile(idx, Coordinate(0.0, 0.0))
+                Thread.sleep(200)
+            }
+        }
+
+        println("Tiles remaining: ${hostGame.tileTrack.count { it != null }}")
+
+        // Now test refill
+        val activePlayer = hostGame.activePlayer
+        val activeRoot = when (activePlayer) {
+            0 -> hostRoot
+            1 -> guestRoots[0]
+            2 -> guestRoots[1]
+            else -> error("Invalid")
+        }
+
+        // Call refill
+        activeRoot.playerActionService.refillWheel()
+
+        // Verify refill happened locally
+        assertTrue(activeRoot.currentGame!!.tileTrack.count { it != null } > 2)
+
+        // Check if other players see the refill
+        Thread.sleep(500)
+        val hostTiles = hostRoot.currentGame!!.tileTrack.count { it != null }
+        val guest1Tiles = guestRoots[0].currentGame!!.tileTrack.count { it != null }
+        val guest2Tiles = guestRoots[1].currentGame!!.tileTrack.count { it != null }
+
+        // This will likely fail because refill isn't communicated
+        assertEquals(hostTiles, guest1Tiles, "All players should see same tile count")
+        assertEquals(hostTiles, guest2Tiles, "All players should see same tile count")
+    }
+
 
 
 

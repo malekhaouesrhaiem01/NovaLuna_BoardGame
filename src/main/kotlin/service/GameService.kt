@@ -98,7 +98,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         tileTrack.add(0, null) // Meeple position
 
         // Set player heights based on order
-        for (i in 0 until players.size - 1) {
+        for (i in 0 until players.size) {
             players[i].height = players.size - i
         }
 
@@ -118,12 +118,15 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             simulationSpeed = simulationSpeed,
             players = players.toMutableList(),
             drawPile = drawPile,
-            tileTrack = tileTrack
+            tileTrack = tileTrack,
+            firstGame = isFirstGame
         )
 
         rootService.currentGame = game
         onAllRefreshables { refreshAfterStartGame() }
     }
+
+    
 
     /**
      * Checks if one of the two conditions for ending the game are fulfilled.
@@ -170,6 +173,12 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
+        println("   [startTurn] BEFORE clone:")
+        game.players.forEachIndexed { idx, p ->
+            println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
+        }
+
+
         // Reset the refill flag for the new turn
         game.refilledThisTurn = false
 
@@ -192,6 +201,11 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         // replace the currentGame in the rootService with the new NovaLunaGame
         rootService.currentGame = newState
+
+        println("   [startTurn] AFTER clone:")
+        newState.players.forEachIndexed { idx, p ->
+            println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
+        }
 
 
         onAllRefreshables { refreshAfterStartTurn() }
@@ -220,7 +234,12 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game)
 
+        println("   END TURN:")
+        println("   - Current player: ${game.activePlayer} (${game.players[game.activePlayer].playerName})")
+
         if(checkEndGame()){
+            println("   - Game ending detected!")
+
             val winner = game.players[game.activePlayer]
 
             endGame(winner)
@@ -247,7 +266,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             }
             endGame(winner)
         }
-        
+
+        println("   - Next player will be: ${game.activePlayer} (${game.players[game.activePlayer].playerName})")
+        println("   - Resetting refilledThisTurn flag")
         onAllRefreshables { refreshAfterEndTurn() }
 
 
@@ -663,6 +684,11 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
 
         val currentPlayer =  game.players[game.activePlayer]
+
+        println("   [HEIGHT CALC] game.activePlayer index = ${game.activePlayer}")
+        println("   [HEIGHT CALC] game.activePlayer name  = ${game.players[game.activePlayer].playerName}")
+        println("   [HEIGHT CALC] movingPlayer name      = ${currentPlayer.playerName}")
+
         val newMeeplePos = game.tileTrack.indexOf(selectedTile)
         val stepsForPlayer =  selectedTile.time
 
@@ -691,5 +717,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         currentPlayer.height -= 1
 
         // onAllRefreshable { refreshAfterMoveMeepleAndPlayer() }
+        println("   - Current height AFTER: ${currentPlayer.height}")
+        println("   - All heights AFTER: ${game.players.map { "${it.playerName}:${it.height}" }}")
+        println("   [moveMeepleAndPlayer END]")
     }
 }

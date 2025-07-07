@@ -137,6 +137,11 @@ class NovaLunaNetworkClient(
         println("DEBUG: onInitReceived called with sender: $sender")
         println("DEBUG: Current connection state: ${networkService.connectionState}")
 
+        if (sender == this.playerName) {
+            println("DEBUG: Ignoring my own InitMessage")
+            return
+        }
+
         // Wait for receivers to be ready if needed
         if (!annotatedReceiversReady) {
             println("DEBUG: Waiting for annotated receivers to be ready...")
@@ -170,8 +175,12 @@ class NovaLunaNetworkClient(
     @GameActionReceiver
     @Suppress("UNUSED_PARAMETER", "unused")
     fun onTurnReceived(message: TurnMessage, sender: String) {
-
-            networkService.receiveTurnMessage(message)
+        // ignore our own messages (the server echoes them back to us)
+        if (sender == this.playerName) {
+            println("DEBUG: Ignoring my own TurnMessage for tile ${message.tileId}")
+            return
+        }
+            networkService.receiveTurnMessage(message, sender)
           }
 
     private fun disconnectAndError(reason: Any) {

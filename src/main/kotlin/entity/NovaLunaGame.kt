@@ -21,7 +21,7 @@ data class NovaLunaGame(var activePlayer: Int,
                         val tileTrack: MutableList<Tile?>,
                         var previousState: NovaLunaGame? = null,
                         var nextState: NovaLunaGame? = null,
-                        var firstGame: Boolean
+                        var firstGame: Boolean,
                         var refilledThisTurn: Boolean = false
 ) : Cloneable{
     public override fun clone(): NovaLunaGame {

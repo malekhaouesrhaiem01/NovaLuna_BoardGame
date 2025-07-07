@@ -11,6 +11,7 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.*
 import java.util.*
 
+
 class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
     //this needs to be called from the start button in the hostgame lobby
     //(I am assuming it's similar to the offline lobby scene)
@@ -25,6 +26,16 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
     private var ifFirstGame : Boolean = false
     private var currentColorPickerIndex = -1
 
+
+    override fun refreshAfterPlayerJoined() {
+        // always rebuild the list of player rows
+        // and do it on the BGW-UI thread
+
+
+            buildPlayerUIs()
+
+
+    }
     private val contentPane = Pane<UIComponent>(
         width = 1920,
         height = 1080,
@@ -400,10 +411,6 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
     }
 
     override fun refreshConnectionState(state: ConnectionState) {
-        when (state) {
-            ConnectionState.WAITING_FOR_GUESTS,
-            ConnectionState.WAITING_FOR_INIT -> buildPlayerUIs()
-            else -> { }
-        }
+
     }
 }

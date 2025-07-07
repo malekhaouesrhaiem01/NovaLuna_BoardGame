@@ -77,6 +77,10 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                 showError("First, you have to make a move")
             }else{
                 rootService.gameService.endTurn()
+                println("🔴 MANUAL END TURN CLICKED")
+                println("   - Connection state: ${rootService.networkService.connectionState}")
+                println("   - Active player: ${rootService.currentGame?.activePlayer}")
+                println("   - refilledThisTurn: ${rootService.currentGame?.refilledThisTurn}")
             }
         }
     }
@@ -846,34 +850,6 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         }, 4000)
     }
 
-    fun setTokens(game: NovaLunaGame){
-
-        for (label in tokensOnTheMoonWheel){
-            contentPane.remove(label)
-        }
-        tokensOnTheMoonWheel.clear()
-
-        for (i in 0 until 4) {
-            for(player in game.players){
-                if (player.height - 1 == i){
-                    val pos = player.moonTrackPosition % 24
-
-                    val token = Label(
-                        posX = tokenCoordinates[pos].first,
-                        posY = tokenCoordinates[pos].second,
-                        height = 35,
-                        width = 35,
-                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply { style.borderRadius = BorderRadius(100) }
-                    )
-
-                    contentPane.add(token)
-                    tokensOnTheMoonWheel.add(token)
-                }
-            }
-        }
-
-    }
-
     fun setCoordinatesForTheMoonWheel(){
         // 1510, 110
         tileCoordinates.add(Pair(910, 25))
@@ -916,8 +892,37 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         tokenCoordinates.add(780 to 298)
         tokenCoordinates.add(826 to 263)
         tokenCoordinates.add(880 to 241)
+    }
+
+    fun setTokens(game: NovaLunaGame){
+
+        for (label in tokensOnTheMoonWheel){
+            contentPane.remove(label)
+        }
+        tokensOnTheMoonWheel.clear()
+
+        for (i in 0 until 4) {
+            for(player in game.players){
+                if (player.height - 1 == i){
+                    val pos = player.moonTrackPosition % 24
+
+                    val token = Label(
+                        posX = tokenCoordinates[pos].first,
+                        posY = tokenCoordinates[pos].second,
+                        height = 35,
+                        width = 35,
+                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply { style.borderRadius = BorderRadius(100) }
+                    )
+
+                    contentPane.add(token)
+                    tokensOnTheMoonWheel.add(token)
+                }
+            }
+        }
 
     }
+
+
 
     fun clearPlayersDisplay(){
         for(player in playerComponents){

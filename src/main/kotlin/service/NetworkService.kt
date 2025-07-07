@@ -34,6 +34,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     /** Tracks host + guest names in join order */
     val currentSessionPlayers = mutableListOf<String>()
 
+    private var playerObjectIds = mutableMapOf<String, Int>()
 
     /** Underlying BGW-Net client; null when offline */
     private var client: NovaLunaNetworkClient? = null
@@ -70,6 +71,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         currentSessionPlayers.add(guestName)
         currentSessionID = response.sessionID
         updateConnectionState(ConnectionState.WAITING_FOR_INIT)
+        onAllRefreshables { refreshAfterPlayerJoined() }
+
     }
 
     /** Host side: called on each new guest join notification */
@@ -189,8 +192,12 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
 
         // 3) Delegate into GameService (host still uses regular startNewGame to shuffle)
-        rootService.gameService.startNewGame(annotatedPlayers, 10, randomOrder)
+        rootService.gameService.startNewGame(annotatedPlayers, 10, randomOrder, isFirstGame)
         val game = rootService.currentGame ?: error("GameService failed to initialize the game state")
+        game.players.forEach {
+            playerObjectIds[it.playerName] = System.identityHashCode(it)
+        }
+        println("   [HOST] Player object IDs: $playerObjectIds")
 
 // 4) Build and send the InitMessage using the ACTUAL shuffled tile order
         val drawPileIds = mutableListOf<Int>()
@@ -270,10 +277,15 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             )
         }
 
+
+
         // 4) Delegate into game logic
         rootService.gameService.startNetworkGame(localPlayers, 10, message.drawPile, message.isFirstGame)
         val game = rootService.currentGame ?: error("GameService failed to initialize after InitMessage")
-
+        game.players.forEach {
+            playerObjectIds[it.playerName] = System.identityHashCode(it)
+        }
+        println("   [GUEST] Player object IDs: $playerObjectIds")
         // 5) Figure out who starts
         val firstIndex = game.activePlayer
         val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
@@ -299,6 +311,14 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      * @param refillTrack  true indicates that the player has done a refill Action
      */
     fun sendTurnMessage(tileId: Int, x: Int, y: Int, refillTrack: Boolean) {
+
+
+        println("   SEND TURN MESSAGE:")
+        println("   - Tile ID: $tileId")
+        println("   - Position: ($x, $y)")
+        println("   - Refill included: $refillTrack")
+        println("   - Current state: $connectionState")
+
         // 1) Only send if it's actually our turn
         check(connectionState == ConnectionState.PLAYING_MY_TURN) {
             "Cannot send turn when not in PLAYING_MY_TURN (state=$connectionState)"
@@ -312,70 +332,85 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         // 3) Send the message over BGW-Net
         client?.sendGameActionMessage(turnMsg) ?: error("Network client is not initialized")
 
+        println("   - Changing state to WAITING_FOR_OPPONENT")
+
         // 4) Switch to waiting for the opponent's move
         updateConnectionState(ConnectionState.WAITING_FOR_OPPONENT)
+        println("   - Calling endTurn()")
 
         rootService.gameService.endTurn()
+        println("    Turn ended")
+
+        val game = rootService.currentGame ?: return
+        val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
+
+        if (myIndex == game.activePlayer) {
+            // We get another turn!
+            println("DEBUG: Same player gets another turn")
+            updateConnectionState(ConnectionState.PLAYING_MY_TURN)
+        }
+        println("[SEND] ${client!!.playerName} thinks next player is: ${game.players[game.activePlayer].playerName}")
+        println("[SEND] ${client!!.playerName} connection state is now: $connectionState")
+
+
     }
 
     /**
      * Called when a TurnMessage arrives from the opponent.
      * Applies their move locally and hands control back to us.
      */
-    fun receiveTurnMessage(message: TurnMessage) {
-        // 1) Only valid when we're waiting for the opponent
+    fun receiveTurnMessage(message: TurnMessage, sender: String) {
+
+        
+
+        println("  RECEIVE TURN MESSAGE:")
+        println("   - From player: $sender")
+        println("   - Tile ID: ${message.tileId}")
+        println("   - Refill included: ${message.refillTrack}")
         check(connectionState == ConnectionState.WAITING_FOR_OPPONENT) {
             "Not expecting an opponent move in state=$connectionState"
         }
 
-        // 2) Get the current game
         val game = checkNotNull(rootService.currentGame) {
             "No game in progress when receiving a turn"
         }
 
-        // 3) Locate the tile in the tileTrack by its ID
-        val tileIndex = game.tileTrack.indexOfFirst { it?.id == message.tileId }
-        require(tileIndex >= 0) {
-            "Received TurnMessage for unknown tile ID=${message.tileId}"
-        }
+        val senderIndex = game.players.indexOfFirst {it.playerName == sender}
+        game.activePlayer = senderIndex
 
-        // 4) Apply the move exactly as they did: place the tile at (x,y)
-        rootService.playerActionService.playTile(
-            tileTrackIndex = tileIndex, position = Coordinate(message.x.toDouble(), message.y.toDouble())
-        )
 
-        // 5) If they refilled the wheel as part of their move, do that too
+        // Apply refill if needed
         if (message.refillTrack) {
             rootService.playerActionService.refillWheel()
         }
 
+        // Place the tile exactly as done by the opponent
+        val tileIndex = game.tileTrack.indexOfFirst { it?.id == message.tileId }
+        require(tileIndex >= 0) { "Unknown tile ID=${message.tileId}" }
+
+
+
+
+        rootService.playerActionService.playTile(
+            tileTrackIndex = tileIndex,
+            position = Coordinate(message.x.toDouble(), message.y.toDouble())
+        )
+
+
+
+        // End their turn
         rootService.gameService.endTurn()
 
-
-        // DEBUG: Print player positions
-        println("DEBUG: After opponent's move:")
-        game.players.forEachIndexed { index, player ->
-            println("  Player $index (${player.playerName}): moonPos=${player.moonTrackPosition}, height=${player.height}")
+        // Decide next connection state: if the same player remains active, grant another turn
+        val nextState = if (game.players[game.activePlayer].playerName == client!!.playerName) {
+            ConnectionState.PLAYING_MY_TURN
+        } else {
+            ConnectionState.WAITING_FOR_OPPONENT
         }
-        println("  Active player index: ${game.activePlayer}")
-
-        // 6) Who's up next?
-        val nextActive = game.activePlayer          // index in game.players
-        val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
-        require(myIndex >= 0) { "Local player not found in game.players" }
-
-        println("DEBUG: My index: $myIndex, Next active: $nextActive")
-
-
-        // 7) Set the correct state
-        val nextState = if (myIndex == nextActive) ConnectionState.PLAYING_MY_TURN
-        else ConnectionState.WAITING_FOR_OPPONENT
-
-        println("DEBUG: Transitioning to: $nextState")
-
         updateConnectionState(nextState)
-
-
+        println("Who does ${client!!.playerName} think is next: ${game.players[game.activePlayer].playerName}")
+        println("My connection state will be: $nextState")
+        println("DEBUG: Transitioning to connectionState=$nextState for player {client.playerName}")
     }
 
     /**
