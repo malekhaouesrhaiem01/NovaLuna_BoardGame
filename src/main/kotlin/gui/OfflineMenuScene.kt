@@ -14,15 +14,10 @@ import java.util.Timer
 import java.util.TimerTask
 
 /**
- * The OfflineMenu Scene/ GameConfig Scene for an Offline Game in NovaLuna
+ *
  * Implements [Refreshable] to react to service layer updates.
  *
  * @param rootService Provides access to GameService for starting new game.
- *
- * @property availableColors A List of available colors the Player can still choose from
- * @property ifRandom Boolean to determine if the Player order is Random or not
- * @property ifFirstGame Boolean to determine if it's the Players FirstGame
- * @property actualSpeed The GameSpeed of an NovaLune Bot
  */
 class OfflineMenuScene (private val rootService: RootService) :
     MenuScene(1920,1080, background = ImageVisual("back_image.png")), Refreshable {

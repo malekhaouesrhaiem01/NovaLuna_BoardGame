@@ -10,15 +10,6 @@ import tools.aqua.bgw.visual.*
 import entity.PlayerType
 import java.util.*
 
-/**
- *  The JoinGame Scene for an online Game in NovaLuna
- *
- *  Implements [Refreshable] to react to service layer updates.
- *
- *  @constructor Creates a new JoinGame Scene with the specified rootService.
- *
- *  @param rootService The [RootService] that manages the game state.
- */
 class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
     //val joinGameSceneTwo = JoinGameSceneTwo(rootService)

@@ -15,12 +15,12 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * and place it on their personal space  at the desired position
      * the Meeple is  then moved to that index.
      * The player's time marker is advanced based on the tile's cost.
-     * Triggers [gui.NovaApplication.refreshAfterTilePlayed] to update the UI accordingly.
+     * Triggers [refreshAfterTilePlayed] to update the UI accordingly.
      *
      * @param tileTrackIndex The index of the tile to take from the tile track (must be one of the next 3 tiles).
      * @param position The coordinate where the tile should be placed on the current player's space .
      *
-     * @throws IllegalStateException If no game is active, or it's not the current player's turn.
+     * @throws IllegalStateException If no game is active or it's not the current player's turn.
      * @throws IllegalArgumentException If the selected tile is invalid or cannot be placed at the given position.
      */
     fun playTile(tileTrackIndex: Int, position: Coordinate) {
@@ -117,19 +117,12 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws IllegalStateException If no game is running.
      * @throws NoSuchElementException If there's no undo state to go back to.
      */
-    fun undo(): Boolean {
-        val current = rootService.currentGame ?: return false
-        val prev = current.previousState ?: return false
+    fun undo() {
+        val game = checkNotNull(rootService.currentGame)
 
-        // Set the game back to the previous snapshot
-        rootService.currentGame = prev
 
-        // Clear redo link on the now-current state to maintain proper history
-        prev.nextState = current
+        rootService.currentGame = game.previousState
 
-        // Trigger a full refresh of the UI to show the undone state
-        onAllRefreshables { refreshAfterUndo() } // oder je nachdem, welcher Refresh angezeigt werden soll
-        return true
     }
 
 
@@ -154,16 +147,8 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws IllegalStateException If no game is running.
      * @throws NoSuchElementException If there’s nothing to redo.
      */
-    fun redo(): Boolean {
-        val current = rootService.currentGame ?: return false
-        val next = current.nextState ?: return false
-
-        // Set the game forward to the next snapshot
-        rootService.currentGame = next
-
-        // Trigger a full refresh of the UI to show the redone state
-        onAllRefreshables { refreshAfterRedo() }
-        return true
+    fun redo() {
+        //Method implementation
     }
 
     /**
@@ -183,7 +168,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @returns This method has no return value (`Unit`).
      *
      * @throws IllegalStateException If no game is running or if the game is online.
-     * @throws java.io.IOException If saving fails (example: due to file access issues).
+     * @throws IOException If saving fails (example: due to file access issues).
      */
     fun save() {
         //Method implementation
@@ -205,8 +190,8 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      *
      * @returns This method has no return value (`Unit`).
      *
-     * @throws java.io.FileNotFoundException If the saved game can’t be found.
-     * @throws java.io.IOException If something goes wrong while loading.
+     * @throws FileNotFoundException If the saved game can’t be found.
+     * @throws IOException If something goes wrong while loading.
      */
     fun load() {
         //Method implementation
@@ -214,7 +199,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
 
 
     /**
-     * The method [refillWheel] fills up the moonWheel with cards in the [entity.NovaLunaGame.drawPile]
+     * The method [refillWheel] fills up the moonWheel with cards in the [drawPile]
      * when there are 2 or fewer cards in the moonWheel
      *
      *

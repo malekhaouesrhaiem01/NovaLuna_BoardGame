@@ -109,8 +109,8 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
             onlineGameScene
         )
 
-        //this.showGameScene(onlineGameScene)
-        this.showGameScene(gameScene)
+        this.showGameScene(onlineGameScene)
+        //this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene)
 
     }
