@@ -15,12 +15,12 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * and place it on their personal space  at the desired position
      * the Meeple is  then moved to that index.
      * The player's time marker is advanced based on the tile's cost.
-     * Triggers [refreshAfterTilePlayed] to update the UI accordingly.
+     * Triggers [gui.NovaApplication.refreshAfterTilePlayed] to update the UI accordingly.
      *
      * @param tileTrackIndex The index of the tile to take from the tile track (must be one of the next 3 tiles).
      * @param position The coordinate where the tile should be placed on the current player's space .
      *
-     * @throws IllegalStateException If no game is active or it's not the current player's turn.
+     * @throws IllegalStateException If no game is active, or it's not the current player's turn.
      * @throws IllegalArgumentException If the selected tile is invalid or cannot be placed at the given position.
      */
     fun playTile(tileTrackIndex: Int, position: Coordinate) {
@@ -158,7 +158,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @returns This method has no return value (`Unit`).
      *
      * @throws IllegalStateException If no game is running or if the game is online.
-     * @throws IOException If saving fails (example: due to file access issues).
+     * @throws java.io.IOException If saving fails (example: due to file access issues).
      */
     fun save() {
         //Method implementation
@@ -180,8 +180,8 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      *
      * @returns This method has no return value (`Unit`).
      *
-     * @throws FileNotFoundException If the saved game can’t be found.
-     * @throws IOException If something goes wrong while loading.
+     * @throws java.io.FileNotFoundException If the saved game can’t be found.
+     * @throws java.io.IOException If something goes wrong while loading.
      */
     fun load() {
         //Method implementation
@@ -189,7 +189,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
 
 
     /**
-     * The method [refillWheel] fills up the moonWheel with cards in the [drawPile]
+     * The method [refillWheel] fills up the moonWheel with cards in the [entity.NovaLunaGame.drawPile]
      * when there are 2 or fewer cards in the moonWheel
      *
      *
