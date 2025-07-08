@@ -106,7 +106,7 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
             joinGameSceneTwo,
             resultMenuScene,
             gameScene,
-            onlineGameScene
+            //onlineGameScene
         )
 
         //this.showGameScene(onlineGameScene)

@@ -1,0 +1,418 @@
+package service
+
+import edu.udo.cs.sopra.ntf.messages.InitMessage
+import edu.udo.cs.sopra.ntf.messages.TurnMessage
+import entity.Player
+import entity.PlayerColour
+import entity.PlayerType
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
+import tools.aqua.bgw.net.common.notification.PlayerJoinedNotification
+import tools.aqua.bgw.util.Coordinate
+
+class NovaLunaNetworkServiceTest {
+
+    private lateinit var hostRoot: RootService
+    private lateinit var guestRoots: List<RootService>
+
+    companion object {
+        private const val SECRET    = "neumond25"
+        private val HOST_NAME = "Host" + System.currentTimeMillis()
+    }
+
+    @BeforeEach
+    fun setup() {
+        hostRoot   = RootService()
+
+        guestRoots = listOf(
+            RootService(),
+            RootService(),
+            RootService()
+        )
+    }
+
+    private fun serviceWait(svc: NetworkService, target: ConnectionState) {
+        val playerName = svc.getClientForTesting()?.playerName ?: "Unknown"
+        repeat(100) { // 10 seconds total
+            if (svc.connectionState == target) {
+                println("[DEBUG] $playerName reached $target")
+                return
+            }
+            Thread.sleep(100)
+        }
+        // Add current state to error message for debugging
+        fail("$playerName: Timed out waiting for $target (current=${svc.connectionState})")
+    }
+
+    private fun setupThreePlayerGame() {
+        val hostSvc = hostRoot.networkService
+        val guest1Svc = guestRoots[0].networkService
+        val guest2Svc = guestRoots[1].networkService
+
+        // Host creates game
+        hostSvc.hostGame(SECRET, HOST_NAME)
+        serviceWait(hostSvc, ConnectionState.WAITING_FOR_GUESTS)
+        val sessionID = hostSvc.currentSessionID!!
+
+        // Guests join
+        guest1Svc.joinGame(SECRET, "Guest1", sessionID)
+        serviceWait(guest1Svc, ConnectionState.WAITING_FOR_INIT)
+        serviceWait(hostSvc, ConnectionState.WAITING_FOR_GUESTS)
+
+        guest2Svc.joinGame(SECRET, "Guest2", sessionID)
+        serviceWait(guest2Svc, ConnectionState.WAITING_FOR_INIT)
+        serviceWait(hostSvc, ConnectionState.WAITING_FOR_GUESTS)
+
+        // Wait for receivers
+        Thread.sleep(2500)
+
+        // --- ensure all clients have initialized their @GameActionReceiver methods ---
+        listOf(hostRoot, *guestRoots.take(2).toTypedArray()).forEach { root ->
+            val svc = root.networkService
+            val client = svc.getClientForTesting()
+                ?: error("Client not yet created for root $root")
+            repeat(50) {
+                if (client.isAnnotatedReceiversReady()) return@repeat
+                Thread.sleep(100)
+            }
+            assertTrue(
+                client.isAnnotatedReceiversReady(),
+                "Client ${client.playerName} never became ready"
+            )
+        }
+
+        // Create players
+        val players = listOf(
+            Player(HOST_NAME, 21, 0, false, PlayerType.HUMAN, PlayerColour.BLUE, mutableListOf(), 0),
+            Player("Guest1", 21, 0, false, PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0),
+            Player("Guest2", 21, 0, false, PlayerType.HUMAN, PlayerColour.WHITE, mutableListOf(), 0)
+        )
+
+        // Start game
+        hostSvc.startNewHostedGame(players, isFirstGame = false, randomOrder = false)
+
+        // Wait for initial states
+        serviceWait(hostSvc, ConnectionState.PLAYING_MY_TURN)
+        serviceWait(guest1Svc, ConnectionState.WAITING_FOR_OPPONENT)
+        serviceWait(guest2Svc, ConnectionState.WAITING_FOR_OPPONENT)
+    }
+
+    private fun verifyGameStateConsistency(vararg roots: RootService) {
+        val games = roots.map { it.currentGame!! }
+
+        // Verify active player
+        val activePlayerIndices = games.map { it.activePlayer }.distinct()
+        assertEquals(1, activePlayerIndices.size, "All clients should agree on active player")
+
+        // Verify player positions
+        for (playerIdx in games[0].players.indices) {
+            val positions = games.map { it.players[playerIdx].moonTrackPosition }.distinct()
+            assertEquals(1, positions.size,
+                "Player $playerIdx moon position should be consistent across all clients")
+
+            val tileCounts = games.map { it.players[playerIdx].tiles.size }.distinct()
+            assertEquals(1, tileCounts.size,
+                "Player $playerIdx tile count should be consistent across all clients")
+        }
+
+        // Verify meeple position
+        val meeplePositions = games.map { it.meeplePosition }.distinct()
+        assertEquals(1, meeplePositions.size, "Meeple position should be consistent")
+
+        // Verify tile track (excluding nulls for comparison)
+        for (i in games[0].tileTrack.indices) {
+            val tileIds = games.map { it.tileTrack[i]?.id }.distinct()
+            assertEquals(1, tileIds.size,
+                "Tile track position $i should have same tile (or null) across all clients")
+        }
+    }
+
+    // Additional helper for 4-player setup if needed
+    private fun setupFourPlayerGame() {
+        val hostSvc = hostRoot.networkService
+        val guest1Svc = guestRoots[0].networkService
+        val guest2Svc = guestRoots[1].networkService
+        val guest3Svc = guestRoots[2].networkService
+
+        // Host creates game
+        hostSvc.hostGame(SECRET, HOST_NAME)
+        serviceWait(hostSvc, ConnectionState.WAITING_FOR_GUESTS)
+        val sessionID = hostSvc.currentSessionID!!
+
+        // All guests join
+        guest1Svc.joinGame(SECRET, "Guest1", sessionID)
+        serviceWait(guest1Svc, ConnectionState.WAITING_FOR_INIT)
+
+        guest2Svc.joinGame(SECRET, "Guest2", sessionID)
+        serviceWait(guest2Svc, ConnectionState.WAITING_FOR_INIT)
+
+        guest3Svc.joinGame(SECRET, "Guest3", sessionID)
+        serviceWait(guest3Svc, ConnectionState.WAITING_FOR_INIT)
+
+        serviceWait(hostSvc, ConnectionState.WAITING_FOR_GUESTS)
+
+        // Wait for receivers
+        Thread.sleep(2500)
+
+        // --- ensure all clients have initialized their @GameActionReceiver methods ---
+        listOf(hostRoot, *guestRoots.take(2).toTypedArray()).forEach { root ->
+            val svc = root.networkService
+            val client = svc.getClientForTesting()
+                ?: error("Client not yet created for root $root")
+            repeat(50) {
+                if (client.isAnnotatedReceiversReady()) return@repeat
+                Thread.sleep(100)
+            }
+            assertTrue(
+                client.isAnnotatedReceiversReady(),
+                "Client ${client.playerName} never became ready"
+            )
+        }
+
+        // Create players
+        val players = listOf(
+            Player(HOST_NAME, 21, 0, false, PlayerType.HUMAN, PlayerColour.BLUE, mutableListOf(), 0),
+            Player("Guest1", 21, 0, false, PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0),
+            Player("Guest2", 21, 0, false, PlayerType.HUMAN, PlayerColour.WHITE, mutableListOf(), 0),
+            Player("Guest3", 21, 0, false, PlayerType.HUMAN, PlayerColour.BLACK, mutableListOf(), 0)
+        )
+
+        // Start game
+        hostSvc.startNewHostedGame(players, isFirstGame = false, randomOrder = false)
+
+        // Wait for initial states
+        serviceWait(hostSvc, ConnectionState.PLAYING_MY_TURN)
+        serviceWait(guest1Svc, ConnectionState.WAITING_FOR_OPPONENT)
+        serviceWait(guest2Svc, ConnectionState.WAITING_FOR_OPPONENT)
+        serviceWait(guest3Svc, ConnectionState.WAITING_FOR_OPPONENT)
+    }
+
+    @Test
+    fun testTwoPlayerHostJoinAndInit() {
+        val hostSvc  = hostRoot.networkService
+        val guestSvc = guestRoots[0].networkService
+
+        // 1) Host opens a lobby
+        hostSvc.hostGame(SECRET, HOST_NAME)
+        serviceWait(hostSvc, ConnectionState.WAITING_FOR_GUESTS)
+
+        // 2) Grab and assert the session ID
+        val sessionID = hostSvc.currentSessionID
+        assertNotNull(sessionID)
+        assertEquals(listOf(HOST_NAME), hostSvc.currentSessionPlayers)
+
+        // 3) Guest joins using that session ID
+        guestSvc.joinGame(SECRET, "Guest1", sessionID!!)
+        serviceWait(guestSvc, ConnectionState.WAITING_FOR_INIT)
+        assertEquals(listOf(HOST_NAME, "Guest1"), guestSvc.currentSessionPlayers)
+
+        // 4) Host sees the guest
+        serviceWait(hostSvc, ConnectionState.WAITING_FOR_GUESTS)
+        assertEquals(listOf(HOST_NAME, "Guest1"), hostSvc.currentSessionPlayers)
+
+        Thread.sleep(10000) // 10 seconds total
+
+        // 5) Build the two Player objects
+        val p0 = Player(HOST_NAME, 21, 0, false, PlayerType.HUMAN, PlayerColour.BLUE,   mutableListOf(), 0)
+        val p1 = Player("Guest1",   21, 0, true,  PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0)
+
+// IMPORTANT: Wait for guest's annotated receivers to be ready
+        Thread.sleep(2500) // Give time for annotated receivers to initialize
+
+// 6) Start the actual game
+        hostSvc.startNewHostedGame(listOf(p0, p1), isFirstGame = false, randomOrder = false)
+
+        // 7) Wait for init to finish & turns to begin
+        serviceWait(hostSvc, ConnectionState.PLAYING_MY_TURN)
+        serviceWait(guestSvc, ConnectionState.WAITING_FOR_OPPONENT)
+
+        // 8) Finally assert both see the same player order
+        val hostNames  = hostRoot.currentGame!!.players.map { it.playerName }
+        val guestNames = guestRoots[0].currentGame!!.players.map { it.playerName }
+        assertEquals(hostNames, guestNames)
+    }
+
+    @Test
+    fun testTurnMessageFlow() {
+        // Set up a two-player game
+        testTwoPlayerHostJoinAndInit()
+
+        val hostSvc  = hostRoot.networkService
+        val guestSvc = guestRoots[0].networkService
+
+        // Host picks a tile index and gets its ID
+        val hostGame = hostRoot.currentGame!!
+        val idx      = hostGame.tileTrack.indexOfFirst { it != null }
+        assertTrue(idx >= 0)
+        val tileId   = hostGame.tileTrack[idx]!!.id
+
+        // Play locally and send the TurnMessage
+        hostRoot.playerActionService.playTile(idx, Coordinate(0.0, 0.0))
+        hostSvc.sendTurnMessage(tileId, 0, 0, refillTrack = false)
+        serviceWait(hostSvc, ConnectionState.WAITING_FOR_OPPONENT)
+
+        // Guest receives and executes it
+        serviceWait(guestSvc, ConnectionState.PLAYING_MY_TURN)
+
+        while (guestRoots[0].currentGame!!.activePlayer == 1) {
+            val guestGame = guestRoots[0].currentGame!!
+            val gIdx = guestGame.tileTrack.indexOfFirst { it != null }
+            if (gIdx < 0) break // No tiles available
+
+            val guestTileId = guestGame.tileTrack[gIdx]!!.id
+            guestRoots[0].playerActionService.playTile(gIdx, Coordinate(1.0, 1.0))
+            guestSvc.sendTurnMessage(guestTileId, 1, 1, refillTrack = false)
+            serviceWait(guestSvc, ConnectionState.WAITING_FOR_OPPONENT)
+
+            // Check if it's still guest's turn
+            if (guestGame.activePlayer == 1) {
+                serviceWait(guestSvc, ConnectionState.PLAYING_MY_TURN)
+            }
+        }
+
+        // Host should now be back on PLAYING_MY_TURN
+        serviceWait(hostSvc, ConnectionState.PLAYING_MY_TURN)
+    }
+
+    @Test
+    fun testDisconnectAndCleanup() {
+        // Establish connection first
+        testTwoPlayerHostJoinAndInit()
+
+        // Disconnect both sides
+        hostRoot.networkService.disconnect()
+        guestRoots[0].networkService.disconnect()
+        serviceWait(hostRoot.networkService, ConnectionState.DISCONNECTED)
+        serviceWait(guestRoots[0].networkService, ConnectionState.DISCONNECTED)
+
+        // Session ID should be cleared
+        assertNull(hostRoot.networkService.currentSessionID)
+    }
+
+    @Test
+    fun testThreePlayerGameFlow() {
+        val hostSvc = hostRoot.networkService
+        val guest1Svc = guestRoots[0].networkService
+        val guest2Svc = guestRoots[1].networkService
+
+        // Setup game...
+        setupThreePlayerGame()
+
+        // Play 10 turns using only game logic
+        repeat(10) { turnNumber ->
+            println("\n=== Turn $turnNumber ===")
+
+            val activeGame = hostRoot.currentGame!!
+            val activePlayerName = activeGame.players[activeGame.activePlayer].playerName
+
+            // Determine which service is active
+            val (activeRoot, activeService) = when (activePlayerName) {
+                HOST_NAME -> Pair(hostRoot, hostSvc)
+                "Guest1" -> Pair(guestRoots[0], guest1Svc)
+                "Guest2" -> Pair(guestRoots[1], guest2Svc)
+                else -> error("Unknown player")
+            }
+
+            serviceWait(activeService, ConnectionState.PLAYING_MY_TURN)
+
+
+            // Verify correct player is in PLAYING_MY_TURN state
+            assertEquals(ConnectionState.PLAYING_MY_TURN, activeService.connectionState,
+                "$activePlayerName should be in PLAYING_MY_TURN state")
+
+            // Play a tile through normal game logic
+            val game = activeRoot.currentGame!!
+            val tileIdx = game.tileTrack.indexOfFirst { it != null }
+
+            if (tileIdx >= 0) {
+                val position = game.players[game.activePlayer].tiles.size.let {
+                    Coordinate(it % 5.0, it / 5.0)  // Simple grid layout
+                }
+
+                println("$activePlayerName playing tile at index $tileIdx to position $position")
+
+                // This single call handles everything:
+                // 1. Places the tile
+                // 2. Updates game state
+                // 3. Sends network message
+                activeRoot.playerActionService.playTile(tileIdx, position)
+
+                // Wait for network propagation
+                Thread.sleep(200)
+
+                // Verify all players see the same game state
+                verifyGameStateConsistency(hostRoot, guestRoots[0], guestRoots[1])
+            }
+        }
+
+
+
+    }
+
+    @Test
+    fun testRefillAndManualEndTurn() {
+        // Setup 3-player game
+        setupThreePlayerGame()
+
+        val hostGame = hostRoot.currentGame!!
+
+        // Play tiles until we need a refill (<=2 tiles)
+        while (hostGame.tileTrack.count { it != null } > 2) {
+            val activeService = when (hostGame.activePlayer) {
+                0 -> hostRoot.networkService
+                1 -> guestRoots[0].networkService
+                2 -> guestRoots[1].networkService
+                else -> error("Invalid player")
+            }
+
+            serviceWait(activeService, ConnectionState.PLAYING_MY_TURN)
+
+            val activeRoot = when (hostGame.activePlayer) {
+                0 -> hostRoot
+                1 -> guestRoots[0]
+                2 -> guestRoots[1]
+                else -> error("Invalid")
+            }
+
+            val idx = activeRoot.currentGame!!.tileTrack.indexOfFirst { it != null }
+            if (idx >= 0) {
+                activeRoot.playerActionService.playTile(idx, Coordinate(0.0, 0.0))
+                Thread.sleep(200)
+            }
+        }
+
+        println("Tiles remaining: ${hostGame.tileTrack.count { it != null }}")
+
+        // Now test refill
+        val activePlayer = hostGame.activePlayer
+        val activeRoot = when (activePlayer) {
+            0 -> hostRoot
+            1 -> guestRoots[0]
+            2 -> guestRoots[1]
+            else -> error("Invalid")
+        }
+
+        // Call refill
+        activeRoot.playerActionService.refillWheel()
+
+        // Verify refill happened locally
+        assertTrue(activeRoot.currentGame!!.tileTrack.count { it != null } > 2)
+
+        // Check if other players see the refill
+        Thread.sleep(500)
+        val hostTiles = hostRoot.currentGame!!.tileTrack.count { it != null }
+        val guest1Tiles = guestRoots[0].currentGame!!.tileTrack.count { it != null }
+        val guest2Tiles = guestRoots[1].currentGame!!.tileTrack.count { it != null }
+
+        // This will likely fail because refill isn't communicated
+        assertEquals(hostTiles, guest1Tiles, "All players should see same tile count")
+        assertEquals(hostTiles, guest2Tiles, "All players should see same tile count")
+    }
+
+
+
+
+
+}

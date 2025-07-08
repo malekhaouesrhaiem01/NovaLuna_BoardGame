@@ -11,6 +11,7 @@ package entity
  * @property tileTrack The current circular track of visible tiles.
  * @property previousState The previous game state, used for undo function.
  * @property nextState The next game state, used for redo function.
+ * @property refilledThisTurn Tracks if a refill action was performed for network messages.
  */
 data class NovaLunaGame(var activePlayer: Int,
                         var meeplePosition: Int,
@@ -20,7 +21,8 @@ data class NovaLunaGame(var activePlayer: Int,
                         val tileTrack: MutableList<Tile?>,
                         var previousState: NovaLunaGame? = null,
                         var nextState: NovaLunaGame? = null,
-                        var firstGame: Boolean
+                        var firstGame: Boolean,
+                        var refilledThisTurn: Boolean = false
 ) : Cloneable{
     public override fun clone(): NovaLunaGame {
         val copiedPlayers = players.map{ it.clone() }.toMutableList()

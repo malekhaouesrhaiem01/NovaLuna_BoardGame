@@ -12,19 +12,6 @@ import tools.aqua.bgw.visual.*
 import java.util.*
 
 
-/**
- *  The GameConfig Scene when Hosting a Game in NovaLuna
- *
- *  Implements [Refreshable] to react to service layer updates.
- *
- *  @constructor Creates a new GameConfig Scene with the specified rootService.
- *
- *  @param rootService The [RootService] that manages the game state.
- *  @property availableColors A List of available colors the Player can still choose from
- *  @property ifRandom Boolean to determine if the Player order is Random or not
- *  @property ifFirstGame Boolean to determine if it's the Players FirstGame
- *  @property currentColorPickerIndex The Index of the current Color
- */
 class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
     //this needs to be called from the start button in the hostgame lobby
     //(I am assuming it's similar to the offline lobby scene)
@@ -39,6 +26,16 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
     private var ifFirstGame : Boolean = false
     private var currentColorPickerIndex = -1
 
+
+    override fun refreshAfterPlayerJoined() {
+        // always rebuild the list of player rows
+        // and do it on the BGW-UI thread
+
+
+            buildPlayerUIs()
+
+
+    }
     private val contentPane = Pane<UIComponent>(
         width = 1920,
         height = 1080,
@@ -162,13 +159,6 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
         }
     )
 
-    /**
-     * A data class to display the different Labels of a Player in the GameConfig Scene
-     * @property orderToken The Order of the Players
-     * @property nameLabel Name of the Player
-     * @property colorButton Button of the color
-     * @property colorIndex Index of the Color
-     */
     data class PlayerGUI(
         val orderToken: Label,
         val nameLabel: Label,
@@ -421,10 +411,6 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
     }
 
     override fun refreshConnectionState(state: ConnectionState) {
-        when (state) {
-            ConnectionState.WAITING_FOR_GUESTS,
-            ConnectionState.WAITING_FOR_INIT -> buildPlayerUIs()
-            else -> { }
-        }
+
     }
 }

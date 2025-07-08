@@ -8,17 +8,6 @@ import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.*
 
-
-/**
- *  The Waiting Lobby when joining an online Game in NovaLuna
- *
- *  Implements [Refreshable] to react to service layer updates.
- *
- *  @constructor Creates a new Waiting Lobby Scene with the specified rootService and Player Name.
- *
- *  @param rootService The [RootService] that manages the game state.
- *  @param playerName The Name of the Player joining
- */
 class JoinGameSceneTwo (private val rootService: RootService,
                         private val playerName: String) : MenuScene(1920, 1080), Refreshable {
 

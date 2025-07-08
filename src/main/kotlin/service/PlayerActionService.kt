@@ -15,12 +15,12 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * and place it on their personal space  at the desired position
      * the Meeple is  then moved to that index.
      * The player's time marker is advanced based on the tile's cost.
-     * Triggers [gui.NovaApplication.refreshAfterTilePlayed] to update the UI accordingly.
+     * Triggers [refreshAfterTilePlayed] to update the UI accordingly.
      *
      * @param tileTrackIndex The index of the tile to take from the tile track (must be one of the next 3 tiles).
      * @param position The coordinate where the tile should be placed on the current player's space .
      *
-     * @throws IllegalStateException If no game is active, or it's not the current player's turn.
+     * @throws IllegalStateException If no game is active or it's not the current player's turn.
      * @throws IllegalArgumentException If the selected tile is invalid or cannot be placed at the given position.
      */
     fun playTile(tileTrackIndex: Int, position: Coordinate) {
@@ -29,6 +29,10 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         // Get the selected tile from the tile track
         val selectedTile = game.tileTrack[tileTrackIndex]
         checkNotNull(selectedTile)
+
+        // store the tile ID before moving the tile (for sendTurnMessage below)
+        val tileId = selectedTile.id
+
         // add the selected tile to the list of tiles of the current player
         game.players[game.activePlayer].tiles.add(selectedTile)
         // add the coordinates where the tile is placed to the tile
@@ -37,9 +41,27 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         // update position on the moon wheel of the token
         // and the position of the meeple on the tile track
         rootService.gameService.moveMeepleAndPlayer(selectedTile)
+        println("   [playTile] AFTER moveMeepleAndPlayer")
+        println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
 
         // check if tasks are now fulfilled
         rootService.gameService.updateTasks()
+        println("   [playTile] AFTER updateTasks")
+        println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
+        // Send network message if it's a network game and it's our turn
+        if (rootService.networkService.connectionState == ConnectionState.PLAYING_MY_TURN) {
+            println("    Sending network message...")
+
+            rootService.networkService.sendTurnMessage(
+                tileId = tileId,
+                x = position.xCoord.toInt(),
+                y = position.yCoord.toInt(),
+                refillTrack = game.refilledThisTurn
+            )
+            println("    Network message sent")
+            println("    NOT sending network message (state: ${rootService.networkService.connectionState})")
+
+        }
 
         // check if game conditions are fulfilled to end the game
         // if not just refresh after a tile ist played
@@ -152,7 +174,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @returns This method has no return value (`Unit`).
      *
      * @throws IllegalStateException If no game is running or if the game is online.
-     * @throws java.io.IOException If saving fails (example: due to file access issues).
+     * @throws IOException If saving fails (example: due to file access issues).
      */
     fun save() {
         //Method implementation
@@ -174,8 +196,8 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      *
      * @returns This method has no return value (`Unit`).
      *
-     * @throws java.io.FileNotFoundException If the saved game can’t be found.
-     * @throws java.io.IOException If something goes wrong while loading.
+     * @throws FileNotFoundException If the saved game can’t be found.
+     * @throws IOException If something goes wrong while loading.
      */
     fun load() {
         //Method implementation
@@ -183,7 +205,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
 
 
     /**
-     * The method [refillWheel] fills up the moonWheel with cards in the [entity.NovaLunaGame.drawPile]
+     * The method [refillWheel] fills up the moonWheel with cards in the [drawPile]
      * when there are 2 or fewer cards in the moonWheel
      *
      *
@@ -203,6 +225,11 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         val game = rootService.currentGame
         checkNotNull(game)
 
+        println("     REFILL: Starting refill")
+        println("   - Active player: ${game.activePlayer} (${game.players[game.activePlayer].playerName})")
+        println("   - Connection state: ${rootService.networkService.connectionState}")
+        println("   - Tiles before refill: ${game.tileTrack.count { it != null }}")
+
         val filled = game.tileTrack.count {it != null}
 
         if (filled > 2) return //falls mehr als 2 funktioniert es nicht.
@@ -217,6 +244,14 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
             }
             index = (index + 1) % game.tileTrack.size
         }
+
+
+
+        // Mark that refill happened this turn
+        game.refilledThisTurn = true
+
+        println("   - Tiles after refill: ${game.tileTrack.count { it != null }}")
+        println("   - refilledThisTurn flag: ${game.refilledThisTurn}")
 
         onAllRefreshables { refreshAfterRefill() }
     }
