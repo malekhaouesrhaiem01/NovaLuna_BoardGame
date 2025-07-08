@@ -37,6 +37,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         // Initializing the draw pile
         val drawPile = rootService.tileLoader.readTiles().shuffled().toMutableList()
 
+        drawPile.reverse()
+
         // Initializing the tileTrack with the top 11 tiles from the drawPile
         val tileTrack: MutableList<Tile?> = drawPile.subList(0, 11).toMutableList()
         drawPile.subList(0, 11).clear()
@@ -92,6 +94,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             allTiles.find { it.id == id } ?: error("Tile with ID $id not found")
         }.toMutableList<Tile?>()  // Explicitly specify nullable type
 
+        drawPile.reverse()
+
         // Initialize tileTrack with first 11 tiles
         val tileTrack: MutableList<Tile?> = drawPile.take(11).toMutableList()
         drawPile.subList(0, 11).clear()
@@ -104,10 +108,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         // Determine token count based on first game rules
         val tokenCount = if (isFirstGame) when (players.size) {
-            3 -> 18
-            4 -> 16
-            else -> 21
-        } else 21
+            3 -> 18 -1
+            4 -> 16 -1
+            else -> 21-1
+        } else 21 -1
 
         // Update player token counts
         players.forEach { it.tokenCount = tokenCount }
@@ -516,12 +520,12 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
         if (game.firstGame){ //Firstgame == true
             when(game.players.size){
-                2 -> game.players[game.activePlayer].tokenCount = 16 - count
-                3 -> game.players[game.activePlayer].tokenCount = 18 - count
-                4 -> game.players[game.activePlayer].tokenCount = 21 - count
+                2 -> game.players[game.activePlayer].tokenCount = 16 - 1 - count
+                3 -> game.players[game.activePlayer].tokenCount = 18 - 1 - count
+                4 -> game.players[game.activePlayer].tokenCount = 21 - 1 - count
             }
         } else{
-            game.players[game.activePlayer].tokenCount = 21 - count
+            game.players[game.activePlayer].tokenCount = 21 - 1 - count
         }
         if (game.players[game.activePlayer].tokenCount < 0){
             game.players[game.activePlayer].tokenCount = 0
@@ -701,6 +705,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         selectedTile.moonTrackPosition = null
 
         currentPlayer.moonTrackPosition += stepsForPlayer
+        currentPlayer.height = 0
 
         //changes the height of the currentPlayer, for the case two Players are at the same Position
         for(player in game.players){
@@ -714,7 +719,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             }
         }
         // remove 1 height, because we add 1 height for every Player arriving in a new Position
-        currentPlayer.height -= 1
+        //currentPlayer.height -= 1
 
         // onAllRefreshable { refreshAfterMoveMeepleAndPlayer() }
         println("   - Current height AFTER: ${currentPlayer.height}")

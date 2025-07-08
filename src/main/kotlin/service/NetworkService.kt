@@ -207,6 +207,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         for (i in 1 until game.tileTrack.size) {
             game.tileTrack[i]?.let { drawPileIds.add(it.id) }
         }
+        drawPileIds.reverse()
 // Add all tiles from drawPile
         game.drawPile.forEach { tile ->
             tile?.let { drawPileIds.add(it.id) }
@@ -257,9 +258,9 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         // 2) Compute token counts exactly as in the offline
         val playerCount = message.players.size
         val tokenCount = if (message.isFirstGame) when (playerCount) {
-            3 -> 18
-            4 -> 16
-            else -> 21
+            3 -> 18 - 1
+            4 -> 16 - 1
+            else -> 21 - 1
         } else 21
 
         // 3) Rebuild the Player list, annotating onlineMode per slot
