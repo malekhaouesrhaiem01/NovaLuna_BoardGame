@@ -179,15 +179,6 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
         game.activePlayer =  game.players.indexOf(currentPlayer)
 
-        if(checkEndGame()){
-            var winner = game.players[0]
-            for (player in game.players){
-                if (player.tokenCount < winner.tokenCount){
-                    winner = player
-                }
-            }
-            endGame(winner)
-        }
         
         onAllRefreshables { refreshAfterEndTurn() }
 

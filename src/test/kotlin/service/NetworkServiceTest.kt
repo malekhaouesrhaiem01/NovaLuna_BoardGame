@@ -12,6 +12,9 @@ import tools.aqua.bgw.net.common.response.JoinGameResponseStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/**
+ * Test class for the NetworkService Class
+ */
 class NetworkServiceTest {
 
     @Test
