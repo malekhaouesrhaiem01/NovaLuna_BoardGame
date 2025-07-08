@@ -200,7 +200,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
     * displaying player scores, and clearing the game state.
     *
     * This method is  called from [checkEndGame] when an end condition is met.
-    * Triggers [refreshAfterGameEnd] to update the UI with the winner name and players  scores  .
+    * Triggers [gui.NovaApplication.refreshAfterGameEnd] to update the UI with the winner name and players  scores  .
     * @throws IllegalStateException if no game is currently active or the game is already ended
     */
     fun endGame(winner: Player){
