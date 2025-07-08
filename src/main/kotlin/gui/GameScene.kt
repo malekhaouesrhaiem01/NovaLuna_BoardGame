@@ -74,12 +74,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
     ).apply {
         onMouseClicked = {
-            val current = rootService.currentGame
-            if (current?.previousState == null) {
-                showError("Nothing to undo!")
-            } else {
-                rootService.playerActionService.undo()
-            }
+            rootService.playerActionService.undo()
         }
     }
 
@@ -93,12 +88,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
     ).apply {
         onMouseClicked = {
-            val current = rootService.currentGame
-            if (current?.nextState == null) {
-                showError("Nothing to redo!")
-            } else {
-                rootService.playerActionService.redo()
-            }
+            rootService.playerActionService.redo()
         }
 
     }
@@ -991,6 +981,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     }
 
     override fun refreshAfterUndo() {
+        chosenTile = null
+        isAlreadyPlayed = false
+        ifHuman = null
         // clear everything …
         clearMoonWheel()
         clearPlayersDisplay()
@@ -1004,6 +997,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     }
 
     override fun refreshAfterRedo() {
+        chosenTile = null
+        isAlreadyPlayed = false
+        ifHuman = null
         // analog zu refreshAfterUndo()
         clearMoonWheel()
         clearPlayersDisplay()

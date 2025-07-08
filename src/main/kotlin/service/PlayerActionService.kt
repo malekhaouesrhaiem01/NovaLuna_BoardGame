@@ -25,6 +25,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      */
     fun playTile(tileTrackIndex: Int, position: Coordinate) {
         val game = checkNotNull(rootService.currentGame)
+        game.previousState = game.clone()
         // Get the selected tile from the tile track
         val selectedTile = game.tileTrack[tileTrackIndex]
         checkNotNull(selectedTile)
@@ -64,6 +65,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      */
     open fun playTile(move: Move) {
         val game = checkNotNull(rootService.currentGame)
+        game.previousState = game.clone()
         // get the index of the selected tile in the [Move] object
         val tileIndex = game.tileTrack.indexOf(move.tile)
         // calls the main playTile function to play the selected move from the bot
@@ -92,19 +94,14 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws IllegalStateException If no game is running.
      * @throws NoSuchElementException If there's no undo state to go back to.
      */
-    fun undo(): Boolean {
-        val current = rootService.currentGame ?: return false
-        val prev = current.previousState ?: return false
-
-        // Set the game back to the previous snapshot
-        rootService.currentGame = prev
-
-        // Clear redo link on the now-current state to maintain proper history
-        prev.nextState = current
-
-        // Trigger a full refresh of the UI to show the undone state
-        onAllRefreshables { refreshAfterUndo() } // oder je nachdem, welcher Refresh angezeigt werden soll
-        return true
+    fun undo() {
+        val game = checkNotNull(rootService.currentGame)
+        val prev = game.previousState
+        if(prev != null) {
+            prev.nextState = game
+            rootService.currentGame = prev
+            onAllRefreshables { refreshAfterUndo() }
+        }
     }
 
 
@@ -129,16 +126,13 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws IllegalStateException If no game is running.
      * @throws NoSuchElementException If there’s nothing to redo.
      */
-    fun redo(): Boolean {
-        val current = rootService.currentGame ?: return false
-        val next = current.nextState ?: return false
-
-        // Set the game forward to the next snapshot
-        rootService.currentGame = next
-
-        // Trigger a full refresh of the UI to show the redone state
-        onAllRefreshables { refreshAfterRedo() }
-        return true
+    fun redo() {
+        val game = checkNotNull(rootService.currentGame)
+        val next = game.nextState
+        if(next != null) {
+            rootService.currentGame = next
+            onAllRefreshables { refreshAfterRedo() }
+        }
     }
 
     /**
@@ -227,4 +221,3 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         onAllRefreshables { refreshAfterRefill() }
     }
 }
-

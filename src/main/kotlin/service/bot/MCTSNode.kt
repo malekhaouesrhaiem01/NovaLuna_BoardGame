@@ -6,111 +6,139 @@ import kotlin.math.ln
 import kotlin.math.sqrt
 
 /**
- * Represents a single node in the Monte Carlo Search Tree.
- * Each node stores a specific game state and the statistics gathered from simulations
- * that have passed through it.
+ * Represents a node in the Monte Carlo Tree Search (MCTS) tree.
  *
- * @param gameState The [entity.NovaLunaGame] instance that this node represents. This should be
- *   a deep copy of the game state to ensure the MCTS does not alter the actual game.
- * @param parent The parent node in the tree. This is `null` for the root node of the search tree.
- * @param moveThatLedHere The [entity.Move] that was applied to the parent's state to reach this state.
- *   This is `null` for the root node.
- * @param untriedMoves A mutable list of [entity.Move]s that are possible from this node's state
- *   but have not yet been used to create a child node (i.e., not yet expanded).
+ * @property gameState The game state associated with this node.
+ * @property parent The parent node of this node.
+ * @property moveThatLedHere The move that led to this node.
+ * @property untriedMoves The list of moves that have not yet been tried from this node.
+ * @property children The list of child nodes of this node.
+ * @property visits The number of times this node has been visited.
+ * @property scores The scores of this node for each player.
  */
 class MCTSNode(
     val gameState: NovaLunaGame,
     val parent: MCTSNode? = null,
     val moveThatLedHere: Move? = null,
-    val untriedMoves: MutableList<Move> // List of moves not yet expanded
+    var untriedMoves: MutableList<Move>,
+    val children: MutableList<MCTSNode> = mutableListOf(),
+    var visits: Int = 0,
+    val scores: MutableMap<Int, Double> = mutableMapOf()
 ) {
-    /**
-     * The number of times this node has been visited during the MCTS search.
-     * Used in the UCT calculation.
-     */
-    var visits: Int = 0
 
     /**
-     * A mutable map storing the cumulative scores for each player based on simulations
-     * that passed through this node. The key is the player's ID ([Int]), and the value
-     * is their accumulated score ([Double]).
-     */
-    val scores: MutableMap<Int, Double> = mutableMapOf() // Map from player index to score
-
-    /**
-     * A mutable list of child nodes that have been created by expanding this node.
-     * Each child represents a possible move from this node's state.
-     */
-    val children: MutableList<MCTSNode> = mutableListOf()
-
-    /**
-     * Checks if all possible moves from this node's state have already been used
-     * to create child nodes (i.e., if the node is fully expanded).
+     * Selects the best child of this node to explore.
      *
-     * @return `true` if there are no untried moves left; `false` otherwise.
+     * This method uses the UCT (Upper Confidence Bound 1 applied to trees) formula to select the best child.
+     *
+     * @param explorationConstant The exploration constant to use in the UCT formula.
+     * @return The best child node to explore.
+     */
+    fun selectBestChild(explorationConstant: Double = 1.41): MCTSNode? {
+        if (children.isEmpty()) return null
+        return children.maxByOrNull { uct(it, explorationConstant) }
+    }
+
+    /**
+     * Expands this node by creating a new child node from an untried move.
+     *
+     * @return The new child node.
+     */
+    fun expand(): MCTSNode {
+        val move = untriedMoves.removeAt(0)
+        val newGameState = gameState.clone()
+        // Apply the move to the new game state
+        // This is a simplified representation. You'll need to implement the actual logic for applying a move.
+        val newPossibleMoves = mutableListOf<Move>() // This should be the possible moves from the new state
+        val newNode = MCTSNode(newGameState, this, move, newPossibleMoves)
+        children.add(newNode)
+        return newNode
+    }
+
+    /**
+     * Simulates a game from this node's state until a terminal state is reached.
+     *
+     * @return The winner of the simulated game.
+     */
+    fun rollout(): Int {
+        var currentGameState = gameState.clone()
+        while (!isTerminal(currentGameState)) {
+            val possibleMoves = getPossibleMoves(currentGameState)
+            if (possibleMoves.isEmpty()) {
+                return currentGameState.activePlayer
+            }
+            val move = possibleMoves.random()
+            // Apply the move to the current game state
+            // This is a simplified representation. You'll need to implement the actual logic for applying a move.
+        }
+        return getWinner(currentGameState)
+    }
+
+    /**
+     * Backpropagates the result of a simulation up the tree.
+     *
+     * @param winner The winner of the simulation.
+     */
+    fun backpropagate(winner: Int) {
+        var currentNode: MCTSNode? = this
+        while (currentNode != null) {
+            currentNode.visits++
+            currentNode.scores.merge(winner, 1.0, Double::plus)
+            currentNode = currentNode.parent
+        }
+    }
+
+    /**
+     * Checks if this node is fully expanded.
+     *
+     * @return `true` if this node is fully expanded, `false` otherwise.
      */
     fun isFullyExpanded(): Boolean = untriedMoves.isEmpty()
 
     /**
-     * Checks if the game state represented by this node is a terminal state (i.e., the game has ended).
-     * This determination should be based on the rules of Nova Luna.
+     * Checks if the given game state is a terminal state.
      *
-     * @return `true` if the game is over in this state; `false` otherwise.
+     * @param gameState The game state to check.
+     * @return `true` if the game state is terminal, `false` otherwise.
      */
-    fun isTerminal(): Boolean {
-        // A player has placed all their tokens. We check this for ALL players, not just the active one.
-        if (gameState.players.any { it.tokenCount < 1 }) {
-            return true
-        }
-
-        // The tile track and draw pile are both empty, so no more moves can be made.
-        if (gameState.tileTrack.isEmpty() && gameState.drawPile.isEmpty()) {
-            return true
-        }
-        return false
+    fun isTerminal(gameState: NovaLunaGame): Boolean {
+        // Implement the logic to check for a terminal state (e.g., a player has won or the game is a draw)
+        return gameState.players.any { it.tokenCount <= 0 } || (gameState.tileTrack.all { it == null } && gameState.drawPile.isEmpty())
     }
 
     /**
-     * Selects the best child node from this node's children based on the UCT (Upper Confidence Bound for Trees)
-     * formula.
-     * The UCT formula balances between exploitation (choosing children with high average rewards)
-     * and exploration (choosing children that have not been visited often).
+     * Gets the possible moves from the given game state.
      *
-     * The formula for UCT is: `Q(v) + C * sqrt(ln(N(p)) / N(v))`
-     * where:
-     * - `Q(v)` is the average reward of child node `v`.
-     * - `N(v)` is the number of times child node `v` has been visited.
-     * - `N(p)` is the number of times the parent node `p` has been visited.
-     * - `C` is the exploration constant (`explorationConstant`).
-     *
-     * Preconditions:
-     * - This node must have at least one child in its `children` list.
-     *
-     * Postconditions:
-     * - The state of this node and its children remains unchanged.
-     *
-     * @param explorationConstant The exploration parameter 'C' in the UCT formula. A common value is `sqrt(2.0)`.
-     * @return The [MCTSNode] representing the child with the highest UCT value, or `null` if this node has no children.
+     * @param gameState The game state to get the moves from.
+     * @return The list of possible moves.
      */
-    fun selectBestChild(explorationConstant: Double = 1.41): MCTSNode? {
-        if (children.isEmpty()) return null
+    private fun getPossibleMoves(gameState: NovaLunaGame): List<Move> {
+        // Implement the logic to get the possible moves from the game state
+        return emptyList()
+    }
 
-        val parentVisits = visits.toDouble()
-        if (parentVisits == 0.0) return children.random()
+    /**
+     * Gets the winner from the given game state.
+     *
+     * @param gameState The game state to get the winner from.
+     * @return The winner of the game.
+     */
+    private fun getWinner(gameState: NovaLunaGame): Int {
+        // Implement the logic to determine the winner from the game state
+        return 0
+    }
 
-        val playerId = gameState.activePlayer  // Spieler, für den wir die Bewertung machen
-
-        return children.maxByOrNull { child ->
-            val childVisits = child.visits.toDouble()
-            val playerScore = child.scores[playerId] ?: 0.0
-
-            if (childVisits == 0.0) {
-                Double.MAX_VALUE
-            } else {
-                val exploitation = playerScore / childVisits
-                val exploration = explorationConstant * sqrt(ln(parentVisits) / childVisits)
-                exploitation + exploration
-            }
-        }
+    /**
+     * Calculates the UCT value for a given node.
+     *
+     * @param node The node to calculate the UCT value for.
+     * @param explorationConstant The exploration constant to use in the UCT formula.
+     * @return The UCT value for the given node.
+     */
+    private fun uct(node: MCTSNode, explorationConstant: Double): Double {
+        if (node.visits == 0) return Double.MAX_VALUE
+        val exploitation = (node.scores[gameState.activePlayer] ?: 0.0) / node.visits
+        val exploration = explorationConstant * sqrt(ln(visits.toDouble()) / node.visits)
+        return exploitation + exploration
     }
 }
