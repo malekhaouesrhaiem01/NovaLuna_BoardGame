@@ -1,5 +1,5 @@
-/*
-ackage service
+package service/*
+package service
 import edu.udo.cs.sopra.ntf.messages.InitMessage
 import edu.udo.cs.sopra.ntf.messages.TurnMessage
 import io.mockk.every

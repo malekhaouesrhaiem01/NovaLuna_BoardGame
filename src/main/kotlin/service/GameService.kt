@@ -234,11 +234,11 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game)
 
-        println("   END TURN:")
-        println("   - Current player: ${game.activePlayer} (${game.players[game.activePlayer].playerName})")
+        //println("   END TURN:")
+        //println("   - Current player: ${game.activePlayer} (${game.players[game.activePlayer].playerName})")
 
         if(checkEndGame()){
-            println("   - Game ending detected!")
+            //println("   - Game ending detected!")
 
             val winner = game.players[game.activePlayer]
 
