@@ -206,9 +206,6 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
 
         println("   [startTurn] AFTER clone:")
-        newState.players.forEachIndexed { idx, p ->
-            println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
-        }
 
 
         onAllRefreshables { refreshAfterStartTurn() }

@@ -275,11 +275,11 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         drawPile.text = game.drawPile.size.toString()
 
 
-        if(!ifHuman!!){
-            if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
-                rootService.easyBotService.executeEasyMove()
-            }
-        }
+        // if(!ifHuman!!){
+        //     if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
+        //         rootService.easyBotService.executeEasyMove()
+        //     }
+        // }
 
 
     }
@@ -292,11 +292,11 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         addCurrentPlayer(game)
         addPlayers(game)
 
-        if(!ifHuman!!){
-            if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
-                rootService.easyBotService.executeEasyMove()
-            }
-        }
+        // if(!ifHuman!!){
+        //     if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
+        //         rootService.easyBotService.executeEasyMove()
+        //     }
+        // }
 
 
     }
