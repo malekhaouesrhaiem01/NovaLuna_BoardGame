@@ -37,6 +37,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         // Initializing the draw pile
         val drawPile = rootService.tileLoader.readTiles().shuffled().toMutableList()
 
+        drawPile.reverse()
+
         // Initializing the tileTrack with the top 11 tiles from the drawPile
         val tileTrack: MutableList<Tile?> = drawPile.subList(0, 11).toMutableList()
         drawPile.subList(0, 11).clear()
@@ -69,6 +71,67 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         onAllRefreshables { refreshAfterStartGame()}
         startTurn()
     }
+
+    /**
+     * Starts a new Nova Luna game for network play with a predefined tile order.
+     * Used by NetworkService to ensure all players have the same tile arrangement.
+     *
+     * @param players The list of players
+     * @param simulationSpeed The simulation speed
+     * @param tileIds The exact order of tile IDs to use (no shuffling)
+     * @param isFirstGame Whether this is the first game (affects token count)
+     */
+    fun startNetworkGame(players: List<Player>, simulationSpeed: Int, tileIds: List<Int>, isFirstGame: Boolean) {
+        require(players.size in 2..4) { "Spieleranzahl muss zwischen 2 und 4 sein." }
+        require(simulationSpeed < 11) { "SimulationSpeed darf maximal 10 sein" }
+
+        if (rootService.currentGame != null) {
+            throw IllegalStateException("A game is already running.")
+        }
+
+        // Convert tile IDs to actual tiles in the exact order provided
+        val allTiles = rootService.tileLoader.readTiles().filterNotNull()
+        val drawPile: MutableList<Tile?> = tileIds.map { id ->
+            allTiles.find { it.id == id } ?: error("Tile with ID $id not found")
+        }.toMutableList<Tile?>()  // Explicitly specify nullable type
+
+        drawPile.reverse()
+
+        // Initialize tileTrack with first 11 tiles
+        val tileTrack: MutableList<Tile?> = drawPile.take(11).toMutableList()
+        drawPile.subList(0, 11).clear()
+        tileTrack.add(0, null) // Meeple position
+
+        // Set player heights based on order
+        for (i in 0 until players.size) {
+            players[i].height = players.size - i
+        }
+
+        // Determine token count based on first game rules
+        val tokenCount = if (isFirstGame) when (players.size) {
+            3 -> 18 -1
+            4 -> 16 -1
+            else -> 21-1
+        } else 21 -1
+
+        // Update player token counts
+        players.forEach { it.tokenCount = tokenCount }
+
+        val game = NovaLunaGame(
+            activePlayer = 0,
+            meeplePosition = 0,
+            simulationSpeed = simulationSpeed,
+            players = players.toMutableList(),
+            drawPile = drawPile,
+            tileTrack = tileTrack,
+            firstGame = isFirstGame
+        )
+
+        rootService.currentGame = game
+        onAllRefreshables { refreshAfterStartGame() }
+    }
+
+
 
     /**
      * Checks if one of the two conditions for ending the game are fulfilled.
@@ -115,6 +178,15 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
+        println("   [startTurn] BEFORE clone:")
+        game.players.forEachIndexed { idx, p ->
+            println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
+        }
+
+
+        // Reset the refill flag for the new turn
+        //game.refilledThisTurn = false
+
         var checkAutoRefill = true
         for (tile in game.tileTrack){
             if (tile != null) {
@@ -132,6 +204,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         } else if(player.playerType == entity.PlayerType.HARDBOT) {
             rootService.hardBotService.executeHardBotMove()
         }
+
+        println("   [startTurn] AFTER clone:")
 
 
         onAllRefreshables { refreshAfterStartTurn() }
@@ -160,7 +234,12 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game)
 
+        println("   END TURN:")
+        println("   - Current player: ${game.activePlayer} (${game.players[game.activePlayer].playerName})")
+
         if(checkEndGame()){
+            println("   - Game ending detected!")
+
             val winner = game.players[game.activePlayer]
 
             endGame(winner)
@@ -394,12 +473,12 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
         if (game.firstGame){ //Firstgame == true
             when(game.players.size){
-                2 -> game.players[game.activePlayer].tokenCount = 16 - count
-                3 -> game.players[game.activePlayer].tokenCount = 18 - count
-                4 -> game.players[game.activePlayer].tokenCount = 21 - count
+                2 -> game.players[game.activePlayer].tokenCount = 16 - 1 - count
+                3 -> game.players[game.activePlayer].tokenCount = 18 - 1 - count
+                4 -> game.players[game.activePlayer].tokenCount = 21 - 1 - count
             }
         } else{
-            game.players[game.activePlayer].tokenCount = 21 - count
+            game.players[game.activePlayer].tokenCount = 21 - 1 - count
         }
         if (game.players[game.activePlayer].tokenCount < 0){
             game.players[game.activePlayer].tokenCount = 0
@@ -575,6 +654,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         selectedTile.moonTrackPosition = null
 
         currentPlayer.moonTrackPosition += stepsForPlayer
+        currentPlayer.height = 0
 
         //changes the height of the currentPlayer, for the case two Players are at the same Position
         for (player in game.players)
@@ -590,7 +670,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             }
         }
         // remove 1 height, because we add 1 height for every Player arriving in a new Position
-        currentPlayer.height -= 1
+        //currentPlayer.height -= 1
 
         }
 

@@ -16,16 +16,6 @@ import tools.aqua.bgw.visual.ImageVisual
 import entity.PlayerType
 import java.util.*
 
-/**
- *  The HostGame Scene for an online Game in NovaLuna.
- *
- *  Implements [Refreshable] to react to service layer updates.
- *
- *  @constructor Creates a new HostGame Scene with the specified rootService.
- *
- *  @param rootService The [RootService] that manages the game state.
- *  @property hostGameSceneTwo The Game Config Scene when hosting a Game
- */
 class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
     val hostGameSceneTwo = HostGameSceneTwo(rootService)

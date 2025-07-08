@@ -12,6 +12,7 @@ import tools.aqua.bgw.net.common.response.JoinGameResponse
 import tools.aqua.bgw.net.common.response.JoinGameResponseStatus
 import edu.udo.cs.sopra.ntf.messages.InitMessage
 import edu.udo.cs.sopra.ntf.messages.TurnMessage
+import tools.aqua.bgw.core.BoardGameApplication
 /**
  * This class handles all networking logic for the Nova Luna game by extending [BoardGameClient].
  * It receives and processes game-related messages from the server and delegates actions to [NetworkService].
@@ -37,13 +38,30 @@ class NovaLunaNetworkClient(
      *
      * @param response The server's response to a create game request.
      */
+
+
+    // Add this flag to track if we're ready to receive messages
+    @Volatile
+    private var annotatedReceiversReady = false
+
+    // Override this method to detect when receivers are ready
+    override fun onOpen() {
+        super.onOpen()
+        // Start a background thread to wait for receiver initialization
+        Thread {
+            Thread.sleep(2000) // Give framework time to initialize
+            annotatedReceiversReady = true
+            println("DEBUG: Annotated receivers are now ready")
+        }.start()
+    }
+
+    fun isAnnotatedReceiversReady(): Boolean = annotatedReceiversReady
     override fun onCreateGameResponse(response: CreateGameResponse) {
         check(networkService.connectionState == ConnectionState.WAITING_FOR_HOST_CONFIRMATION) {
             "Unexpected CreateGameResponse"
         }
 
         if (response.status == CreateGameResponseStatus.SUCCESS) {
-            requireNotNull(response.sessionID) { "sessionID must not be null on SUCCESS" }
             sessionID = response.sessionID
             // forward into the service (which itself updates the state)
             networkService.onCreateGameResponse(response, playerName)
@@ -79,13 +97,14 @@ class NovaLunaNetworkClient(
      * @param notification The join notification sent by the server.
      */
     override fun onPlayerJoined(notification: PlayerJoinedNotification) {
-        check(networkService.connectionState == ConnectionState.WAITING_FOR_GUESTS) {
-            "Not awaiting any guests."
-        }
+        // FIX: Allow both WAITING_FOR_GUESTS and WAITING_FOR_INIT states
+        check(
+            networkService.connectionState == ConnectionState.WAITING_FOR_GUESTS ||
+                    networkService.connectionState == ConnectionState.WAITING_FOR_INIT
+        ) { "Not awaiting any guests or init." }
 
         otherPlayerName = notification.sender
-        // only update the lobby list , not auto start
-        networkService.onPlayerJoined(notification)
+        networkService.onPlayerJoined(notification )
     }
     /**
      * Handles a game action response from the server.
@@ -110,10 +129,41 @@ class NovaLunaNetworkClient(
      * @param message The initial game setup message.
      * @param sender The sender (host) of the message.
      */
+
+
     @GameActionReceiver
     @Suppress("UNUSED_PARAMETER", "unused")
     fun onInitReceived(message: InitMessage, sender: String) {
-        networkService.startNewJoinedGame(message)
+        println("DEBUG: onInitReceived called with sender: $sender")
+        println("DEBUG: Current connection state: ${networkService.connectionState}")
+
+        if (sender == this.playerName) {
+            println("DEBUG: Ignoring my own InitMessage")
+            return
+        }
+
+        // Wait for receivers to be ready if needed
+        if (!annotatedReceiversReady) {
+            println("DEBUG: Waiting for annotated receivers to be ready...")
+            var waited = 0
+            while (!annotatedReceiversReady && waited < 50) { // 5 seconds max
+                Thread.sleep(100)
+                waited++
+            }
+            if (annotatedReceiversReady) {
+                println("DEBUG: Annotated receivers now ready after ${waited * 100}ms")
+            } else {
+                println("DEBUG: WARNING: Annotated receivers still not ready after timeout")
+            }
+        }
+
+        try {
+            networkService.startNewJoinedGame(message)
+            println("DEBUG: startNewJoinedGame completed successfully")
+        } catch (e: Exception) {
+            println("DEBUG: Exception in startNewJoinedGame: ${e.message}")
+            e.printStackTrace()
+        }
     }
     /**
      * Receiver for turn update messages from the host.
@@ -125,13 +175,14 @@ class NovaLunaNetworkClient(
     @GameActionReceiver
     @Suppress("UNUSED_PARAMETER", "unused")
     fun onTurnReceived(message: TurnMessage, sender: String) {
-        networkService.receiveTurnMessage(message)
-    }
-    /**
-     * Disconnects the client and throws an error with the given reason.
-     *
-     * @param reason The reason for disconnection.
-     */
+        // ignore our own messages (the server echoes them back to us)
+        if (sender == this.playerName) {
+            println("DEBUG: Ignoring my own TurnMessage for tile ${message.tileId}")
+            return
+        }
+            networkService.receiveTurnMessage(message, sender)
+          }
+
     private fun disconnectAndError(reason: Any) {
         networkService.disconnect()
         error(reason)

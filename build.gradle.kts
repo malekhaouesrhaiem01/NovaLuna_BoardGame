@@ -50,6 +50,12 @@ dependencies {
     implementation(group = "tools.aqua", name = "bgw-net-common", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-client", version = bgwVersion)
     implementation(group = "edu.udo.cs.sopra", name = "ntf", version = "1.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    implementation("tools.aqua:bgw-net-client:0.10")
+
+
+
 
 }
 

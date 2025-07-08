@@ -15,15 +15,6 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 
-/**
- *  The ResultMenu Scene in NovaLuna.
- *
- *  Implements [Refreshable] to react to service layer updates.
- *
- *  @constructor Creates a new ResultMenu Scene with the specified rootService.
- *
- *  @param rootService The [RootService] that manages the game state.
- */
 class ResultMenuScene (private val rootService: RootService) : MenuScene(1920, 1080), Refreshable {
 
     /**
