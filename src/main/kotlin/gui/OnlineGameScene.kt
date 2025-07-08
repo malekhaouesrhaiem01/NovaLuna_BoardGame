@@ -20,7 +20,23 @@ import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
 import java.util.*
-
+/**
+ *  The Online GameScene for an online Game in NovaLuna.
+ *
+ *  Implements [Refreshable] to react to service layer updates.
+ *
+ *  @constructor Creates a new online GameScene with the specified rootService.
+ *
+ *  @param rootService The [RootService] that manages the game state.
+ *  @property tileCoordinates A List of Tile Coordinates
+ *  @property tokenCoordinates A List of Token Coordinates
+ *  @property tokensOnTheMoonWheel A List to display the tokens on the MoonWheel
+ *  @property tilesOnTheMoonWheel A List to store the Tiles on the MoonWheel
+ *  @property chosenTile The Tile chosen by the Player
+ *  @property playerComponents A List to Display the different Players tiles
+ *  @property isAlreadyPlayed Boolean to determine if a Player has Played a Tile
+ *
+ */
 class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920, 1080), Refreshable {
 
     val tileCoordinates: MutableList<Pair<Int, Int>> = mutableListOf()

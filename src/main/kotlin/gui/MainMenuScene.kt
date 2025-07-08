@@ -9,9 +9,7 @@ import tools.aqua.bgw.util.*
 import tools.aqua.bgw.visual.*
 
 /**
- *
- * Implements [Refreshable] to react to service layer updates.
- *
+ * The MainMenuScene class for the Game NovaLuna.
  */
 class MainMenuScene : MenuScene(1920, 1080,ImageVisual("back_image.png")), Refreshable {
 
