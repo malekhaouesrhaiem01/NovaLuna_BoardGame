@@ -98,18 +98,6 @@ class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
         }
     )
 
-    private val urlInput = TextField(
-        prompt = "URL",
-        width = 400,
-        height = 90,
-        posX = 760,
-        posY = 487,
-        font = Font(48, Color.WHITE,"Space Grotesk" ),
-        visual = ColorVisual(Color(0xC1780C)).apply {
-            style.borderRadius = BorderRadius(15)
-        }
-    )
-
     val easyButton = Button(
         text = "easy",
         width = 180,
@@ -231,7 +219,7 @@ class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
 
         addComponents(contentPane)
         contentPane.addAll( backToken, nextButton, sessionInput,
-            playerInput, urlInput, easyButton, hardButton,
+            playerInput, easyButton, hardButton,
             labelNovaLuna, backButton, errorLabel)
     }
 

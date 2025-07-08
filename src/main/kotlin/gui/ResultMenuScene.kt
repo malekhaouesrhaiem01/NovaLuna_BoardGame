@@ -1,19 +1,13 @@
 package gui
 
 import entity.Player
-import service.Refreshable
-import service.RootService
+import service.*
 import tools.aqua.bgw.components.layoutviews.Pane
-import tools.aqua.bgw.components.uicomponents.Button
-import tools.aqua.bgw.components.uicomponents.Label
-import tools.aqua.bgw.components.uicomponents.UIComponent
-import tools.aqua.bgw.core.Alignment
-import tools.aqua.bgw.core.Color
-import tools.aqua.bgw.core.MenuScene
+import tools.aqua.bgw.components.uicomponents.*
+import tools.aqua.bgw.core.*
 import tools.aqua.bgw.style.BorderRadius
 import tools.aqua.bgw.util.Font
-import tools.aqua.bgw.visual.ColorVisual
-import tools.aqua.bgw.visual.ImageVisual
+import tools.aqua.bgw.visual.*
 /**
  *  The ResultMenu Scene in NovaLuna.
  *
@@ -97,7 +91,8 @@ class ResultMenuScene (private val rootService: RootService) : MenuScene(1920, 1
 
     init{
         addComponents(contentPane)
-        contentPane.addAll( winnerLabel, *scoreLabels.toTypedArray(), newGameButton, exitButton)
+        contentPane.addAll( winnerLabel, newGameButton, exitButton)
+        scoreLabels.forEach { contentPane.add(it) }
     }
 
     /**

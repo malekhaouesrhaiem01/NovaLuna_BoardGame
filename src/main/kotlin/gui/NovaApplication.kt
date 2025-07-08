@@ -17,7 +17,6 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
     private lateinit var joinGameSceneOne: JoinGameSceneOne
     private lateinit var joinGameSceneTwo: JoinGameSceneTwo
     lateinit var hostGameSceneOne: HostGameSceneOne
-    private lateinit var hostGameSceneTwo: HostGameSceneTwo
     private val resultMenuScene: ResultMenuScene
 
     private var gameScene = GameScene(rootService)

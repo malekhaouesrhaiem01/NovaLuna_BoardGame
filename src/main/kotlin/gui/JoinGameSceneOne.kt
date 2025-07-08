@@ -91,18 +91,6 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
     )
     val playerName = playerInput.text
 
-    private val urlInput = TextField(
-        prompt = "URL",
-        width = 400,
-        height = 90,
-        posX = 760,
-        posY = 487,
-        font = Font(48, Color.WHITE,"Space Grotesk" ),
-        visual = ColorVisual(Color(0xC1780C)).apply {
-            style.borderRadius = BorderRadius(15)
-        }
-    )
-
     val easyButton = Button(
         text = "easy",
         width = 180,
@@ -203,10 +191,6 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
                 showError("Please enter a session ID!")
                 return@onMouseClicked
             }
-            if (urlInput.text.isEmpty()) {
-                showError("Please enter a URL!")
-                return@onMouseClicked
-            }
 
             rootService.networkService.myPlayerType = when (whichPlayer) {
                 1    -> PlayerType.EASYBOT
@@ -229,7 +213,7 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
 
         addComponents(contentPane)
         contentPane.addAll(backToken, backButton, joinButton,
-            sessionInput, playerInput, urlInput, easyButton,
+            sessionInput, playerInput, easyButton,
             hardButton, labelNovaLuna, errorLabel)
     }
 

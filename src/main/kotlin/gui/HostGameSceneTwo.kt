@@ -39,15 +39,7 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
     private var currentColorPickerIndex = -1
 
 
-    override fun refreshAfterPlayerJoined() {
-        // always rebuild the list of player rows
-        // and do it on the BGW-UI thread
 
-
-            buildPlayerUIs()
-
-
-    }
     private val contentPane = Pane<UIComponent>(
         width = 1920,
         height = 1080,
@@ -428,7 +420,17 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
         selectColorPane.isVisible = false
     }
 
-    override fun refreshConnectionState(state: ConnectionState) {
+    /**
+     * Refreshes the scene after a player has joined.
+     * This method is called by the [RootService] to update the player list.
+     */
+    override fun refreshAfterPlayerJoined() {
+        // always rebuild the list of player rows
+        // and do it on the BGW-UI thread
+
+
+        buildPlayerUIs()
 
     }
+    //override fun refreshConnectionState(state: ConnectionState) {}
 }
