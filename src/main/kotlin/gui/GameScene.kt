@@ -370,7 +370,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         clearPlayersDisplay()
     }
 
-    fun clearPlayersDisplay(){
+    private fun clearPlayersDisplay(){
         for(player in playerComponents){
             contentPane.remove(player)
         }
@@ -378,7 +378,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         playerComponents.clear()
     }
 
-    fun clearMoonWheel(){
+    private fun clearMoonWheel(){
 
         for (tile in tilesOnTheMoonWheel){
             contentPane.remove(tile.label)
@@ -388,7 +388,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    fun fullMoonWheel(game: NovaLunaGame){
+    private fun fullMoonWheel(game: NovaLunaGame){
 
         val tiles = game.tileTrack
 
@@ -440,7 +440,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         contentPane.add(meeple)
     }
 
-    fun getColor(tileColor : TileColour): Color{
+    private fun getColor(tileColor : TileColour): Color{
         val color = when(tileColor){
             TileColour.RED -> {
                 Color.RED
@@ -458,7 +458,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         return color
     }
 
-    fun getPlayerColor(playerColor : PlayerColour): Color{
+    private fun getPlayerColor(playerColor : PlayerColour): Color{
         val color = when(playerColor){
             PlayerColour.WHITE -> {
                 Color.WHITE
@@ -477,7 +477,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     }
 
 
-    fun createTile(tile: Tile): Pane<ComponentView>{
+    private fun createTile(tile: Tile): Pane<ComponentView>{
         val color = getColor(tile.tileColour)
 
         val tileGridPane = GridPane<ComponentView>(
@@ -524,7 +524,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         return tilePane
     }
 
-    fun createTask(task : Map<TileColour, Int>): Pane<ComponentView>{
+    private fun createTask(task : Map<TileColour, Int>): Pane<ComponentView>{
 
         val mainPane =  Pane<ComponentView>(
             width = 50, //61.5,
@@ -567,7 +567,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    fun setTile(tileLabel: ComponentView, idx: Int ){
+    private fun setTile(tileLabel: ComponentView, idx: Int ){
         if (chosenTile != null){
             if (chosenTile!!.first == tileLabel){
                 chosenTile = null
@@ -585,7 +585,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         }
     }
 
-    fun updateDrawStack(game: NovaLunaGame){
+    private fun updateDrawStack(game: NovaLunaGame){
         // clear the grid
         for(row in 0 until gridPaneStack.rows){
             for(column in 0 until gridPaneStack.columns){
@@ -604,7 +604,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         }
     }
 
-    fun addCurrentPlayer(game: NovaLunaGame){
+    private fun addCurrentPlayer(game: NovaLunaGame){
 
         val player = game.players[game.activePlayer]
 
@@ -629,7 +629,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         contentPane.add(activePlayer)
     }
 
-    fun showActivePlayerHand(player: Player){
+    private fun showActivePlayerHand(player: Player){
 
         playersHand.clear()
 
@@ -664,7 +664,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    fun showPlayerHand(player: Player){
+    private fun showPlayerHand(player: Player){
 
         playersHand.clear()
 
@@ -700,7 +700,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    fun showWithoutPossiblePositions(player: Player){
+    private fun showWithoutPossiblePositions(player: Player){
 
         val minX = player.tiles.minOfOrNull { it?.position!!.xCoord.toInt() } ?: 0
         val maxX = player.tiles.maxOfOrNull { it?.position!!.xCoord.toInt() } ?: 0
@@ -739,7 +739,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    fun showWithPossiblePositions(player: Player){
+    private fun showWithPossiblePositions(player: Player){
 
         val validPositions = rootService.gameService.getPossiblePosition()
 
@@ -783,7 +783,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    fun placePossiblePositions(grid: GridPane<ComponentView>, positions: List<Coordinate>, offsetX: Int, offsetY: Int){
+    private fun placePossiblePositions(grid: GridPane<ComponentView>, positions: List<Coordinate>, offsetX: Int, offsetY: Int){
 
         for ( coord in positions){
 
@@ -811,7 +811,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         }
     }
 
-    fun placeTiles(grid: GridPane<ComponentView>, player: Player, offsetX: Int, offsetY: Int){
+    private fun placeTiles(grid: GridPane<ComponentView>, player: Player, offsetX: Int, offsetY: Int){
 
         for (tile in player.tiles){
 
@@ -846,7 +846,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         }
     }
 
-    fun addPlayers(game: NovaLunaGame){
+    private fun addPlayers(game: NovaLunaGame){
 
 
         val grid = GridPane<ComponentView>(
@@ -885,7 +885,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    fun setCoordinatesForTheMoonWheel(){
+    private fun setCoordinatesForTheMoonWheel(){
         // 1510, 110
         tileCoordinates.add(Pair(910, 25))
         tileCoordinates.add(Pair(1095, 80))
@@ -901,7 +901,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         tileCoordinates.add(Pair(695, 80))
     }
 
-    fun setTokenCoordinatesForTheMoonWheel(){
+    private fun setTokenCoordinatesForTheMoonWheel(){
 
         tokenCoordinates.add(937 to 233)
         tokenCoordinates.add(995 to 242)
@@ -933,7 +933,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     }
 
 
-    fun checkIfHuman(game: NovaLunaGame) {
+    private fun checkIfHuman(game: NovaLunaGame) {
         val isHuman = game.players[game.activePlayer].playerType == PlayerType.HUMAN
         undoButton.isVisible = isHuman
         redoButton.isVisible = isHuman
@@ -942,7 +942,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         ifHuman = isHuman
     }
 
-    fun hideDrawStack(){
+    private fun hideDrawStack(){
         overlayPaneDrawStack.isVisible = false
     }
 
