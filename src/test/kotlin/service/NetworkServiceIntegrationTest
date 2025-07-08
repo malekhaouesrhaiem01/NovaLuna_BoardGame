@@ -12,16 +12,19 @@ import org.junit.jupiter.api.fail
 import tools.aqua.bgw.net.common.notification.PlayerJoinedNotification
 import tools.aqua.bgw.util.Coordinate
 
+/**
+ * Class to Test the NetworkService
+ */
 class NovaLunaNetworkServiceTest {
 
     private lateinit var hostRoot: RootService
     private lateinit var guestRoots: List<RootService>
 
-    companion object {
-        private const val SECRET    = "neumond25"
-        private val HOST_NAME = "Host" + System.currentTimeMillis()
-    }
 
+
+    /**
+     * Initializes predefined settings before each test.
+     */
     @BeforeEach
     fun setup() {
         hostRoot   = RootService()
@@ -189,6 +192,9 @@ class NovaLunaNetworkServiceTest {
         serviceWait(guest3Svc, ConnectionState.WAITING_FOR_OPPONENT)
     }
 
+    /**
+     * Test for TwoPlayerHostJoinAndInit function
+     */
     @Test
     fun testTwoPlayerHostJoinAndInit() {
         val hostSvc  = hostRoot.networkService
@@ -234,6 +240,9 @@ class NovaLunaNetworkServiceTest {
         assertEquals(hostNames, guestNames)
     }
 
+    /**
+     * Test for TurnMessageFlow function
+     */
     @Test
     fun testTurnMessageFlow() {
         // Set up a two-player game
@@ -276,6 +285,9 @@ class NovaLunaNetworkServiceTest {
         serviceWait(hostSvc, ConnectionState.PLAYING_MY_TURN)
     }
 
+    /**
+     * Test for DisconnectAndCleanup function
+     */
     @Test
     fun testDisconnectAndCleanup() {
         // Establish connection first
@@ -291,6 +303,9 @@ class NovaLunaNetworkServiceTest {
         assertNull(hostRoot.networkService.currentSessionID)
     }
 
+    /**
+     * Test for ThreePlayerGameflow function
+     */
     @Test
     fun testThreePlayerGameFlow() {
         val hostSvc = hostRoot.networkService
@@ -351,6 +366,9 @@ class NovaLunaNetworkServiceTest {
 
     }
 
+    /**
+     * Test for RefillAndManualEndTurn function
+     */
     @Test
     fun testRefillAndManualEndTurn() {
         // Setup 3-player game
@@ -411,8 +429,11 @@ class NovaLunaNetworkServiceTest {
         assertEquals(hostTiles, guest2Tiles, "All players should see same tile count")
     }
 
-
-
-
-
+    /**
+     *  Variable Initialization
+     */
+    companion object {
+        private const val SECRET    = "neumond25"
+        private val HOST_NAME = "Host" + System.currentTimeMillis()
+    }
 }
