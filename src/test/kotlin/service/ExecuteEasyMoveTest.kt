@@ -12,10 +12,6 @@ import java.util.concurrent.TimeUnit
  */
 class ExecuteEasyMoveTest {
     private lateinit var rootService: RootService
-    @BeforeTest
-    fun setUpGame() {
-        rootService = RootService()
-    }
     private val tileList: MutableList<Tile?> = mutableListOf()
     private val tileColourList: List<Pair<Map<TileColour, Int>, Boolean>> = listOf(Pair(
         mapOf(TileColour.RED to 3, TileColour.BLUE to 2), false))
@@ -41,7 +37,13 @@ class ExecuteEasyMoveTest {
     )
     private val tile = Tile(1, 2, TileColour.BLUE, tileColourList, null, 1)
     private val move = Move(tile, pos)
-
+    /**
+     * Initializes predefined settings before each test.
+     */
+    @BeforeTest
+    fun setUpGame() {
+        rootService = RootService()
+    }
     /**
      * test for correct function of wait time and bot plays a move
      */

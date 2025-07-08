@@ -9,10 +9,7 @@ import kotlin.test.*
  */
 class SelectBestChildTest {
     private lateinit var rootService: RootService
-    @BeforeTest
-    fun setUpGame() {
-        rootService = RootService()
-    }
+
 
     private val tileList:MutableList<Tile?> = mutableListOf()
     private val tileColourList: List<Pair<Map<TileColour, Int>, Boolean>> = listOf(Pair(
@@ -31,7 +28,13 @@ class SelectBestChildTest {
     private val tile = Tile(1, 2, TileColour.BLUE, tileColourList, null,
         1)
     private val move= Move(tile, pos)
-
+    /**
+     * Initializes predefined settings before each test.
+     */
+    @BeforeTest
+    fun setUpGame() {
+        rootService = RootService()
+    }
     /**
      * test for selecting correct child
      */

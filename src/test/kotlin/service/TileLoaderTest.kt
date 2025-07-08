@@ -5,7 +5,9 @@ import kotlin.test.assertTrue
 
 /** Test class to test loading of the Tiles from a csv-data */
 class TileLoaderTest {
-
+    /**
+     * Tests if Tiles load correctly
+     */
     @Test
     fun testIfTilesLoad(){
 

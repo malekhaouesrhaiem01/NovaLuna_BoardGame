@@ -16,7 +16,9 @@ import kotlin.test.assertEquals
  * Test class for the NetworkService Class
  */
 class NetworkServiceTest {
-
+    /**
+     * Tests for the HostGame function
+     */
     @Test
     fun testHostGame() {
         val rootService = RootService()
@@ -34,6 +36,9 @@ class NetworkServiceTest {
 
     }
 
+    /**
+     * Test for the JoinGame function
+     */
     @Test
     fun testJoinGame() {
         val rootService = RootService()
@@ -50,6 +55,9 @@ class NetworkServiceTest {
         assertEquals(ConnectionState.WAITING_FOR_JOIN_CONFIRMATION, networkService.connectionState)
     }
 
+    /**
+     * Test for the StartNewHostedGame function
+     */
     @Test
     fun testStartNewHostedGame() {
         val rootService = RootService()
@@ -114,6 +122,9 @@ class NetworkServiceTest {
         networkService.startNewHostedGame(players2, isFirstGame = false, randomOrder = true)
     }
 
+    /**
+     * Test for the StartNewJoinGame function
+     */
     @Test
     fun testStartNewJoinedGame(){
         val rootService = RootService()
@@ -153,6 +164,9 @@ class NetworkServiceTest {
         networkService.startNewJoinedGame(message2)
     }
 
+    /**
+     * Tests for the ReceiveTurnMessage function
+     */
     @Test
     fun testReceiveTurnMessage(){
         val rootService = RootService()

@@ -28,7 +28,9 @@ class NovaLunaNetworkClientTest {
 
     private lateinit var networkService: NetworkService
     private lateinit var client: NovaLunaNetworkClient
-
+    /**
+     * Initializes predefined settings before each test.
+     */
     @BeforeEach
     fun setup() {
         networkService = mockk(relaxed = true)

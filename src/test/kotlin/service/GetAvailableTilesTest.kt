@@ -91,7 +91,8 @@ class GetAvailableTilesTest
 
         for(i in 1 until game.tileTrack.size)
         {
-            if(i != 5 && i != 7 && i != 6 && i != 9) game.tileTrack[i] = null
+            val bool = i != 5 && i != 7 && i != 6 && i != 9
+            if(bool) game.tileTrack[i] = null
         }
 
         val expected = listOf(9,5,6)
