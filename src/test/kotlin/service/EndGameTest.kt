@@ -3,7 +3,9 @@ package service
 import entity.Player
 import entity.PlayerColour
 import entity.PlayerType
+import org.jetbrains.annotations.Nullable
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertNull
 /**
  * Test class for verifying the behavior of the game end logic within [GameService].
@@ -23,7 +25,7 @@ class EndGameTest {
     @Test
     fun testEndGame(){
         val rootService = RootService()
-        assertNull(rootService.gameService.checkEndGame())
+        assertThrows<IllegalStateException> {  (rootService.gameService.checkEndGame()) }
 
         val players = listOf(
             Player(
