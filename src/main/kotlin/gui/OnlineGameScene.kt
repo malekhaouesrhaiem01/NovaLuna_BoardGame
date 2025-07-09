@@ -381,11 +381,12 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         val ifHuman = player.playerType == PlayerType.HUMAN
 
         val validPositions = rootService.gameService.getPossiblePosition()
+        val allCoords = player.tiles.filterNotNull().map { it.position!!} + validPositions
 
-        val minX = validPositions.minOfOrNull { it.xCoord.toInt() } ?: 0
-        val maxX = validPositions.maxOfOrNull { it.xCoord.toInt() } ?: 0
-        val minY = validPositions.minOfOrNull { it.yCoord.toInt() } ?: 0
-        val maxY = validPositions.maxOfOrNull { it.yCoord.toInt() } ?: 0
+        val minX = allCoords.minOf { it.xCoord.toInt() }
+        val maxX = allCoords.maxOf { it.xCoord.toInt() }
+        val minY = allCoords.minOf { it.yCoord.toInt() }
+        val maxY = allCoords.maxOf { it.yCoord.toInt() }
 
         val column = maxX - minX + 1
         val row = maxY - minY + 1

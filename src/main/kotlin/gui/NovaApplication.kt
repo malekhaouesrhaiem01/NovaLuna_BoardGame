@@ -104,12 +104,12 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
             joinGameSceneOne,
             joinGameSceneTwo,
             resultMenuScene,
-            gameScene,
-            //onlineGameScene
+            //gameScene,
+            onlineGameScene
         )
 
-        //this.showGameScene(onlineGameScene)
-        this.showGameScene(gameScene)
+        this.showGameScene(onlineGameScene)
+        //this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene)
 
     }
