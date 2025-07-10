@@ -9,7 +9,7 @@ import edu.udo.cs.sopra.ntf.messages.TurnMessage
 import entity.Player
 import entity.PlayerColour
 import entity.PlayerType
-import tools.aqua.bgw.util.Coordinate
+import entity.SerializableCoordinate
 import service.TileLoader
 
 /**
@@ -394,7 +394,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         rootService.playerActionService.playTile(
             tileTrackIndex = tileIndex,
-            position = Coordinate(message.x.toDouble(), message.y.toDouble())
+            position = SerializableCoordinate(message.x.toDouble(), message.y.toDouble())
         )
 
 

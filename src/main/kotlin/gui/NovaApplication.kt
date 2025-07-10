@@ -27,6 +27,8 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
 
         mainMenuScene = MainMenuScene().apply {
             offlineButton.onMouseClicked = {
+                // Reset the offline menu state when navigating to it
+                offlineMenuScene.resetMenuState()
                 showMenuScene(offlineMenuScene)
             }
             joinButton.onMouseClicked = {
@@ -34,6 +36,16 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
             }
             hostButton.onMouseClicked = {
                 showMenuScene(hostGameSceneOne)
+            }
+            loadButton.onMouseClicked = {
+                try {
+                    rootService.playerActionService.load()
+                    // If loading is successful, show the game scene
+                    this@NovaApplication.showGameScene(gameScene)
+                } catch (e: Exception) {
+                    // If loading fails, we could show an error - for now just print to console
+                    println("Failed to load game: ${e.message}")
+                }
             }
         }
         offlineMenuScene = OfflineMenuScene(rootService).apply {

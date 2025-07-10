@@ -6,6 +6,7 @@ import org.gradle.kotlin.dsl.application
 
 plugins {
     kotlin("jvm") version "1.9.25"
+    kotlin("plugin.serialization") version "2.2.0"
     application
     id("edu.udo.cs.sopra") version "1.0.2"
 }
@@ -52,6 +53,7 @@ dependencies {
     implementation(group = "edu.udo.cs.sopra", name = "ntf", version = "1.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     implementation("tools.aqua:bgw-net-client:0.10")
 
 

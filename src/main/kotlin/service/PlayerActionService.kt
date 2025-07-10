@@ -1,6 +1,11 @@
 package service
 import entity.Move
-import tools.aqua.bgw.util.Coordinate
+import entity.NovaLunaGame
+import entity.SerializableCoordinate
+import entity.toBGWCoordinate
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.File
 
 /**
  * Service layer class that provides the logic for the possible actions a Player in
@@ -9,6 +14,31 @@ import tools.aqua.bgw.util.Coordinate
  * @param rootService The [RootService] instance to access the other service methods and entity layer
  */
 open class PlayerActionService(private val rootService: RootService) : AbstractRefreshingService() {
+
+    private val undoStack = mutableListOf<String>()
+    private val redoStack = mutableListOf<String>()
+
+    /**
+     * Saves the initial game state to allow undoing back to the start of the game.
+     * This should be called once when a new game begins.
+     */
+    fun saveInitialGameState() {
+        val game = checkNotNull(rootService.currentGame)
+        val gameState = Json.encodeToString(game)
+        undoStack.clear() // Clear any previous undo history
+        redoStack.clear() // Clear any previous redo history
+        undoStack.add(gameState)
+    }
+
+    /**
+     * Resets all game state including undo/redo history.
+     * Should be called when starting a completely new game to ensure clean state.
+     */
+    fun resetGameState() {
+        undoStack.clear()
+        redoStack.clear()
+        println("DEBUG: Game state reset - cleared undo/redo history")
+    }
 
     /**
      * Allows the current player to select a tile from the Moon Wheel at the specified index
@@ -23,9 +53,13 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws IllegalStateException If no game is active or it's not the current player's turn.
      * @throws IllegalArgumentException If the selected tile is invalid or cannot be placed at the given position.
      */
-    fun playTile(tileTrackIndex: Int, position: Coordinate) {
+    fun playTile(tileTrackIndex: Int, position: SerializableCoordinate) {
         val game = checkNotNull(rootService.currentGame)
-        game.previousState = game.clone()
+        val gameState = Json.encodeToString(game)
+        undoStack.add(gameState)
+        redoStack.clear()
+        println("DEBUG: PlayTile called. Added state to undo stack. Stack size: ${undoStack.size}")
+
         // Get the selected tile from the tile track
         val selectedTile = game.tileTrack[tileTrackIndex]
         checkNotNull(selectedTile)
@@ -37,6 +71,9 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         game.players[game.activePlayer].tiles.add(selectedTile)
         // add the coordinates where the tile is placed to the tile
         selectedTile.position = position
+        
+        // Mark that the current player has played this turn
+        game.hasPlayedThisTurn = true
 
         // update position on the moon wheel of the token
         // and the position of the meeple on the tile track
@@ -54,8 +91,8 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
 
             rootService.networkService.sendTurnMessage(
                 tileId = tileId,
-                x = position.xCoord.toInt(),
-                y = position.yCoord.toInt(),
+                x = position.x.toInt(),
+                y = position.y.toInt(),
                 refillTrack = game.refilledThisTurn
             )
             println("    Network message sent")
@@ -87,7 +124,6 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      */
     open fun playTile(move: Move) {
         val game = checkNotNull(rootService.currentGame)
-        game.previousState = game.clone()
         // get the index of the selected tile in the [Move] object
         val tileIndex = game.tileTrack.indexOf(move.tile)
         // calls the main playTile function to play the selected move from the bot
@@ -117,12 +153,28 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws NoSuchElementException If there's no undo state to go back to.
      */
     fun undo() {
-        val game = checkNotNull(rootService.currentGame)
-        val prev = game.previousState
-        if(prev != null) {
-            prev.nextState = game
-            rootService.currentGame = prev
+        println("DEBUG: Undo called. Stack size: ${undoStack.size}")
+        if (undoStack.isNotEmpty()) {
+            val game = checkNotNull(rootService.currentGame)
+            val currentGameState = Json.encodeToString(game)
+            redoStack.add(currentGameState)
+            println("DEBUG: Added current state to redo stack. Redo stack size: ${redoStack.size}")
+
+            val lastGameState = undoStack.removeAt(undoStack.lastIndex)
+            println("DEBUG: Removed state from undo stack. New undo stack size: ${undoStack.size}")
+            rootService.currentGame = Json.decodeFromString<NovaLunaGame>(lastGameState)
+            
+            // Restore the turn state without auto-triggering bots yet
+            rootService.gameService.restoreTurnStateWithoutBot()
+            
+            // Refresh the UI to reflect the restored state
             onAllRefreshables { refreshAfterUndo() }
+            onAllRefreshables { refreshAfterStartTurn() }
+            
+            // Now trigger bot if needed, after UI is refreshed
+            triggerBotAfterRestore()
+        } else {
+            println("DEBUG: Undo stack is empty, cannot undo")
         }
     }
 
@@ -149,11 +201,23 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws NoSuchElementException If there’s nothing to redo.
      */
     fun redo() {
-        val game = checkNotNull(rootService.currentGame)
-        val next = game.nextState
-        if(next != null) {
-            rootService.currentGame = next
+        if (redoStack.isNotEmpty()) {
+            val game = checkNotNull(rootService.currentGame)
+            val currentGameState = Json.encodeToString(game)
+            undoStack.add(currentGameState)
+
+            val nextGameState = redoStack.removeAt(redoStack.lastIndex)
+            rootService.currentGame = Json.decodeFromString<NovaLunaGame>(nextGameState)
+            
+            // Restore the turn state without auto-triggering bots yet
+            rootService.gameService.restoreTurnStateWithoutBot()
+            
+            // Refresh the UI to reflect the restored state
             onAllRefreshables { refreshAfterRedo() }
+            onAllRefreshables { refreshAfterStartTurn() }
+            
+            // Now trigger bot if needed, after UI is refreshed
+            triggerBotAfterRestore()
         }
     }
 
@@ -177,7 +241,17 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws IOException If saving fails (example: due to file access issues).
      */
     fun save() {
-        //Method implementation
+        val game = checkNotNull(rootService.currentGame)
+        
+        // Create a save data structure that includes game state and undo/redo history
+        val saveData = mapOf(
+            "gameState" to Json.encodeToString(game),
+            "undoStack" to Json.encodeToString(undoStack),
+            "redoStack" to Json.encodeToString(redoStack)
+        )
+        
+        val saveJson = Json.encodeToString(saveData)
+        File("novaluna.sav").writeText(saveJson)
     }
 
     /**
@@ -200,7 +274,45 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws IOException If something goes wrong while loading.
      */
     fun load() {
-        //Method implementation
+        val file = File("novaluna.sav")
+        if (file.exists()) {
+            val saveContent = file.readText()
+            
+            try {
+                // Try to load new format (with undo/redo history)
+                val saveData = Json.decodeFromString<Map<String, String>>(saveContent)
+                
+                // Restore game state
+                rootService.currentGame = Json.decodeFromString<NovaLunaGame>(saveData["gameState"]!!)
+                
+                // Restore undo/redo history
+                undoStack.clear()
+                redoStack.clear()
+                undoStack.addAll(Json.decodeFromString<List<String>>(saveData["undoStack"]!!))
+                redoStack.addAll(Json.decodeFromString<List<String>>(saveData["redoStack"]!!))
+                
+                println("DEBUG: Loaded game with undo history. Undo stack size: ${undoStack.size}, Redo stack size: ${redoStack.size}")
+                
+            } catch (e: Exception) {
+                // Fallback to old format (just game state) for backward compatibility
+                println("DEBUG: Loading old format save file")
+                rootService.currentGame = Json.decodeFromString<NovaLunaGame>(saveContent)
+                
+                // For old format, clear stacks - no history available
+                undoStack.clear()
+                redoStack.clear()
+            }
+            
+            // Restore the turn state without auto-triggering bots yet
+            rootService.gameService.restoreTurnStateWithoutBot()
+            
+            // Refresh the UI to reflect the loaded state
+            onAllRefreshables { refreshAfterStartGame() }
+            onAllRefreshables { refreshAfterStartTurn() }
+            
+            // Now trigger bot if needed, after UI is refreshed
+            triggerBotAfterRestore()
+        }
     }
 
 
@@ -224,6 +336,11 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
     fun refillWheel(){
         val game = rootService.currentGame
         checkNotNull(game)
+
+        // Save state before refilling for undo functionality
+        val gameState = Json.encodeToString(game)
+        undoStack.add(gameState)
+        redoStack.clear()
 
         println("     REFILL: Starting refill")
         println("   - Active player: ${game.activePlayer} (${game.players[game.activePlayer].playerName})")
@@ -254,5 +371,22 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         println("   - refilledThisTurn flag: ${game.refilledThisTurn}")
 
         onAllRefreshables { refreshAfterRefill() }
+    }
+
+    /**
+     * Triggers a bot move if the current player is a bot and no move has been made this turn.
+     * This is called after undo/redo operations to ensure the bot acts after the UI is fully refreshed.
+     */
+    private fun triggerBotAfterRestore() {
+        val game = rootService.currentGame ?: return
+        val player = game.players[game.activePlayer]
+        
+        if (!game.hasPlayedThisTurn) { // Only trigger if no move has been made this turn
+            if (player.playerType == entity.PlayerType.EASYBOT) {
+                rootService.easyBotService.executeEasyMove()
+            } else if (player.playerType == entity.PlayerType.HARDBOT) {
+                rootService.hardBotService.executeHardBotMove()
+            }
+        }
     }
 }

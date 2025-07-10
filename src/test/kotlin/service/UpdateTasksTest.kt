@@ -1,9 +1,6 @@
 package service
 
-import entity.Player
-import entity.PlayerColour
-import entity.PlayerType
-import tools.aqua.bgw.util.Coordinate
+import entity.*
 import kotlin.test.*
 /**
  * Test class for the `updateTasks()` method in [GameService].
@@ -50,16 +47,16 @@ class UpdateTasksTest {
         rootService.currentGame?.players?.first()?.tiles?.addAll(tiles.take(10))
 
         val cords = listOf(
-            Coordinate( 1, 0),
-            Coordinate(0, 1),
-            Coordinate(0, 0),
-            Coordinate(0,- 1),
-            Coordinate( -1, 0),
-            Coordinate(-1, 1),
-            Coordinate(1, 1),
-            Coordinate(1,- 1),
-            Coordinate(-1, -1),
-            Coordinate(2,0),
+            SerializableCoordinate( 1.0, 0.0),
+            SerializableCoordinate(0.0, 1.0),
+            SerializableCoordinate(0.0, 0.0),
+            SerializableCoordinate(0.0,- 1.0),
+            SerializableCoordinate( -1.0, 0.0),
+            SerializableCoordinate(-1.0, 1.0),
+            SerializableCoordinate(1.0, 1.0),
+            SerializableCoordinate(1.0,- 1.0),
+            SerializableCoordinate(-1.0, -1.0),
+            SerializableCoordinate(2.0,0.0),
         )
 
         for(i in 0 ..  currentPlayerHand.size - 1){

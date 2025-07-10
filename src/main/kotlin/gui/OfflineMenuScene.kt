@@ -850,6 +850,57 @@ class OfflineMenuScene (private val rootService: RootService) :
             }
         }
 
+    }
 
+    /**
+     * Resets the offline menu scene to its initial state.
+     * Clears all player names, resets colors, and other settings.
+     */
+    fun resetMenuState() {
+        // Reset text fields
+        firstDefaultInput.text = ""
+        secondDefaultInput.text = ""
+        
+        // Reset color availability and buttons
+        availableColors.fill(true)
+        firstColorButton.text = "NONE"
+        secondColorButton.text = "NONE"
+        
+        // Reset player types and colors for initial players
+        val visualOff = ColorVisual(Color(193, 120, 12)).apply {
+            style.borderRadius = BorderRadius(15)
+            transparency = 0.5
+        }
+        
+        // Reset first player
+        player1.whichPlayer = 0 // Human
+        player1.color = 4 // No color selected
+        player1.easyButton.visual = visualOff
+        player1.hardButton.visual = visualOff
+        
+        // Reset second player
+        player2.whichPlayer = 0 // Human
+        player2.color = 4 // No color selected
+        player2.easyButton.visual = visualOff
+        player2.hardButton.visual = visualOff
+        
+        // Reset any dynamically added players to initial state (only 2 players)
+        while (players.size > 2) {
+            val removedPlayer = players.removeAt(players.lastIndex)
+            // Remove the UI components from the scene
+            contentPane.remove(removedPlayer.orderToken)
+            contentPane.remove(removedPlayer.defaultInput)
+            contentPane.remove(removedPlayer.colorButton)
+            contentPane.remove(removedPlayer.easyButton)
+            contentPane.remove(removedPlayer.hardButton)
+            removedPlayer.removeButton?.let { contentPane.remove(it) }
+        }
+        
+        // Reset other settings
+        ifRandom = false
+        actualSpeed = 3
+        ifFirstGame = false
+        
+        println("DEBUG: OfflineMenuScene state reset - players: ${players.size}, colors available: $availableColors")
     }
 }

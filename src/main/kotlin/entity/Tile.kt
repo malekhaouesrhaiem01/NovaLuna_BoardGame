@@ -1,6 +1,6 @@
 package entity
 
-import tools.aqua.bgw.util.Coordinate
+import kotlinx.serialization.Serializable
 
 /**
  * Represents a tile in the game Nova Luna.
@@ -13,11 +13,12 @@ import tools.aqua.bgw.util.Coordinate
  * @property position Coordinates of the tile on a players grid.
  * @property moonTrackPosition the position of the Tile on the MoonTrack
  */
+@Serializable
 data class Tile(val id : Int,
                 val time: Int,
                 val tileColour: TileColour,
                 var tasks: List<Pair<Map<TileColour, Int>, Boolean>>,
-                var position: Coordinate? = null,
+                var position: SerializableCoordinate? = null,
                 var moonTrackPosition: Int?
 )
 

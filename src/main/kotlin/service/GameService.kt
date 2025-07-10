@@ -1,11 +1,6 @@
 package service
 
-import entity.NovaLunaGame
-import entity.Player
-import entity.Move
-import entity.Tile
-import entity.TileColour
-import tools.aqua.bgw.util.Coordinate
+import entity.*
 
 /**
  * Service layer class that provides the logic for actions not
@@ -68,6 +63,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         rootService.currentGame = game
 
+        // Save the initial game state for undo functionality
+        rootService.playerActionService.saveInitialGameState()
+
         onAllRefreshables { refreshAfterStartGame()}
         startTurn()
     }
@@ -128,6 +126,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         )
 
         rootService.currentGame = game
+        
+        // Save the initial game state for undo functionality
+        rootService.playerActionService.saveInitialGameState()
+        
         onAllRefreshables { refreshAfterStartGame() }
     }
 
@@ -183,9 +185,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
         }
 
-
-        // Reset the refill flag for the new turn
-        //game.refilledThisTurn = false
+        // Reset the turn flags for the new turn
+        game.hasPlayedThisTurn = false
+        game.refilledThisTurn = false
 
         var checkAutoRefill = true
         for (tile in game.tileTrack){
@@ -209,6 +211,57 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
 
         onAllRefreshables { refreshAfterStartTurn() }
+    }
+
+    /**
+     * Restores the turn state after an undo/redo operation.
+     * Performs necessary checks like auto-refill but does not trigger bot moves.
+     * Also preserves the hasPlayedThisTurn flag from the restored state.
+     * 
+     * @throws IllegalStateException If no game is currently running.
+     */
+    fun restoreTurnStateWithoutBot() {
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game is currently running." }
+
+        // Don't reset hasPlayedThisTurn - preserve it from the restored state
+        // Don't reset refilledThisTurn - preserve it from the restored state
+
+        // Check if auto-refill is needed (when all tiles are null)
+        var checkAutoRefill = true
+        for (tile in game.tileTrack) {
+            if (tile != null) {
+                checkAutoRefill = false
+                break
+            }
+        }
+        if (checkAutoRefill) {
+            rootService.playerActionService.refillWheel()
+        }
+    }
+
+    /**
+     * Restores the turn state after an undo/redo operation.
+     * Performs necessary checks like auto-refill and triggers bot moves if needed.
+     * Also preserves the hasPlayedThisTurn flag from the restored state.
+     * 
+     * @throws IllegalStateException If no game is currently running.
+     */
+    fun restoreTurnState() {
+        restoreTurnStateWithoutBot()
+        
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game is currently running." }
+
+        // If it's a bot's turn after restore, trigger the bot to make its move
+        val player = game.players[game.activePlayer]
+        if (!game.hasPlayedThisTurn) { // Only trigger if no move has been made this turn
+            if (player.playerType == entity.PlayerType.EASYBOT) {
+                rootService.easyBotService.executeEasyMove()
+            } else if (player.playerType == entity.PlayerType.HARDBOT) {
+                rootService.hardBotService.executeHardBotMove()
+            }
+        }
     }
 
     private fun saveForUndoRedo(game : NovaLunaGame) {}
@@ -277,6 +330,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         // Eigentlich muss doch nur auf GUI Ebene die Anzahl der Tokens
         // der einzelnen Spieler angezeigt werden
         onAllRefreshables { refreshAfterGameEnd(winner) }
+        
+        // Reset game state and clear undo/redo history
+        rootService.playerActionService.resetGameState()
         rootService.currentGame = null
     }
 
@@ -343,7 +399,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      *
      * @sample getPossiblePosition()
      */
-    fun getPossiblePosition(): List<Coordinate>
+    fun getPossiblePosition(): List<SerializableCoordinate>
     {
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
@@ -351,7 +407,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val player = game.players[game.activePlayer]
 
         //Liste mit allen Positionen die schon belegt sind
-        val occupied = mutableListOf<Coordinate>()
+        val occupied = mutableListOf<SerializableCoordinate>()
         for (tile in player.tiles)
         {
             if(tile?.position != null)
@@ -361,19 +417,19 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
 
         //Wenn noch kein Tile gelegt wurde, also erstes Tile, dann direkt 0,0
-        if( occupied.isEmpty()) return listOf(Coordinate(0, 0))
+        if( occupied.isEmpty()) return listOf(SerializableCoordinate(0.0, 0.0))
 
         //Die Liste, welche returned wird.
-        val possible = mutableListOf<Coordinate>()
+        val possible = mutableListOf<SerializableCoordinate>()
 
         // Alle Nachbar Coordinates der bereits belegten Tiles
         for (pos in occupied)
         {
             val neighbors = listOf(
-                Coordinate(pos.xCoord + 1, pos.yCoord),
-                Coordinate(pos.xCoord - 1, pos.yCoord),
-                Coordinate(pos.xCoord, pos.yCoord + 1),
-                Coordinate(pos.xCoord, pos.yCoord - 1),
+                SerializableCoordinate(pos.x + 1, pos.y),
+                SerializableCoordinate(pos.x - 1, pos.y),
+                SerializableCoordinate(pos.x, pos.y + 1),
+                SerializableCoordinate(pos.x, pos.y - 1),
             )
 
             //Hier wird ermitteltet, welche Nachbar Positionen frei sind
@@ -512,10 +568,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             if (neighbourTile != null){
                 try {
                     when (neighbourTile.position) {
-                        Coordinate(coordinate!!.xCoord + 1, coordinate.yCoord) -> neighbors.add(neighbourTile)
-                        Coordinate(coordinate.xCoord - 1, coordinate.yCoord) -> neighbors.add(neighbourTile)
-                        Coordinate(coordinate.xCoord, coordinate.yCoord + 1) -> neighbors.add(neighbourTile)
-                        Coordinate(coordinate.xCoord, coordinate.yCoord - 1) -> neighbors.add(neighbourTile)
+                        SerializableCoordinate(coordinate!!.x + 1, coordinate.y) -> neighbors.add(neighbourTile)
+                        SerializableCoordinate(coordinate.x - 1, coordinate.y) -> neighbors.add(neighbourTile)
+                        SerializableCoordinate(coordinate.x, coordinate.y + 1) -> neighbors.add(neighbourTile)
+                        SerializableCoordinate(coordinate.x, coordinate.y - 1) -> neighbors.add(neighbourTile)
                     }
                 } catch (_ : NullPointerException){}
             }
@@ -553,10 +609,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             if (neighbourTile != null){
                 try {
                     when (neighbourTile.position) {
-                        Coordinate(coordinate!!.xCoord - 1, coordinate.yCoord) -> neighbors.add(neighbourTile)
-                        Coordinate(coordinate.xCoord + 1, coordinate.yCoord) -> neighbors.add(neighbourTile)
-                        Coordinate(coordinate.xCoord, coordinate.yCoord + 1) -> neighbors.add(neighbourTile)
-                        Coordinate(coordinate.xCoord, coordinate.yCoord - 1) -> neighbors.add(neighbourTile)
+                        SerializableCoordinate(coordinate!!.x - 1, coordinate.y) -> neighbors.add(neighbourTile)
+                        SerializableCoordinate(coordinate.x + 1, coordinate.y) -> neighbors.add(neighbourTile)
+                        SerializableCoordinate(coordinate.x, coordinate.y + 1) -> neighbors.add(neighbourTile)
+                        SerializableCoordinate(coordinate.x, coordinate.y - 1) -> neighbors.add(neighbourTile)
                     }
                 } catch (_ : NullPointerException){}
             }

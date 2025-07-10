@@ -1,7 +1,6 @@
 package service
 import entity.*
 import service.bot.MCTSNode
-import tools.aqua.bgw.util.Coordinate
 import kotlin.test.*
 
 /**
@@ -14,7 +13,7 @@ class SelectBestChildTest {
     private val tileList:MutableList<Tile?> = mutableListOf()
     private val tileColourList: List<Pair<Map<TileColour, Int>, Boolean>> = listOf(Pair(
         mapOf(TileColour.RED to 3, TileColour.BLUE to 2), false))
-    private val pos: Coordinate = Coordinate(0,0)
+    private val pos: SerializableCoordinate = SerializableCoordinate(0.0,0.0)
     private val player1 = Player("Alice", 18,0,
         false, PlayerType.HUMAN, PlayerColour.BLACK, tileList, 1)
     private val player2 = Player("Bob", 18,0,

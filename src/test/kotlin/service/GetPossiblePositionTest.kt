@@ -1,7 +1,6 @@
 package service
 
 import entity.*
-import tools.aqua.bgw.util.Coordinate
 import kotlin.test.*
 
 /**
@@ -45,7 +44,7 @@ class GetPossiblePositionTest
     @Test
     fun testReturnsZeroForFirstTile()
     {
-        val expected = listOf(Coordinate(0,0))
+        val expected = listOf(SerializableCoordinate(0.0,0.0))
         assertEquals(expected, rootService.gameService.getPossiblePosition())
     }
 
@@ -61,18 +60,18 @@ class GetPossiblePositionTest
             time = 1,
             tileColour = TileColour.RED,
             tasks = listOf(),
-            position = Coordinate(0,0),
+            position = SerializableCoordinate(0.0,0.0),
             moonTrackPosition = null
         )
         game.players[game.activePlayer].tiles.add(tile)
 
         val expected = listOf(
-            Coordinate(1,0),
-            Coordinate(-1,0),
-            Coordinate(0,1),
-            Coordinate(0,-1)
+            SerializableCoordinate(1.0,0.0),
+            SerializableCoordinate(-1.0,0.0),
+            SerializableCoordinate(0.0,1.0),
+            SerializableCoordinate(0.0,-1.0)
         )
-        assertEquals(expected, rootService.gameService.getPossiblePosition())
+        assertEquals(expected.toSet(), rootService.gameService.getPossiblePosition().toSet())
     }
 
     /**
@@ -84,20 +83,20 @@ class GetPossiblePositionTest
         val game = rootService.currentGame!!
 
         game.players[game.activePlayer].tiles.add(
-            Tile(1, 1, TileColour.RED, listOf(), Coordinate(0,0), null)
+            Tile(1, 1, TileColour.RED, listOf(), SerializableCoordinate(0.0,0.0), null)
         )
 
         game.players[game.activePlayer].tiles.add(
-            Tile(2, 1, TileColour.BLUE, listOf(), Coordinate(1,0), null)
+            Tile(2, 1, TileColour.BLUE, listOf(), SerializableCoordinate(1.0,0.0), null)
         )
 
         val expectedSet = setOf(
-            Coordinate(-1,0),
-            Coordinate(0,1),
-            Coordinate(0,-1),
-            Coordinate(2,0),
-            Coordinate(1,1),
-            Coordinate(1,-1),
+            SerializableCoordinate(-1.0,0.0),
+            SerializableCoordinate(0.0,1.0),
+            SerializableCoordinate(0.0,-1.0),
+            SerializableCoordinate(2.0,0.0),
+            SerializableCoordinate(1.0,1.0),
+            SerializableCoordinate(1.0,-1.0),
         )
 
         val actualSet = rootService.gameService.getPossiblePosition().toSet()

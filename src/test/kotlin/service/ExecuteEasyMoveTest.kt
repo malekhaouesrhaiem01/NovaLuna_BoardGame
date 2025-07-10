@@ -3,7 +3,6 @@ package service
 import entity.*
 import service.bot.EasyBotService
 import kotlin.test.*
-import tools.aqua.bgw.util.Coordinate
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -16,7 +15,7 @@ class ExecuteEasyMoveTest {
     private val tileColourList: List<Pair<Map<TileColour, Int>, Boolean>> = listOf(Pair(
         mapOf(TileColour.RED to 3, TileColour.BLUE to 2), false))
 
-    private val pos: Coordinate = Coordinate(0, 0)
+    private val pos: SerializableCoordinate = SerializableCoordinate(0.0, 0.0)
     private val easyBotPlayer = Player(
         "EasyBot",
         18, 0,

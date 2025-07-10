@@ -1,5 +1,7 @@
 package entity
 
+import kotlinx.serialization.Serializable
+
 /**
  * Represents the full game state of Nova Luna session.
  *
@@ -13,23 +15,35 @@ package entity
  * @property nextState The next game state, used for redo function.
  * @property refilledThisTurn Tracks if a refill action was performed for network messages.
  */
+@Serializable
 data class NovaLunaGame(var activePlayer: Int,
                         var meeplePosition: Int,
                         var simulationSpeed: Int,
                         val players: MutableList<Player>,
                         val drawPile: MutableList<Tile?>,
                         val tileTrack: MutableList<Tile?>,
-                        var previousState: NovaLunaGame? = null,
-                        var nextState: NovaLunaGame? = null,
                         var firstGame: Boolean,
-                        var refilledThisTurn: Boolean = false
-) : Cloneable{
-    public override fun clone(): NovaLunaGame {
-        val copiedPlayers = players.map{ it.clone() }.toMutableList()
-        val copiedDrawPile = drawPile.map { it?.copy() }.toMutableList()
-        val copiedTileTrack = tileTrack.map { it?.copy() }.toMutableList()
-
-        return NovaLunaGame(this.activePlayer, this.meeplePosition, this.simulationSpeed,
-            copiedPlayers, copiedDrawPile, copiedTileTrack, previousState, null, firstGame = this.firstGame)
+                        var refilledThisTurn: Boolean = false,
+                        var hasPlayedThisTurn: Boolean = false
+) {
+    /**
+     * Creates a deep copy of this game state for use in bot simulations.
+     * This method creates new instances of all mutable collections and their contents,
+     * ensuring that modifications to the copy don't affect the original game state.
+     *
+     * @return A deep copy of this game state without any undo/redo chain.
+     */
+    fun deepCopy(): NovaLunaGame {
+        return NovaLunaGame(
+            activePlayer = this.activePlayer,
+            meeplePosition = this.meeplePosition,
+            simulationSpeed = this.simulationSpeed,
+            players = this.players.map { it.copy() }.toMutableList(),
+            drawPile = this.drawPile.map { it?.copy() }.toMutableList(),
+            tileTrack = this.tileTrack.map { it?.copy() }.toMutableList(),
+            firstGame = this.firstGame,
+            refilledThisTurn = this.refilledThisTurn,
+            hasPlayedThisTurn = this.hasPlayedThisTurn
+        )
     }
 }

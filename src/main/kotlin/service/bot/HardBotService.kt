@@ -43,6 +43,7 @@ class HardBotService(private val rootService: RootService) {
             val bestMove = findBestMove(game, possibleMoves, System.currentTimeMillis() + 9500)
             scheduler.schedule({
                 rootService.playerActionService.playTile(bestMove)
+                // For bots, automatically end the turn after playing
                 scheduler.schedule({
                     rootService.gameService.endTurn()
                 }, 1, TimeUnit.SECONDS)
@@ -61,7 +62,7 @@ class HardBotService(private val rootService: RootService) {
      * @return The best move found by the MCTS.
      */
     private fun findBestMove(game: entity.NovaLunaGame, moves: List<Move>, endTime: Long): Move {
-        val root = MCTSNode(game.clone(), untriedMoves = moves.toMutableList())
+        val root = MCTSNode(game.deepCopy(), untriedMoves = moves.toMutableList())
 
         while (System.currentTimeMillis() < endTime) {
             val node = root.selectBestChild() ?: root

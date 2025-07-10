@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import tools.aqua.bgw.net.common.notification.PlayerJoinedNotification
-import tools.aqua.bgw.util.Coordinate
+import entity.SerializableCoordinate
 
 /**
  * Class to Test the NetworkService
@@ -258,7 +258,7 @@ class NovaLunaNetworkServiceTest {
         val tileId   = hostGame.tileTrack[idx]!!.id
 
         // Play locally and send the TurnMessage
-        hostRoot.playerActionService.playTile(idx, Coordinate(0.0, 0.0))
+        hostRoot.playerActionService.playTile(idx, SerializableCoordinate(0.0, 0.0))
         hostSvc.sendTurnMessage(tileId, 0, 0, refillTrack = false)
         serviceWait(hostSvc, ConnectionState.WAITING_FOR_OPPONENT)
 
@@ -271,7 +271,7 @@ class NovaLunaNetworkServiceTest {
             if (gIdx < 0) break // No tiles available
 
             val guestTileId = guestGame.tileTrack[gIdx]!!.id
-            guestRoots[0].playerActionService.playTile(gIdx, Coordinate(1.0, 1.0))
+            guestRoots[0].playerActionService.playTile(gIdx, SerializableCoordinate(1.0, 1.0))
             guestSvc.sendTurnMessage(guestTileId, 1, 1, refillTrack = false)
             serviceWait(guestSvc, ConnectionState.WAITING_FOR_OPPONENT)
 
@@ -343,7 +343,7 @@ class NovaLunaNetworkServiceTest {
 
             if (tileIdx >= 0) {
                 val position = game.players[game.activePlayer].tiles.size.let {
-                    Coordinate(it % 5.0, it / 5.0)  // Simple grid layout
+                    SerializableCoordinate(it % 5.0, it / 5.0)  // Simple grid layout
                 }
 
                 println("$activePlayerName playing tile at index $tileIdx to position $position")
@@ -396,7 +396,7 @@ class NovaLunaNetworkServiceTest {
 
             val idx = activeRoot.currentGame!!.tileTrack.indexOfFirst { it != null }
             if (idx >= 0) {
-                activeRoot.playerActionService.playTile(idx, Coordinate(0.0, 0.0))
+                activeRoot.playerActionService.playTile(idx, SerializableCoordinate(0.0, 0.0))
                 Thread.sleep(200)
             }
         }

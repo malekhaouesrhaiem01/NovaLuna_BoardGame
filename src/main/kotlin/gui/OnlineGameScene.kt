@@ -382,10 +382,10 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
         val validPositions = rootService.gameService.getPossiblePosition()
 
-        val minX = validPositions.minOfOrNull { it.xCoord.toInt() } ?: 0
-        val maxX = validPositions.maxOfOrNull { it.xCoord.toInt() } ?: 0
-        val minY = validPositions.minOfOrNull { it.yCoord.toInt() } ?: 0
-        val maxY = validPositions.maxOfOrNull { it.yCoord.toInt() } ?: 0
+        val minX = validPositions.minOfOrNull { it.x.toInt() } ?: 0
+        val maxX = validPositions.maxOfOrNull { it.x.toInt() } ?: 0
+        val minY = validPositions.minOfOrNull { it.y.toInt() } ?: 0
+        val maxY = validPositions.maxOfOrNull { it.y.toInt() } ?: 0
 
         val column = maxX - minX + 1
         val row = maxY - minY + 1
@@ -505,10 +505,10 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     private fun  showWithoutPossiblePositions(player: Player){
 
-        val minX = player.tiles.minOfOrNull { it?.position!!.xCoord.toInt() } ?: 0
-        val maxX = player.tiles.maxOfOrNull { it?.position!!.xCoord.toInt() } ?: 0
-        val minY = player.tiles.minOfOrNull { it?.position!!.yCoord.toInt() } ?: 0
-        val maxY = player.tiles.maxOfOrNull { it?.position!!.yCoord.toInt() } ?: 0
+        val minX = player.tiles.minOfOrNull { it?.position!!.x.toInt() } ?: 0
+        val maxX = player.tiles.maxOfOrNull { it?.position!!.x.toInt() } ?: 0
+        val minY = player.tiles.minOfOrNull { it?.position!!.y.toInt() } ?: 0
+        val maxY = player.tiles.maxOfOrNull { it?.position!!.y.toInt() } ?: 0
 
         val column = maxX - minX + 1
         val row = maxY - minY + 1
@@ -771,7 +771,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    private fun  placePossiblePositions(grid: GridPane<ComponentView>, positions: List<Coordinate>, offsetX: Int, offsetY: Int){
+    private fun  placePossiblePositions(grid: GridPane<ComponentView>, positions: List<SerializableCoordinate>, offsetX: Int, offsetY: Int){
 
         for ( coord in positions){
 
@@ -792,8 +792,8 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
             }
 
 
-            val x = coord.xCoord.toInt()
-            val y = coord.yCoord.toInt()
+            val x = coord.x.toInt()
+            val y = coord.y.toInt()
 
             grid[x + offsetX, -y + offsetY] = label
         }
@@ -827,8 +827,8 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                 }
             }
 
-            val x = tile.position!!.xCoord.toInt()
-            val y = tile.position!!.yCoord.toInt()
+            val x = tile.position!!.x.toInt()
+            val y = tile.position!!.y.toInt()
 
             grid[x + offsetX, -y + offsetY] = tileLabel
         }
