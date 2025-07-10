@@ -185,7 +185,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
 
         // Reset the refill flag for the new turn
-        //game.refilledThisTurn = false
+        game.refilledThisTurn = false
 
         var checkAutoRefill = true
         for (tile in game.tileTrack){

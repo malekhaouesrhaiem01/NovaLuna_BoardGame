@@ -221,6 +221,9 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             drawPile = drawPileIds, isFirstGame = isFirstGame, players = netPlayers
         )
 
+        println("INIT-MSG ➜ $initMsg")
+
+
         // 5) Send the InitMessage first, before determining states
         client?.sendGameActionMessage(initMsg) ?: error("Network client not initialized")
 
