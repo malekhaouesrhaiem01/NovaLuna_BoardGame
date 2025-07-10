@@ -192,7 +192,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
 
         // 3) Delegate into GameService (host still uses regular startNewGame to shuffle)
-        rootService.gameService.startNewGame(annotatedPlayers, 10, randomOrder, isFirstGame)
+        rootService.gameService.startNewGame(annotatedPlayers, 10, randomOrder, isFirstGame, startTurnImmediately = false)
         val game = rootService.currentGame ?: error("GameService failed to initialize the game state")
         game.players.forEach {
             playerObjectIds[it.playerName] = System.identityHashCode(it)
@@ -207,7 +207,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         for (i in 1 until game.tileTrack.size) {
             game.tileTrack[i]?.let { drawPileIds.add(it.id) }
         }
-        drawPileIds.reverse()
+
 // Add all tiles from drawPile
         game.drawPile.forEach { tile ->
             tile?.let { drawPileIds.add(it.id) }
@@ -217,12 +217,19 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
                 name = p.playerName, color = edu.udo.cs.sopra.ntf.subtypes.Color.valueOf(p.playerColour.name)
             )
         }
+
+        drawPileIds.reverse()
         val initMsg = InitMessage(
             drawPile = drawPileIds, isFirstGame = isFirstGame, players = netPlayers
         )
 
+        println("INIT-MSG ➜ $initMsg")
+
+
         // 5) Send the InitMessage first, before determining states
         client?.sendGameActionMessage(initMsg) ?: error("Network client not initialized")
+
+
 
         // 6) Who does the game say is up first?
         val firstIndex = game.activePlayer
@@ -236,6 +243,10 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         else ConnectionState.WAITING_FOR_OPPONENT
 
         updateConnectionState(nextState)
+
+        //start turn here
+        rootService.gameService.startTurn()
+
         onAllRefreshables { refreshAfterStartGame() }
     }
 
@@ -281,7 +292,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
 
         // 4) Delegate into game logic
-        rootService.gameService.startNetworkGame(localPlayers, 10, message.drawPile, message.isFirstGame)
+        rootService.gameService.startNetworkGame(localPlayers, 10, message.drawPile, message.isFirstGame, startTurnImmediately = false)
+
         val game = rootService.currentGame ?: error("GameService failed to initialize after InitMessage")
         game.players.forEach {
             playerObjectIds[it.playerName] = System.identityHashCode(it)
@@ -299,6 +311,9 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         updateConnectionState(nextState)
         println("DEBUG: State transition completed, new state: $connectionState")
+
+        //start turn here
+        rootService.gameService.startTurn()
 
         onAllRefreshables { refreshAfterStartGame() }
     }
@@ -342,18 +357,22 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         rootService.gameService.endTurn()
         println("    Turn ended")
 
-        val game = rootService.currentGame ?: return
-        val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
+        val game = rootService.currentGame
+        if (game != null) {
+            val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
 
-        if (myIndex == game.activePlayer) {
-            // We get another turn!
-            println("DEBUG: Same player gets another turn")
-            updateConnectionState(ConnectionState.PLAYING_MY_TURN)
+            if (myIndex == game.activePlayer) {
+                // We get another turn!
+                println("DEBUG: Same player gets another turn")
+                updateConnectionState(ConnectionState.PLAYING_MY_TURN)
+            }
+            println("[SEND] ${client!!.playerName} thinks next player is: ${game.players[game.activePlayer].playerName}")
+            println("[SEND] ${client!!.playerName} connection state is now: $connectionState")
+        } else {
+            // Game ended, update connection state appropriately
+            updateConnectionState(ConnectionState.DISCONNECTED)
+            println("[SEND] Game ended during turn processing")
         }
-        println("[SEND] ${client!!.playerName} thinks next player is: ${game.players[game.activePlayer].playerName}")
-        println("[SEND] ${client!!.playerName} connection state is now: $connectionState")
-
-
     }
 
     /**
@@ -375,10 +394,10 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val game = checkNotNull(rootService.currentGame) {
             "No game in progress when receiving a turn"
         }
-
-        val senderIndex = game.players.indexOfFirst {it.playerName == sender}
+        val senderIndex = game.players.indexOfFirst { it.playerName == sender }
+        require(senderIndex >= 0) { "Unknown sender: $sender" }
         game.activePlayer = senderIndex
-
+      
 
         // Apply refill if needed
         if (message.refillTrack) {
@@ -399,19 +418,36 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
 
 
-        // End their turn
-        rootService.gameService.endTurn()
+        // IMPORTANT: Check if game still exists after playTile
+        // playTile might have ended the game, so we need to check before calling endTurn
+        val currentGame = rootService.currentGame
+        if (currentGame != null) {
+            // End their turn
+            rootService.gameService.endTurn()
 
-        // Decide next connection state: if the same player remains active, grant another turn
-        val nextState = if (game.players[game.activePlayer].playerName == client!!.playerName) {
-            ConnectionState.PLAYING_MY_TURN
+            // Check again if game still exists after endTurn
+            val gameAfterEndTurn = rootService.currentGame
+            if (gameAfterEndTurn != null) {
+                // Decide next connection state: if the same player remains active, grant another turn
+                val nextState = if (gameAfterEndTurn.players[gameAfterEndTurn.activePlayer].playerName == client!!.playerName) {
+                    ConnectionState.PLAYING_MY_TURN
+                } else {
+                    ConnectionState.WAITING_FOR_OPPONENT
+                }
+                updateConnectionState(nextState)
+                println("Who does ${client!!.playerName} think is next: ${gameAfterEndTurn.players[gameAfterEndTurn.activePlayer].playerName}")
+                println("My connection state will be: $nextState")
+                println("DEBUG: Transitioning to connectionState=$nextState for player {client.playerName}")
+            } else {
+                // Game ended, disconnect or go to appropriate state
+                updateConnectionState(ConnectionState.DISCONNECTED)
+                println("Game ended during network turn processing")
+            }
         } else {
-            ConnectionState.WAITING_FOR_OPPONENT
+            // Game ended during playTile, handle appropriately
+            updateConnectionState(ConnectionState.DISCONNECTED)
+            println("Game ended during opponent's move")
         }
-        updateConnectionState(nextState)
-        println("Who does ${client!!.playerName} think is next: ${game.players[game.activePlayer].playerName}")
-        println("My connection state will be: $nextState")
-        println("DEBUG: Transitioning to connectionState=$nextState for player {client.playerName}")
     }
 
     /**

@@ -9,6 +9,7 @@ import entity.*
  * @param rootService The [RootService] instance to access the other service methods and entity layer
  */
 open class GameService(private val rootService: RootService) : AbstractRefreshingService() {
+
     /**
      * Starts a new Nova Luna game with the given players and simulation speed.
      * the game state + drawPile + tile track are initialized.
@@ -19,7 +20,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      * @throws IllegalArgumentException or if the simulation speed is greater than 10.
      * @throws IllegalArgumentException If the number of players is not between 2 and 4
      */
-    fun startNewGame(players : List<Player>, simulationSpeed : Int, randomOrder : Boolean = false, firstGame : Boolean){
+    fun startNewGame(players : List<Player>, simulationSpeed : Int, randomOrder : Boolean = false, firstGame : Boolean, startTurnImmediately: Boolean = true){
 
         // überprüfe, ob Anzahl der Spieler passt (2 bis 4)
         require(players.size in 2..4) { "Spieleranzahl muss zwischen 2 und 4 sein." }
@@ -32,7 +33,6 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         // Initializing the draw pile
         val drawPile = rootService.tileLoader.readTiles().shuffled().toMutableList()
 
-        drawPile.reverse()
 
         // Initializing the tileTrack with the top 11 tiles from the drawPile
         val tileTrack: MutableList<Tile?> = drawPile.subList(0, 11).toMutableList()
@@ -67,7 +67,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         rootService.playerActionService.saveInitialGameState()
 
         onAllRefreshables { refreshAfterStartGame()}
-        startTurn()
+        if(startTurnImmediately){
+            startTurn()
+        }
     }
 
     /**
@@ -79,7 +81,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      * @param tileIds The exact order of tile IDs to use (no shuffling)
      * @param isFirstGame Whether this is the first game (affects token count)
      */
-    fun startNetworkGame(players: List<Player>, simulationSpeed: Int, tileIds: List<Int>, isFirstGame: Boolean) {
+    fun startNetworkGame(players: List<Player>, simulationSpeed: Int, tileIds: List<Int>, isFirstGame: Boolean, startTurnImmediately: Boolean = true) {
         require(players.size in 2..4) { "Spieleranzahl muss zwischen 2 und 4 sein." }
         require(simulationSpeed < 11) { "SimulationSpeed darf maximal 10 sein" }
 
@@ -131,6 +133,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         rootService.playerActionService.saveInitialGameState()
         
         onAllRefreshables { refreshAfterStartGame() }
+        if(startTurnImmediately){
+            startTurn()
+        }
     }
 
 
@@ -154,8 +159,16 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         val game = checkNotNull(rootService.currentGame)
 
+        var tileTrackIsEmpty = true
+        for (tile in game.tileTrack){
+            if (tile != null){
+                tileTrackIsEmpty = false
+                break
+            }
+        }
+
         return game.players[game.activePlayer].tokenCount < 1 ||
-                game.tileTrack.isEmpty() && game.drawPile.isEmpty()
+                (tileTrackIsEmpty && game.drawPile.isEmpty())
     }
 
     /**
@@ -201,6 +214,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
 
         val player = game.players[game.activePlayer]
+
         if(player.playerType == entity.PlayerType.EASYBOT) {
             rootService.easyBotService.executeEasyMove()
         } else if(player.playerType == entity.PlayerType.HARDBOT) {

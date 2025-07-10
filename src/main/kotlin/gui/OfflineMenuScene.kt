@@ -526,6 +526,12 @@ class OfflineMenuScene (private val rootService: RootService) :
                     )
                 )
             }
+
+            NovaApplication.apply {
+                gameScene.ifOfflineMode = true
+                showGameScene(gameScene)
+            }
+
             rootService.gameService.startNewGame(
                 playersStartGame,
                 actualSpeed,

@@ -85,6 +85,8 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         rootService.gameService.updateTasks()
         println("   [playTile] AFTER updateTasks")
         println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
+
+
         // Send network message if it's a network game and it's our turn
         if (rootService.networkService.connectionState == ConnectionState.PLAYING_MY_TURN) {
             println("    Sending network message...")

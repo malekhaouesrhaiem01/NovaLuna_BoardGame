@@ -1,4 +1,4 @@
-package service/*
+
 package service
 import edu.udo.cs.sopra.ntf.messages.InitMessage
 import edu.udo.cs.sopra.ntf.messages.TurnMessage
@@ -34,8 +34,8 @@ class NovaLunaNetworkClientTest {
      */
     @BeforeEach
     fun setup() {
-       // networkService = mockk(relaxed = true)
-       // every { networkService.connectionState } returnsMany listOf(
+        networkService = mockk(relaxed = true)
+        every { networkService.connectionState } returnsMany listOf(
             ConnectionState.WAITING_FOR_HOST_CONFIRMATION,
             ConnectionState.WAITING_FOR_JOIN_CONFIRMATION,
             ConnectionState.WAITING_FOR_GUESTS,
@@ -172,7 +172,7 @@ class NovaLunaNetworkClientTest {
     fun `onTurnReceived delegates to receiveTurnMessage`() {
         val message = TurnMessage(tileId = 1, x = 0, y = 0, refillTrack = false)
         client.onTurnReceived(message, "Host")
-        verify { networkService.receiveTurnMessage(message) }
+        verify { networkService.receiveTurnMessage(message,"Host") }
     }
     /**
      * Ensures that an empty opponent list results in null as otherPlayerName.
@@ -229,7 +229,7 @@ class NovaLunaNetworkClientTest {
     fun `onTurnReceived with negative tileId delegates anyway`() {
         val message = TurnMessage(tileId = -99, x = -1, y = -1, refillTrack = true)
         client.onTurnReceived(message, sender = "Host")
-        verify { networkService.receiveTurnMessage(message) }
+        verify { networkService.receiveTurnMessage(message,"Host") }
     }
     /**
      * Tests that InitMessage with a large draw pile and mocked players works as expected.
@@ -267,7 +267,7 @@ class NovaLunaNetworkClientTest {
         )
 
         client.onTurnReceived(message, sender = "Host")
-        verify { networkService.receiveTurnMessage(message) }
+        verify { networkService.receiveTurnMessage(message,"Host") }
     }
     /**
      * Ensures that a null sessionID in a successful create response throws an exception.
@@ -307,4 +307,3 @@ class NovaLunaNetworkClientTest {
     }
 
 }
-*/

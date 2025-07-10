@@ -47,7 +47,7 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-    implementation(group = "tools.aqua", name = "bgw-gui", version = bgwVersion)
+        implementation(group = "tools.aqua", name = "bgw-gui", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-common", version = bgwVersion)
     implementation(group = "tools.aqua", name = "bgw-net-client", version = bgwVersion)
     implementation(group = "edu.udo.cs.sopra", name = "ntf", version = "1.1")

@@ -47,8 +47,6 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
         if (currentPlayer.playerType != PlayerType.EASYBOT) {
             throw IllegalStateException("executeEasyMove called, but the current player is not an EASYBOT.")
         }
-        val waitTime = game.simulationSpeed.toLong()
-        val scheduler = Executors.newSingleThreadScheduledExecutor()
         // 1. Get all possible moves from the single source of truth
         val possibleMoves = gameService.getPossibleMovesForCurrentPlayer()
 
@@ -63,10 +61,9 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
         println("EasyBot selected move: Place tile ${randomMove.tile?.id} at ${randomMove.position}")
         // 3. Execute the move
         playerActionService.playTile(randomMove)
-        scheduler.schedule({
-            SwingUtilities.invokeLater {
-                gameService.endTurn()
-            }
-        }, waitTime, TimeUnit.SECONDS)
+
+        if(rootService.networkService.connectionState == service.ConnectionState.DISCONNECTED) {
+            gameService.endTurn()
+        }
     }
 }

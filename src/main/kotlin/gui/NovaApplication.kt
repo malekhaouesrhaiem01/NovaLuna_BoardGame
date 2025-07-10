@@ -19,8 +19,8 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
     lateinit var hostGameSceneOne: HostGameSceneOne
     private val resultMenuScene: ResultMenuScene
 
-    private var gameScene = GameScene(rootService)
-    private var onlineGameScene = OnlineGameScene(rootService)
+    var gameScene = GameScene(rootService)
+    var onlineGameScene = OnlineGameScene(rootService)
 
     init {
         // Register all components that need refresh callbacks
@@ -71,6 +71,8 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
         }
         resultMenuScene = ResultMenuScene(rootService).apply{
             newGameButton.onMouseClicked = {
+                gameScene.ifOfflineMode = false
+                onlineGameScene.ifOnlineMode = false
                 showMenuScene(mainMenuScene)
             }
         }
@@ -117,11 +119,9 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
             joinGameSceneTwo,
             resultMenuScene,
             gameScene,
-            //onlineGameScene
+            onlineGameScene
         )
 
-        //this.showGameScene(onlineGameScene)
-        this.showGameScene(gameScene)
         this.showMenuScene(mainMenuScene)
 
     }

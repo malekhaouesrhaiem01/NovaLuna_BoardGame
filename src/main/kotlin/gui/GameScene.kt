@@ -39,6 +39,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     var playerComponents: MutableList<ComponentView> = mutableListOf()
     var isAlreadyPlayed: Boolean = false
     var ifHuman: Boolean? = null
+    var ifOfflineMode = false
 
     data class TileGUI(
 
@@ -73,7 +74,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
     ).apply {
         onMouseClicked = {
-            rootService.playerActionService.undo()
+            if (ifOfflineMode){
+                rootService.playerActionService.undo()
+            }
         }
     }
 
@@ -87,7 +90,10 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         visual = ColorVisual(Color(0xC1780C)).apply { style.borderRadius = BorderRadius(10) }
     ).apply {
         onMouseClicked = {
-            rootService.playerActionService.redo()
+            if(ifOfflineMode){
+                rootService.playerActionService.redo()
+            }
+
         }
 
     }
@@ -124,7 +130,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             if (!isAlreadyPlayed) {
                 showError("First, you have to make a move")
             }else{
-                rootService.gameService.endTurn()
+                if(ifOfflineMode){
+                    rootService.gameService.endTurn()
+                }
             }
         }
     }
@@ -239,7 +247,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         visual = ImageVisual("tileBack.png")
     ).apply {
         onMouseClicked = {
-            if(!isAlreadyPlayed){
+            if(!isAlreadyPlayed && ifOfflineMode){
                 rootService.playerActionService.refillWheel()
             }
         }
@@ -284,6 +292,8 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     override fun refreshAfterStartGame() {
 
+        if (!ifOfflineMode) return
+
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
         checkIfHuman(game)
         fullMoonWheel(game)
@@ -293,17 +303,12 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         updateDrawStack(game)
         drawPile.text = game.drawPile.size.toString()
 
-
-        // if(!ifHuman!!){
-        //     if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
-        //         rootService.easyBotService.executeEasyMove()
-        //     }
-        // }
-
-
     }
 
     override fun refreshAfterStartTurn(){
+
+        if(!ifOfflineMode) return
+
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
         checkIfHuman(game)
         fullMoonWheel(game)
@@ -311,16 +316,12 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         addCurrentPlayer(game)
         addPlayers(game)
 
-        // if(!ifHuman!!){
-        //     if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
-        //         rootService.easyBotService.executeEasyMove()
-        //     }
-        // }
-
-
     }
 
     override fun refreshAfterEndTurn() {
+
+        if (!ifOfflineMode) return
+
         chosenTile = null
         isAlreadyPlayed = false
         ifHuman = null
@@ -344,6 +345,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     }
 
     override fun refreshAfterTilePlayed(){
+
+        if (!ifOfflineMode) return
+
         clearMoonWheel()
         clearPlayersDisplay()
 
@@ -358,6 +362,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     }
 
     override fun refreshAfterRefill() {
+
+        if (!ifOfflineMode) return
+
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
         clearMoonWheel()
         checkIfHuman(game)
@@ -801,8 +808,10 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
                         showError("First, you have to select a tile")
                     }
                     else{
-                        isAlreadyPlayed = true
-                        rootService.playerActionService.playTile(chosenTile!!.second, coord)
+                        if (ifOfflineMode){
+                            isAlreadyPlayed = true
+                            rootService.playerActionService.playTile(chosenTile!!.second, coord)
+                        }
                     }
                 }
             }
@@ -971,28 +980,38 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     }
 
     override fun refreshAfterUndo() {
+
+        if (!ifOfflineMode) return
+
         chosenTile = null
         ifHuman = null
         // clear everything …
         clearMoonWheel()
         clearPlayersDisplay()
         playersHand.isVisible = false
+
         // und baue dann die Szene neu auf …
         val game = rootService.currentGame ?: return
         
         // Set isAlreadyPlayed based on the restored game state
         isAlreadyPlayed = game.hasPlayedThisTurn
         
+        val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
+        checkIfHuman(game)
         fullMoonWheel(game)
+        setTokens(game)
         addCurrentPlayer(game)
         addPlayers(game)
+        updateDrawStack(game)
         drawPile.text = game.drawPile.size.toString()
     }
 
     override fun refreshAfterRedo() {
+        if (!ifOfflineMode) return
+
         chosenTile = null
         ifHuman = null
-        // analog zu refreshAfterUndo()
+        // clear everything …
         clearMoonWheel()
         clearPlayersDisplay()
         playersHand.isVisible = false
@@ -1001,9 +1020,15 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         // Set isAlreadyPlayed based on the restored game state
         isAlreadyPlayed = game.hasPlayedThisTurn
         
+
+        // und baue dann die Szene neu auf …
+        val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
+        checkIfHuman(game)
         fullMoonWheel(game)
+        setTokens(game)
         addCurrentPlayer(game)
         addPlayers(game)
+        updateDrawStack(game)
         drawPile.text = game.drawPile.size.toString()
     }
 

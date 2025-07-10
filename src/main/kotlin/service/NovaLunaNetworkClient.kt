@@ -12,7 +12,7 @@ import tools.aqua.bgw.net.common.response.JoinGameResponse
 import tools.aqua.bgw.net.common.response.JoinGameResponseStatus
 import edu.udo.cs.sopra.ntf.messages.InitMessage
 import edu.udo.cs.sopra.ntf.messages.TurnMessage
-import tools.aqua.bgw.core.BoardGameApplication
+
 /**
  * This class handles all networking logic for the Nova Luna game by extending [BoardGameClient].
  * It receives and processes game-related messages from the server and delegates actions to [NetworkService].
@@ -62,8 +62,9 @@ class NovaLunaNetworkClient(
         }
 
         if (response.status == CreateGameResponseStatus.SUCCESS) {
-            sessionID = response.sessionID
-            // forward into the service (which itself updates the state)
+            val id = response.sessionID
+                ?: throw IllegalArgumentException("SessionID must not be null when status is SUCCESS.")
+            sessionID = id
             networkService.onCreateGameResponse(response, playerName)
         } else {
             disconnectAndError("CreateGame failed: ${response.status}")
