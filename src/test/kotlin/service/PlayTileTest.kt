@@ -1,10 +1,6 @@
 package service
 
-import entity.Player
-import entity.PlayerColour
-import entity.PlayerType
-import entity.Move
-import tools.aqua.bgw.util.Coordinate
+import entity.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,7 +50,7 @@ class PlayTileTest {
         val game = rootService.currentGame!!
 
         val selectedTile = game.tileTrack[1]
-        rootService.playerActionService.playTile(1, Coordinate(0,0))
+        rootService.playerActionService.playTile(1, SerializableCoordinate(0.0,0.0))
 
         assertEquals(selectedTile, game.players[game.activePlayer].tiles.last())
     }
@@ -67,7 +63,7 @@ class PlayTileTest {
         val game = rootService.currentGame!!
 
         val selectedTile = game.tileTrack[1]
-        val postion = Coordinate(0,0)
+        val postion = SerializableCoordinate(0.0,0.0)
         val move = Move(selectedTile, postion)
 
         rootService.playerActionService.playTile(move)

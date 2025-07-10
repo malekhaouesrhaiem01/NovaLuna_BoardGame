@@ -46,9 +46,9 @@ class MainMenuScene : MenuScene(1920, 1080,ImageVisual("back_image.png")), Refre
     )
 
     /**
-     * Button to quit the application immediately.
+     * Button to load a saved game.
      */
-    private val loadButton = Button(
+    val loadButton = Button(
         text = "Load Game",
         width = 326,
         height = 100,

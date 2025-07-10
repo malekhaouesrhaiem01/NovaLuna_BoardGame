@@ -46,7 +46,7 @@ class MCTSNode(
      */
     fun expand(): MCTSNode {
         val move = untriedMoves.removeAt(0)
-        val newGameState = gameState.clone()
+        val newGameState = gameState.deepCopy()
         // Apply the move to the new game state
         // This is a simplified representation. You'll need to implement the actual logic for applying a move.
         val newPossibleMoves = mutableListOf<Move>() // This should be the possible moves from the new state
@@ -61,7 +61,7 @@ class MCTSNode(
      * @return The winner of the simulated game.
      */
     fun rollout(): Int {
-        var currentGameState = gameState.clone()
+        var currentGameState = gameState.deepCopy()
         while (!isTerminal(currentGameState)) {
             val possibleMoves = getPossibleMoves(currentGameState)
             if (possibleMoves.isEmpty()) {
