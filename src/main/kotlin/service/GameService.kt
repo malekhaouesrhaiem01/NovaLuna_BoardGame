@@ -152,8 +152,16 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         val game = checkNotNull(rootService.currentGame)
 
+        var tileTrackIsEmpty = true
+        for (tile in game.tileTrack){
+            if (tile != null){
+                tileTrackIsEmpty = false
+                break
+            }
+        }
+
         return game.players[game.activePlayer].tokenCount < 1 ||
-                game.tileTrack.isEmpty() && game.drawPile.isEmpty()
+                (tileTrackIsEmpty && game.drawPile.isEmpty())
     }
 
     /**
