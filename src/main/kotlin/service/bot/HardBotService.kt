@@ -1,6 +1,7 @@
 package service.bot
 
 import entity.Move
+import service.ConnectionState
 import service.RootService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -32,6 +33,8 @@ class HardBotService(private val rootService: RootService) {
         val possibleMoves = rootService.gameService.getPossibleMovesForCurrentPlayer()
         check(possibleMoves.isNotEmpty()) { "No possible moves for the hard bot" }
 
+        val isNetworkGame = rootService.networkService.connectionState == ConnectionState.PLAYING_MY_TURN
+
         val delay = when (game.simulationSpeed) {
             0 -> 0L
             1 -> 1000L
@@ -39,15 +42,31 @@ class HardBotService(private val rootService: RootService) {
             else -> 1000L // Default delay
         }
 
-        Thread {
-            val bestMove = findBestMove(game, possibleMoves, System.currentTimeMillis() + 9500)
-            scheduler.schedule({
-                rootService.playerActionService.playTile(bestMove)
+        if (isNetworkGame) {
+            // For network games: simpler flow, no automatic endTurn()
+            Thread {
+                val bestMove = findBestMove(game, possibleMoves, System.currentTimeMillis() + 9500)
+
+                // Use minimal delay for network games to avoid timing issues
+                val networkDelay = if (delay == 0L) 0L else 500L
+
                 scheduler.schedule({
-                    rootService.gameService.endTurn()
-                }, 1, TimeUnit.SECONDS)
-            }, delay, TimeUnit.MILLISECONDS)
-        }.start()
+                    // Only play the tile, network service will handle endTurn()
+                    rootService.playerActionService.playTile(bestMove)
+                }, networkDelay, TimeUnit.MILLISECONDS)
+            }.start()
+        } else {
+            // For offline games: keep the original behavior
+            Thread {
+                val bestMove = findBestMove(game, possibleMoves, System.currentTimeMillis() + 9500)
+                scheduler.schedule({
+                    rootService.playerActionService.playTile(bestMove)
+                    scheduler.schedule({
+                        rootService.gameService.endTurn()
+                    }, 1, TimeUnit.SECONDS)
+                }, delay, TimeUnit.MILLISECONDS)
+            }.start()
+        }
     }
 
     /**
