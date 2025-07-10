@@ -49,6 +49,8 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
     var chosenTile: Pair<ComponentView, Int>? = null
     var isAlreadyPlayed: Boolean = false
 
+    var ifOnlineMode = false
+
     data class TileGUI(
 
         val label: ComponentView,
@@ -92,11 +94,14 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
             if (!isAlreadyPlayed) {
                 showError("First, you have to make a move")
             }else{
-                rootService.gameService.endTurn()
-                println("🔴 MANUAL END TURN CLICKED")
-                println("   - Connection state: ${rootService.networkService.connectionState}")
-                println("   - Active player: ${rootService.currentGame?.activePlayer}")
-                println("   - refilledThisTurn: ${rootService.currentGame?.refilledThisTurn}")
+                if(ifOnlineMode) {
+                    rootService.gameService.endTurn()
+                    println("🔴 MANUAL END TURN CLICKED")
+                    println("   - Connection state: ${rootService.networkService.connectionState}")
+                    println("   - Active player: ${rootService.currentGame?.activePlayer}")
+                    println("   - refilledThisTurn: ${rootService.currentGame?.refilledThisTurn}")
+                }
+
             }
         }
     }
@@ -159,7 +164,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         visual = ImageVisual("tileBack.png")
     ).apply {
         onMouseClicked = {
-            if(!isAlreadyPlayed){
+            if(!isAlreadyPlayed && ifOnlineMode){
                 rootService.playerActionService.refillWheel()
             }
         }
@@ -234,13 +239,16 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     override fun refreshAfterStartGame() {
 
+        if (!ifOnlineMode) return
+
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
         updateDrawStack(game)
-        rootService.gameService.startTurn()
 
     }
 
     override fun refreshAfterStartTurn(){
+        if (!ifOnlineMode) return
+
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
 
         checkIfHumanAndLocalPlayer(game)
@@ -251,13 +259,11 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         createLocalPlayerHand(game)
         createPlayersHands(game)
 
-        if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
-            rootService.easyBotService.executeEasyMove()
-        }
-
     }
 
     override fun refreshAfterEndTurn() {
+        if (!ifOnlineMode) return
+
         chosenTile = null
         isAlreadyPlayed = false
         clearPlayersDisplay()
@@ -279,6 +285,8 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
     }
 
     override fun refreshAfterTilePlayed(){
+        if (!ifOnlineMode) return
+
         clearPlayersDisplay()
 
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
@@ -293,6 +301,8 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
 
     override fun refreshAfterRefill() {
+        if (!ifOnlineMode) return
+
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
 
         updateMoonWheel(game)
@@ -300,6 +310,8 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
     }
 
     override fun refreshAfterGameEnd(winner: Player) {
+        if (!ifOnlineMode) return
+
         chosenTile = null
         isAlreadyPlayed = false
         clearPlayersDisplay()
@@ -786,8 +798,10 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                         showError("First, you have to select a tile")
                     }
                     else{
-                        isAlreadyPlayed = true
-                        rootService.playerActionService.playTile(chosenTile!!.second, coord)
+                        if (ifOnlineMode) {
+                            isAlreadyPlayed = true
+                            rootService.playerActionService.playTile(chosenTile!!.second, coord)
+                        }
                     }
                 }
             }

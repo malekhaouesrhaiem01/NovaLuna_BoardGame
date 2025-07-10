@@ -208,6 +208,8 @@ class JoinGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
 
 
             val joinGameSceneTwo = JoinGameSceneTwo(rootService, name)
+            NovaApplication.onlineGameScene.ifOnlineMode = true
+            NovaApplication.showGameScene(NovaApplication.onlineGameScene)
             NovaApplication.showMenuScene(joinGameSceneTwo)
         }
 

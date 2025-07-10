@@ -332,7 +332,12 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
                     )
                 )
             }
+            NovaApplication.apply {
+                onlineGameScene.ifOnlineMode = true
+                showGameScene(onlineGameScene)
+            }
             rootService.networkService.startNewHostedGame(playersStartGame, ifFirstGame, ifRandom)
+
         }
     }
 

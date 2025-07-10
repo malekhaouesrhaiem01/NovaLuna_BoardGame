@@ -129,6 +129,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         rootService.currentGame = game
         onAllRefreshables { refreshAfterStartGame() }
+
+        startTurn()
     }
 
 
