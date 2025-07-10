@@ -243,6 +243,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
         updateDrawStack(game)
+        //rootService.gameService.startTurn()
 
     }
 
@@ -258,6 +259,10 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
         createLocalPlayerHand(game)
         createPlayersHands(game)
+
+            //if(game.players[game.activePlayer].playerType == PlayerType.EASYBOT){
+            //rootService.easyBotService.executeEasyMove()
+       // }
 
     }
 
