@@ -990,13 +990,13 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         clearPlayersDisplay()
         playersHand.isVisible = false
 
-        // und baue dann die Szene neu auf …
-        val game = rootService.currentGame ?: return
-        
+        // und baue dann die Szene neu auf …        
         // Set isAlreadyPlayed based on the restored game state
-        isAlreadyPlayed = game.hasPlayedThisTurn
-        
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
+
+        
+        isAlreadyPlayed = game.hasPlayedThisTurn
+
         checkIfHuman(game)
         fullMoonWheel(game)
         setTokens(game)
@@ -1015,14 +1015,14 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         clearMoonWheel()
         clearPlayersDisplay()
         playersHand.isVisible = false
-        val game = rootService.currentGame ?: return
         
         // Set isAlreadyPlayed based on the restored game state
-        isAlreadyPlayed = game.hasPlayedThisTurn
         
 
         // und baue dann die Szene neu auf …
         val game = rootService.currentGame ?: throw IllegalStateException("No game is currently running")
+        isAlreadyPlayed = game.hasPlayedThisTurn
+
         checkIfHuman(game)
         fullMoonWheel(game)
         setTokens(game)
