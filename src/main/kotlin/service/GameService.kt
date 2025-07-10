@@ -213,6 +213,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             rootService.playerActionService.refillWheel()
         }
 
+        onAllRefreshables { refreshAfterStartTurn() }
+
         val player = game.players[game.activePlayer]
 
         if(player.playerType == entity.PlayerType.EASYBOT) {
@@ -222,9 +224,6 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
 
         println("   [startTurn] AFTER clone:")
-
-
-        onAllRefreshables { refreshAfterStartTurn() }
     }
 
     /**

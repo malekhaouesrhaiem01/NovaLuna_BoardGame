@@ -62,8 +62,15 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
         // 3. Execute the move
         playerActionService.playTile(randomMove)
 
+        val waitTime = game.simulationSpeed.toLong()
+        val scheduler = Executors.newSingleThreadScheduledExecutor()
+
         if(rootService.networkService.connectionState == service.ConnectionState.DISCONNECTED) {
-            gameService.endTurn()
+            scheduler.schedule({
+                SwingUtilities.invokeLater {
+                    gameService.endTurn()
+                }
+            }, waitTime, TimeUnit.SECONDS)
         }
     }
 }
