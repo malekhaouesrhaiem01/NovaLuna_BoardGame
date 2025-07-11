@@ -15,7 +15,6 @@ import tools.aqua.bgw.core.BoardGameApplication.Companion.runOnGUIThread
 import tools.aqua.bgw.core.BoardGameScene
 import tools.aqua.bgw.core.Color
 import tools.aqua.bgw.style.BorderRadius
-import tools.aqua.bgw.util.Coordinate
 import tools.aqua.bgw.util.Font
 import tools.aqua.bgw.visual.ColorVisual
 import tools.aqua.bgw.visual.ImageVisual
@@ -400,15 +399,13 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         val validPositions = rootService.gameService.getPossiblePosition()
         val allCoords = player.tiles.filterNotNull().map { it.position!!} + validPositions
 
-        val minX = validPositions.minOfOrNull { it.x.toInt() } ?: 0
-        val maxX = validPositions.maxOfOrNull { it.x.toInt() } ?: 0
-        val minY = validPositions.minOfOrNull { it.y.toInt() } ?: 0
-        val maxY = validPositions.maxOfOrNull { it.y.toInt() } ?: 0
+        val minX = allCoords.minOfOrNull { it.x.toInt() } ?: 0
+        val maxX = allCoords.maxOfOrNull { it.x.toInt() } ?: 0
+        val minY = allCoords.minOfOrNull { it.y.toInt() } ?: 0
+        val maxY = allCoords.maxOfOrNull { it.y.toInt() } ?: 0
 
         val column = maxX - minX + 1
         val row = maxY - minY + 1
-        val offsetX = -minX
-        val offsetY = maxY
 
 
         val gridHand = GridPane<ComponentView>(
@@ -418,9 +415,9 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
             columns = column,
             spacing = 5
         ).apply {
-            placeTiles(this, player, offsetX, offsetY)
+            placeTiles(this, player, minX, maxY)
             if (!isAlreadyPlayed && ifHuman && ifActivePlayer) {
-                placePossiblePositions(this, validPositions, offsetX, offsetY)
+                placePossiblePositions(this, validPositions, minX, maxY)
             }
 
         }
@@ -531,9 +528,6 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         val column = maxX - minX + 1
         val row = maxY - minY + 1
 
-        val offsetX = -minX
-        val offsetY = maxY
-
         val gridHand = GridPane<ComponentView>(
             posX = 929,
             posY = 382.5,
@@ -541,7 +535,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
             columns = column,
             spacing = 5
         ).apply {
-            placeTiles(this, player, offsetX, offsetY)
+            placeTiles(this, player, minX, maxY)
         }
 
 
@@ -789,7 +783,7 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    private fun  placePossiblePositions(grid: GridPane<ComponentView>, positions: List<SerializableCoordinate>, offsetX: Int, offsetY: Int){
+    private fun  placePossiblePositions(grid: GridPane<ComponentView>, positions: List<SerializableCoordinate>, minX: Int, maxY: Int){
 
         for ( coord in positions){
 
@@ -812,14 +806,13 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
             }
 
 
-            val x = coord.x.toInt()
-            val y = coord.y.toInt()
-
-            grid[x + offsetX, -y + offsetY] = label
+            val col = coord.x.toInt() - minX
+            val row = maxY - coord.y.toInt()
+            grid[col, row] = label
         }
     }
 
-    private fun  placeTiles(grid: GridPane<ComponentView>, player: Player, offsetX: Int, offsetY: Int){
+    private fun  placeTiles(grid: GridPane<ComponentView>, player: Player, minX: Int, maxY: Int){
 
         for (tile in player.tiles){
 
@@ -850,7 +843,9 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
             val x = tile.position!!.x.toInt()
             val y = tile.position!!.y.toInt()
 
-            grid[x + offsetX, -y + offsetY] = tileLabel
+            val col = x - minX
+            val row = maxY -  y
+            grid[col, row] = tileLabel
         }
     }
 
