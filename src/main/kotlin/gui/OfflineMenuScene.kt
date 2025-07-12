@@ -620,118 +620,105 @@ class OfflineMenuScene (private val rootService: RootService) :
         setupColorButton(orangeColor, 3, "Orange", Color.BLACK, Color(0xFF8401))
     }
 
-    private fun addPlayer(){
-
+    private fun addPlayer() {
         if (players.size == 4) return
 
         val i = players.size
-
         val posY = addButton.posY
 
-        val newOderToken = Label(
-            posX = 190,
-            posY = posY,
-            width = 100,
-            height = 91,
-            text = "${i+1}",
-            font = Font(48, Color.BLACK,"Space Grotesk" ),
-            visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
-                style.borderRadius = BorderRadius(15)
-            }
+        val newOrderToken = createOrderToken(i, posY)
+        val newDefaultInput = createNameInput(posY)
+        val newColorButton = createColorButton(i, posY)
+        val newEasyButton = createTypeButton(i, posY, "easy", 0, 1405.0)
+        val newHardButton = createTypeButton(i, posY, "hard", 1, 1547.0)
+        val removeButton = createRemoveButton(i, posY)
+
+        contentPane.addAll(
+            newOrderToken, newDefaultInput,
+            newColorButton, newEasyButton, newHardButton, removeButton
         )
-
-        val newDefaultInput = TextField(
-            prompt = "Name",
-            width = 350,
-            height = 91,
-            posX = 544,
-            posY = posY,
-            font = Font(48, Color(0xFFFFFFF), "Space Grotesk"),
-            visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
-                style.borderRadius = BorderRadius(15)
-            }
-        )
-
-        val newColorButton = Button(
-            text = "NONE",
-            width = 273.9,
-            height = 91,
-            posX = 1042,
-            posY = posY,
-            font = Font(48, Color.BLACK,"Space Grotesk" ),
-            visual = ColorVisual(Color.GRAY).apply {
-                style.borderRadius = BorderRadius(15)
-            }
-        ).apply {
-            onMouseClicked = {
-                selectColor(i)
-                selectColorPane.isVisible = true
-            }
-        }
-
-        val newEasyButton = Button(
-            text = "easy",
-            width = 133,
-            height = 91,
-            posX = 1405,
-            posY = posY,
-            font = Font(48, Color.BLACK,"Space Grotesk" ),
-            visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
-                style.borderRadius = BorderRadius(15)
-            }
-        ).apply {
-            onMouseClicked = {
-                setPlayerType(i, 0)
-            }
-        }
-        val newHardButton = Button(
-            text = "hard",
-            width = 133,
-            height = 91,
-            posX = 1547,
-            posY = posY,
-            font = Font(48, Color.BLACK,"Space Grotesk" ),
-            visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
-                style.borderRadius = BorderRadius(15)
-            }
-        ).apply {
-            onMouseClicked = { setPlayerType(i, 1) }
-        }
-
-        val removeButton = Button(
-            width = 100,
-            height = 91,
-            posX = 1732,
-            posY = posY,
-            visual = CompoundVisual(
-                ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
-                    style.borderRadius = BorderRadius(15)},
-                ImageVisual("remove.png")
-            )
-        ).apply {
-            onMouseClicked = { removePlayer(i)}
-        }
-
-        contentPane.addAll(newOderToken, newDefaultInput,
-            newColorButton, newEasyButton, newHardButton, removeButton)
 
         val newPlayer = PlayerGUI(
-            newOderToken,
-            newDefaultInput,
-            newColorButton,
-            newEasyButton,
-            newHardButton,
-            removeButton
+            newOrderToken, newDefaultInput, newColorButton,
+            newEasyButton, newHardButton, removeButton
         )
 
         players.add(newPlayer)
 
         addButton.posY = posY + addButton.height + 58
+        addButton.isVisible = players.size < 4
+    }
 
-        if (i+1 == 4){
-            addButton.isVisible = false
+    private fun createOrderToken(index: Int, posY: Double) = Label(
+        posX = 190,
+        posY = posY,
+        width = 100,
+        height = 91,
+        text = "${index + 1}",
+        font = Font(48, Color.BLACK, "Space Grotesk"),
+        visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
+    )
+
+    private fun createNameInput(posY: Double) = TextField(
+        prompt = "Name",
+        width = 350,
+        height = 91,
+        posX = 544,
+        posY = posY,
+        font = Font(48, Color(0xFFFFFFF), "Space Grotesk"),
+        visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
+    )
+
+    private fun createColorButton(index: Int, posY: Double) = Button(
+        text = "NONE",
+        width = 273.9,
+        height = 91,
+        posX = 1042,
+        posY = posY,
+        font = Font(48, Color.BLACK, "Space Grotesk"),
+        visual = ColorVisual(Color.GRAY).apply {
+            style.borderRadius = BorderRadius(15)
+        }
+    ).apply {
+        onMouseClicked = {
+            selectColor(index)
+            selectColorPane.isVisible = true
         }
     }
+
+    private fun createTypeButton(index: Int, posY: Double, label: String, type: Int, posX: Double) = Button(
+        text = label,
+        width = 133,
+        height = 91,
+        posX = posX,
+        posY = posY,
+        font = Font(48, Color.BLACK, "Space Grotesk"),
+        visual = ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+            style.borderRadius = BorderRadius(15)
+        }
+    ).apply {
+        onMouseClicked = { setPlayerType(index, type) }
+    }
+
+    private fun createRemoveButton(index: Int, posY: Double) = Button(
+        width = 100,
+        height = 91,
+        posX = 1732,
+        posY = posY,
+        visual = CompoundVisual(
+            ColorVisual(Color(193, 120, 12, alpha = 0.50)).apply {
+                style.borderRadius = BorderRadius(15)
+            },
+            ImageVisual("remove.png")
+        )
+    ).apply {
+        onMouseClicked = { removePlayer(index) }
+    }
+
 
     private fun removePlayer(i: Int){
 

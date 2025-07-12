@@ -811,74 +811,71 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         offsetY: Int
     ) {
 
-        for ( coord in positions){
-
-            val label = Label(
-                width = 100,
-                height = 100,
-                visual = ColorVisual(Color.GREEN).apply { transparency = 0.7 }
-            ).apply {
-                onMouseClicked = {
-                    if (chosenTile == null){
-                        showError("First, you have to select a tile")
-                    }
-                    else{
-                        if (ifOfflineMode) {
-                            chosenTile?.let {
-                                isAlreadyPlayed = true
-                                rootService.playerActionService.playTile(it.second, coord)
-                            }
-                        }
-                    }
-                }
-            }
-
-
+        for (coord in positions) {
+            val label = createClickablePositionLabel(coord)
             val x = coord.x.toInt()
             val y = coord.y.toInt()
-
             grid[x + offsetX, -y + offsetY] = label
         }
     }
 
-    private fun placeTiles(grid: GridPane<ComponentView>, player: Player, offsetX: Int, offsetY: Int){
-
-        for (tile in player.tiles){
-
-            if (tile == null) continue
-
-            val tileLabel = createTile(tile)
-
-            for ((index, task) in tile.tasks.withIndex()){
-                if (task.second){
-
-                    val xy = when(index){
-                        0 -> 50 to 0
-                        1 -> 0 to 50
-                        else -> 50 to 50
+    private fun createClickablePositionLabel(coord: SerializableCoordinate): Label {
+        return Label(
+            width = 100,
+            height = 100,
+            visual = ColorVisual(Color.GREEN).apply { transparency = 0.7 }
+        ).apply {
+            onMouseClicked = {
+                if (chosenTile == null) {
+                    showError("First, you have to select a tile")
+                } else if (ifOfflineMode) {
+                    chosenTile?.let {
+                        isAlreadyPlayed = true
+                        rootService.playerActionService.playTile(it.second, coord)
                     }
-
-                    val complited = Label(
-                        posX = xy.first,
-                        posY = xy.second,
-                        width = 50,
-                        height = 50,
-                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
-                            style.borderRadius = BorderRadius(100)
-                        }
-                    )
-
-                    tileLabel.add(complited)
-
                 }
             }
+        }
+    }
+
+    private fun placeTiles(grid: GridPane<ComponentView>, player: Player, offsetX: Int, offsetY: Int) {
+        for (tile in player.tiles.filterNotNull()) {
+            val tileLabel = createTile(tile)
+
+            addCompletedTaskDots(tileLabel, tile, player)
 
             tile.position?.let { pos ->
                 val x = pos.x.toInt()
                 val y = pos.y.toInt()
                 grid[x + offsetX, -y + offsetY] = tileLabel
             }
+        }
+    }
 
+    private fun addCompletedTaskDots(tileLabel: Pane<ComponentView>, tile: Tile, player: Player) {
+
+        for ((index, task) in tile.tasks.withIndex()){
+            if (task.second){
+
+                val xy = when(index){
+                    0 -> 50 to 0
+                    1 -> 0 to 50
+                    else -> 50 to 50
+                }
+
+                val complited = Label(
+                    posX = xy.first,
+                    posY = xy.second,
+                    width = 50,
+                    height = 50,
+                    visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
+                        style.borderRadius = BorderRadius(100)
+                    }
+                )
+
+                tileLabel.add(complited)
+
+            }
         }
     }
 

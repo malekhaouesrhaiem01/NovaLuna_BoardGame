@@ -564,63 +564,72 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    private fun  updateMoonWheel(game: NovaLunaGame){
+    private fun updateMoonWheel(game: NovaLunaGame) {
+        clearMoonWheel()
 
-        // clear the MoonWheel
-        for (tile in tilesOnTheMoonWheel){
-            contentPane.remove(tile.label)
-        }
-
-        tilesOnTheMoonWheel.clear()
-
-
-        // Full the MoonWheel
         val tiles = game.tileTrack
         val ifLocalPlayer = !game.players[game.activePlayer].onlineMode
         val ifHuman = game.players[game.activePlayer].playerType == PlayerType.HUMAN
+        val availableTiles: List<Int> = rootService.gameService.getAvailableTiles()
 
-
-        val availableTiles: List<Int?> = rootService.gameService.getAvailableTiles()
-
-        for((i, tile) in tiles.withIndex()){
-            if (tile != null) {
-                val tileLabel = createTile(tile).apply {
-                    posX = tileCoordinates[i].first.toDouble()
-                    posY = tileCoordinates[i].second.toDouble()
-                }
-                val isAvailable = i in availableTiles.filterNotNull()
-                val canPlay = !isAlreadyPlayed && ifHuman && ifLocalPlayer
-
-                val toAdd: ComponentView = if (isAvailable && canPlay) {
-                    tileLabel.apply {
-                        posX = 5.0
-                        posY = 5.0
-                    }
-
-                    Pane<ComponentView>(
-                        posX = tileCoordinates[i].first.toDouble() - 5,
-                        posY = tileCoordinates[i].second.toDouble() - 5,
-                        height = 110,
-                        width = 110,
-                        visual = ColorVisual(Color.GREEN).apply { style.borderRadius = BorderRadius(10) }
-                    ).apply {
-                        onMouseClicked = {
-                            setTile(this, i)
-                        }
-                        addAll(tileLabel)
-                    }
-                } else {
-                    tileLabel
-                }
-
+        for ((i, tile) in tiles.withIndex()) {
+            tile?.let {
+                val toAdd = createTileComponent(i, tile, availableTiles, ifHuman, ifLocalPlayer)
                 tilesOnTheMoonWheel.add(TileGUI(toAdd, tile.id))
                 contentPane.add(toAdd)
             }
         }
 
+        addMeeple(game.meeplePosition)
+    }
+
+    private fun clearMoonWheel() {
+        for (tile in tilesOnTheMoonWheel) {
+            contentPane.remove(tile.label)
+        }
+        tilesOnTheMoonWheel.clear()
+    }
+
+    private fun createTileComponent(
+        index: Int,
+        tile: Tile,
+        availableTiles: List<Int>,
+        ifHuman: Boolean,
+        ifLocalPlayer: Boolean
+    ): ComponentView {
+        val tileLabel = createTile(tile).apply {
+            posX = tileCoordinates[index].first.toDouble()
+            posY = tileCoordinates[index].second.toDouble()
+        }
+
+        val isAvailable = index in availableTiles
+        val canPlay = !isAlreadyPlayed && ifHuman && ifLocalPlayer
+
+        return if (isAvailable && canPlay) {
+            tileLabel.apply {
+                posX = 5.0
+                posY = 5.0
+            }
+
+            Pane<ComponentView>(
+                posX = tileCoordinates[index].first.toDouble() - 5,
+                posY = tileCoordinates[index].second.toDouble() - 5,
+                height = 110,
+                width = 110,
+                visual = ColorVisual(Color.GREEN).apply { style.borderRadius = BorderRadius(10) }
+            ).apply {
+                onMouseClicked = { setTile(this, index) }
+                addAll(tileLabel)
+            }
+        } else {
+            tileLabel
+        }
+    }
+
+    private fun addMeeple(position: Int) {
         val meeple = Label(
-            posX = tileCoordinates[game.meeplePosition].first,
-            posY = tileCoordinates[game.meeplePosition].second,
+            posX = tileCoordinates[position].first,
+            posY = tileCoordinates[position].second,
             width = 100,
             height = 100,
             visual = ImageVisual("meeple.png")
@@ -795,81 +804,121 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    private fun  placePossiblePositions(
+    private fun placePossiblePositions(
         grid: GridPane<ComponentView>,
         positions: List<SerializableCoordinate>,
         minX: Int,
         maxY: Int
-    ){
-
-        for ( coord in positions){
-
-            val label = Label(
-                width = 100,
-                height = 100,
-                visual = ColorVisual(Color.GREEN).apply { transparency = 0.7 }
-            ).apply {
-                onMouseClicked = {
-                    if (chosenTile == null){
-                        showError("First, you have to select a tile")
-                    }
-                    else{
-                        if (ifOnlineMode) {
-                            chosenTile?.let {
-                                isAlreadyPlayed = true
-                                rootService.playerActionService.playTile(it.second, coord)
-                            }
-                        }
-                    }
-                }
-            }
-
-
+    ) {
+        for (coord in positions) {
+            val label = createClickablePositionLabel(coord)
             val col = coord.x.toInt() - minX
             val row = maxY - coord.y.toInt()
             grid[col, row] = label
         }
     }
 
-    private fun  placeTiles(grid: GridPane<ComponentView>, player: Player, minX: Int, maxY: Int){
-
-        for (tile in player.tiles){
-
-            if (tile == null) continue
-
-            val tileLabel = createTile(tile)
-
-            for ((index, task) in tile.tasks.withIndex()){
-                if (task.second){
-
-                    val xy = when(index){
-                        0 -> 50 to 0
-                        1 -> 0 to 50
-                        else -> 50 to 50
+    private fun createClickablePositionLabel(coord: SerializableCoordinate): Label {
+        return Label(
+            width = 100,
+            height = 100,
+            visual = ColorVisual(Color.GREEN).apply { transparency = 0.7 }
+        ).apply {
+            onMouseClicked = {
+                if (chosenTile == null) {
+                    showError("First, you have to select a tile")
+                } else if (ifOnlineMode) {
+                    chosenTile?.let {
+                        isAlreadyPlayed = true
+                        rootService.playerActionService.playTile(it.second, coord)
                     }
-
-                    val complited = Label(
-                        posX = xy.first,
-                        posY = xy.second,
-                        width = 50,
-                        height = 50,
-                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
-                            style.borderRadius = BorderRadius(100)
-                        }
-                    )
-
-                    tileLabel.add(complited)
-
                 }
             }
+        }
+    }
+
+
+
+//    private fun  placeTiles(grid: GridPane<ComponentView>, player: Player, minX: Int, maxY: Int){
+//
+//        for (tile in player.tiles){
+//
+//            if (tile == null) continue
+//
+//            val tileLabel = createTile(tile)
+//
+//            for ((index, task) in tile.tasks.withIndex()){
+//                if (task.second){
+//
+//                    val xy = when(index){
+//                        0 -> 50 to 0
+//                        1 -> 0 to 50
+//                        else -> 50 to 50
+//                    }
+//
+//                    val complited = Label(
+//                        posX = xy.first,
+//                        posY = xy.second,
+//                        width = 50,
+//                        height = 50,
+//                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
+//                            style.borderRadius = BorderRadius(100)
+//                        }
+//                    )
+//
+//                    tileLabel.add(complited)
+//
+//                }
+//            }
+//
+//            tile.position?.let { pos ->
+//                val x = pos.x.toInt()
+//                val y = pos.y.toInt()
+//
+//                val col = x - minX
+//                val row = maxY - y
+//                grid[col, row] = tileLabel
+//            }
+//        }
+//    }
+
+    private fun placeTiles(grid: GridPane<ComponentView>, player: Player, minX: Int, maxY: Int) {
+        for (tile in player.tiles.filterNotNull()) {
+
+            val tileLabel = createTile(tile)
+            addCompletedTaskDots(tileLabel, tile, player)
 
             tile.position?.let { pos ->
-                val x = pos.x.toInt()
-                val y = pos.y.toInt()
-
-                val col = x - minX
-                val row = maxY - y
+                val col = pos.x.toInt() - minX
+                val row = maxY - pos.y.toInt()
                 grid[col, row] = tileLabel
+            }
+        }
+    }
+
+    private fun addCompletedTaskDots(tileLabel: Pane<ComponentView>, tile: Tile, player: Player) {
+
+        for ((index, task) in tile.tasks.withIndex()){
+            if (task.second){
+
+                val (x, y) = when (index) {
+                    0 -> 50 to 0
+                    1 -> 0 to 50
+                    else -> 50 to 50
+                }
+
+                val completedLabel = Label(
+                    posX = x,
+                    posY = y,
+                    width = 50,
+                    height = 50,
+                    visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
+                        style.borderRadius = BorderRadius(100)
+                    }
+                )
+
+                tileLabel.add(completedLabel)
+
             }
         }
     }
