@@ -837,51 +837,6 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         }
     }
 
-
-
-//    private fun  placeTiles(grid: GridPane<ComponentView>, player: Player, minX: Int, maxY: Int){
-//
-//        for (tile in player.tiles){
-//
-//            if (tile == null) continue
-//
-//            val tileLabel = createTile(tile)
-//
-//            for ((index, task) in tile.tasks.withIndex()){
-//                if (task.second){
-//
-//                    val xy = when(index){
-//                        0 -> 50 to 0
-//                        1 -> 0 to 50
-//                        else -> 50 to 50
-//                    }
-//
-//                    val complited = Label(
-//                        posX = xy.first,
-//                        posY = xy.second,
-//                        width = 50,
-//                        height = 50,
-//                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
-//                            style.borderRadius = BorderRadius(100)
-//                        }
-//                    )
-//
-//                    tileLabel.add(complited)
-//
-//                }
-//            }
-//
-//            tile.position?.let { pos ->
-//                val x = pos.x.toInt()
-//                val y = pos.y.toInt()
-//
-//                val col = x - minX
-//                val row = maxY - y
-//                grid[col, row] = tileLabel
-//            }
-//        }
-//    }
-
     private fun placeTiles(grid: GridPane<ComponentView>, player: Player, minX: Int, maxY: Int) {
         for (tile in player.tiles.filterNotNull()) {
 
