@@ -50,6 +50,14 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     var ifOnlineMode = false
 
+    /**
+     * Temporary class used to store labels and IDs of tiles,
+     * which are then stored as elements in the list [tilesOnTheMoonWheel].
+     * These elements are later used to clear the MoonWheel.
+     *
+     * @property label The label (ComponentView) of the tile.
+     * @property id The unique ID of the tile.
+     */
     data class TileGUI(
 
         val label: ComponentView,
@@ -428,7 +436,8 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
             posY = 161,
             width = 1858,
             height = 765,
-            target = gridHand
+            target = gridHand,
+            limitBounds = false
         ).apply {
             interactive = true
         }
@@ -519,11 +528,12 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
     }
 
     private fun  showWithoutPossiblePositions(player: Player){
+        val positions = player.tiles.mapNotNull { it?.position }
 
-        val minX = player.tiles.minOfOrNull { it?.position!!.x.toInt() } ?: 0
-        val maxX = player.tiles.maxOfOrNull { it?.position!!.x.toInt() } ?: 0
-        val minY = player.tiles.minOfOrNull { it?.position!!.y.toInt() } ?: 0
-        val maxY = player.tiles.maxOfOrNull { it?.position!!.y.toInt() } ?: 0
+        val minX = positions.minOfOrNull { it.x.toInt() } ?: 0
+        val maxX = positions.maxOfOrNull { it.x.toInt() } ?: 0
+        val minY = positions.minOfOrNull { it.y.toInt() } ?: 0
+        val maxY = positions.maxOfOrNull { it.y.toInt() } ?: 0
 
         val column = maxX - minX + 1
         val row = maxY - minY + 1
@@ -544,7 +554,8 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
             posY = 161,
             width = 1858,
             height = 765,
-            target = gridHand
+            target = gridHand,
+            limitBounds = false
         ).apply {
             interactive = true
         }
@@ -577,8 +588,10 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                     posX = tileCoordinates[i].first.toDouble()
                     posY = tileCoordinates[i].second.toDouble()
                 }
+                val isAvailable = i in availableTiles.filterNotNull()
+                val canPlay = !isAlreadyPlayed && ifHuman && ifLocalPlayer
 
-                val toAdd: ComponentView = if (i in availableTiles.filterNotNull() && !isAlreadyPlayed && ifHuman && ifLocalPlayer) {
+                val toAdd: ComponentView = if (isAvailable && canPlay) {
                     tileLabel.apply {
                         posX = 5.0
                         posY = 5.0
@@ -743,19 +756,18 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    private fun  setTile(tileLabel: ComponentView, idx: Int ){
-        if (chosenTile != null){
-            if (chosenTile!!.first == tileLabel){
-                chosenTile = null
-                tileLabel.scale = 1.0
-            }
-            else{
-                chosenTile!!.first.scale = 1.0
-                chosenTile = tileLabel to idx
-                tileLabel.scale = 1.5
-            }
+    private fun setTile(tileLabel: ComponentView, idx: Int) {
+        val (selectedView, _) = chosenTile ?: run {
+            chosenTile = tileLabel to idx
+            tileLabel.scale = 1.5
+            return
         }
-        else{
+
+        if (selectedView == tileLabel) {
+            chosenTile = null
+            tileLabel.scale = 1.0
+        } else {
+            selectedView.scale = 1.0
             chosenTile = tileLabel to idx
             tileLabel.scale = 1.5
         }
@@ -783,7 +795,12 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
     }
 
-    private fun  placePossiblePositions(grid: GridPane<ComponentView>, positions: List<SerializableCoordinate>, minX: Int, maxY: Int){
+    private fun  placePossiblePositions(
+        grid: GridPane<ComponentView>,
+        positions: List<SerializableCoordinate>,
+        minX: Int,
+        maxY: Int
+    ){
 
         for ( coord in positions){
 
@@ -798,8 +815,10 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                     }
                     else{
                         if (ifOnlineMode) {
-                            isAlreadyPlayed = true
-                            rootService.playerActionService.playTile(chosenTile!!.second, coord)
+                            chosenTile?.let {
+                                isAlreadyPlayed = true
+                                rootService.playerActionService.playTile(it.second, coord)
+                            }
                         }
                     }
                 }
@@ -816,7 +835,9 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
 
         for (tile in player.tiles){
 
-            val tileLabel = createTile(tile!!)
+            if (tile == null) continue
+
+            val tileLabel = createTile(tile)
 
             for ((index, task) in tile.tasks.withIndex()){
                 if (task.second){
@@ -832,7 +853,9 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                         posY = xy.second,
                         width = 50,
                         height = 50,
-                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply { style.borderRadius = BorderRadius(100) }
+                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
+                            style.borderRadius = BorderRadius(100)
+                        }
                     )
 
                     tileLabel.add(complited)
@@ -840,12 +863,14 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                 }
             }
 
-            val x = tile.position!!.x.toInt()
-            val y = tile.position!!.y.toInt()
+            tile.position?.let { pos ->
+                val x = pos.x.toInt()
+                val y = pos.y.toInt()
 
-            val col = x - minX
-            val row = maxY -  y
-            grid[col, row] = tileLabel
+                val col = x - minX
+                val row = maxY - y
+                grid[col, row] = tileLabel
+            }
         }
     }
 
@@ -881,6 +906,11 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
         }, 4000)
     }
 
+
+    /**
+     * Sets the fixed coordinates for the tiles on the MoonWheel UI.
+     * Each coordinate corresponds to the position of a tile.
+     */
     fun setCoordinatesForTheMoonWheel(){
         // 1510, 110
         tileCoordinates.add(Pair(910, 25))
@@ -942,7 +972,9 @@ class OnlineGameScene(private val rootService: RootService): BoardGameScene(1920
                         posY = tokenCoordinates[pos].second,
                         height = 35,
                         width = 35,
-                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply { style.borderRadius = BorderRadius(100) }
+                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
+                            style.borderRadius = BorderRadius(100)
+                        }
                     )
 
                     contentPane.add(token)

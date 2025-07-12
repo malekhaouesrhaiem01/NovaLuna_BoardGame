@@ -301,6 +301,20 @@ class OfflineMenuScene (private val rootService: RootService) :
         }
     )
 
+
+    /**
+     * This class stores the GUI elements associated with a player setup.
+     * It is created for each player during the player configuration phase.
+     *
+     * @property orderToken Label that shows the order/position of the player (1 to 4).
+     * @property defaultInput TextField for entering the player's name.
+     * @property colorButton Button to choose the player's color.
+     * @property easyButton Button to assign an easy bot to this player.
+     * @property hardButton Button to assign a hard bot to this player.
+     * @property removeButton Optional button to remove this player (only for players 3 and 4).
+     * @property whichPlayer 0 = Human, 1 = Easy Bot, 2 = Hard Bot. Defaults to 0 (Human).
+     * @property color 0 = Black, 1 = White, 2 = Blue, 3 = Orange, 4 = None. Defaults to 4.
+     */
     data class PlayerGUI(
         val orderToken: Label,
         val defaultInput: TextField,
@@ -311,6 +325,8 @@ class OfflineMenuScene (private val rootService: RootService) :
         var whichPlayer : Int = 0,
         var color : Int = 4
     )
+
+
     private val player1 = PlayerGUI(firstOderToken, firstDefaultInput, firstColorButton,
         firstEasyButton, firstHardButton)
 
@@ -561,95 +577,47 @@ class OfflineMenuScene (private val rootService: RootService) :
         }, 3000)
     }
 
-    private fun selectColor(i: Int){
-
+    private fun selectColor(i: Int) {
         val player = players[i]
 
-        noneColor.onMouseClicked = {
-            if(player.color != 4){
-                availableColors[player.color] = true
-            }
-
-            player.color = 4
-            player.colorButton.apply {
-                text = "NONE"
-                font = Font(48, Color.BLACK,"Space Grotesk" )
-                visual = ColorVisual(Color.GRAY).apply {
-                    style.borderRadius = BorderRadius(15)
+        fun setupColorButton(
+            button: Button,
+            colorIndex: Int,
+            colorName: String,
+            fontColor: Color,
+            backgroundColor: Color
+        ) {
+            button.onMouseClicked = {
+                // Free old color if assigned
+                if (player.color != 4) {
+                    availableColors[player.color] = true
                 }
+                // Set new color
+                player.color = colorIndex
+                player.colorButton.apply {
+                    text = colorName
+                    font = Font(48, fontColor, "Space Grotesk")
+                    visual = ColorVisual(backgroundColor).apply {
+                        style.borderRadius = BorderRadius(15)
+                    }
+                }
+                // Mark new color as taken if not 'None'
+                if (colorIndex != 4) {
+                    availableColors[colorIndex] = false
+                }
+                selectColorPane.isVisible = false
             }
-            selectColorPane.isVisible = false
+            if(colorIndex != 4){
+                button.isVisible = availableColors[colorIndex]
+            }
         }
 
-        blackColor.onMouseClicked = {
-            if(player.color != 4){
-                availableColors[player.color] = true
-            }
-            player.color = 0
-            player.colorButton.apply {
-                text = "Black"
-                font = Font(48, Color.WHITE,"Space Grotesk" )
-                visual = ColorVisual(Color.BLACK).apply {
-                    style.borderRadius = BorderRadius(15)
-                }
-            }
-            availableColors[0] = false
-            selectColorPane.isVisible = false
-        }
-
-        whiteColor.onMouseClicked = {
-            if(player.color != 4){
-                availableColors[player.color] = true
-            }
-            player.color = 1
-            player.colorButton.apply {
-                text = "White"
-                font = Font(48, Color.BLACK,"Space Grotesk" )
-                visual = ColorVisual(Color.WHITE).apply {
-                    style.borderRadius = BorderRadius(15)
-                }
-            }
-            availableColors[1] = false
-            selectColorPane.isVisible = false
-        }
-
-        blueColor.onMouseClicked = {
-            if(player.color != 4){
-                availableColors[player.color] = true
-            }
-            player.color = 2
-            player.colorButton.apply {
-                text = "Blue"
-                font = Font(48, Color.BLACK,"Space Grotesk" )
-                visual = ColorVisual(Color.BLUE).apply {
-                    style.borderRadius = BorderRadius(15)
-                }
-            }
-            availableColors[2] = false
-            selectColorPane.isVisible = false
-        }
-
-        orangeColor.onMouseClicked = {
-            if(player.color != 4){
-                availableColors[player.color] = true
-            }
-            player.color = 3
-            player.colorButton.apply {
-                text = "Orange"
-                font = Font(48, Color.BLACK,"Space Grotesk" )
-                visual = ColorVisual(Color(0xFF8401)).apply {
-                    style.borderRadius = BorderRadius(15)
-                }
-            }
-            availableColors[3] = false
-            selectColorPane.isVisible = false
-        }
-
-        blackColor.isVisible = availableColors[0]
-        whiteColor.isVisible = availableColors[1]
-        blueColor.isVisible = availableColors[2]
-        orangeColor.isVisible = availableColors[3]
-
+        // Setup buttons with corresponding colors
+        setupColorButton(noneColor, 4, "NONE", Color.BLACK, Color.GRAY)
+        setupColorButton(blackColor, 0, "Black", Color.WHITE, Color.BLACK)
+        setupColorButton(whiteColor, 1, "White", Color.BLACK, Color.WHITE)
+        setupColorButton(blueColor, 2, "Blue", Color.BLACK, Color.BLUE)
+        setupColorButton(orangeColor, 3, "Orange", Color.BLACK, Color(0xFF8401))
     }
 
     private fun addPlayer(){

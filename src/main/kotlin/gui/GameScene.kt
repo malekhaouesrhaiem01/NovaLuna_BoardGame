@@ -41,6 +41,14 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     var ifHuman: Boolean? = null
     var ifOfflineMode = false
 
+    /**
+     * Temporary class used to store labels and IDs of tiles,
+     * which are then stored as elements in the list [tilesOnTheMoonWheel].
+     * These elements are later used to clear the MoonWheel.
+     *
+     * @property label The label (ComponentView) of the tile.
+     * @property id The unique ID of the tile.
+     */
     data class TileGUI(
 
         val label: ComponentView,
@@ -399,44 +407,43 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    private fun fullMoonWheel(game: NovaLunaGame){
-
+    private fun fullMoonWheel(game: NovaLunaGame) {
         val tiles = game.tileTrack
-
         val availableTiles: List<Int?> = rootService.gameService.getAvailableTiles()
+        val humanCanPlay = ifHuman ?: false
 
-        for((i, tile) in tiles.withIndex()){
-            if (tile != null) {
-                val tileLabel = createTile(tile).apply {
-                    posX = tileCoordinates[i].first.toDouble()
-                    posY = tileCoordinates[i].second.toDouble()
-                }
+        for ((i, tile) in tiles.withIndex()) {
+            if (tile == null) continue
 
-                val toAdd: ComponentView = if (i in availableTiles.filterNotNull() && !isAlreadyPlayed && ifHuman ?: false) {
-                    tileLabel.apply {
-                        posX = 5.0
-                        posY = 5.0
-                    }
-
-                    Pane<ComponentView>(
-                        posX = tileCoordinates[i].first.toDouble() - 5,
-                        posY = tileCoordinates[i].second.toDouble() - 5,
-                        height = 110,
-                        width = 110,
-                        visual = ColorVisual(Color.GREEN).apply { style.borderRadius = BorderRadius(10) }
-                    ).apply {
-                        onMouseClicked = {
-                            setTile(this, i)
-                        }
-                        addAll(tileLabel)
-                    }
-                } else {
-                    tileLabel
-                }
-
-                tilesOnTheMoonWheel.add(TileGUI(toAdd, tile.id))
-                contentPane.add(toAdd)
+            val tileLabel = createTile(tile).apply {
+                posX = tileCoordinates[i].first.toDouble()
+                posY = tileCoordinates[i].second.toDouble()
             }
+
+            val toAdd: ComponentView = if (
+                i in availableTiles.filterNotNull() &&
+                !isAlreadyPlayed &&
+                humanCanPlay
+            ) {
+                tileLabel.posX = 5.0
+                tileLabel.posY = 5.0
+
+                Pane<ComponentView>(
+                    posX = tileCoordinates[i].first.toDouble() - 5,
+                    posY = tileCoordinates[i].second.toDouble() - 5,
+                    height = 110,
+                    width = 110,
+                    visual = ColorVisual(Color.GREEN).apply { style.borderRadius = BorderRadius(10) }
+                ).apply {
+                    onMouseClicked = { setTile(this, i) }
+                    addAll(tileLabel)
+                }
+            } else {
+                tileLabel
+            }
+
+            tilesOnTheMoonWheel.add(TileGUI(toAdd, tile.id))
+            contentPane.add(toAdd)
         }
 
         val meeple = Label(
@@ -450,6 +457,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
         tilesOnTheMoonWheel.add(TileGUI(meeple, 100))
         contentPane.add(meeple)
     }
+
 
     private fun getColor(tileColor : TileColour): Color{
         val color = when(tileColor){
@@ -578,19 +586,18 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    private fun setTile(tileLabel: ComponentView, idx: Int ){
-        if (chosenTile != null){
-            if (chosenTile!!.first == tileLabel){
-                chosenTile = null
-                tileLabel.scale = 1.0
-            }
-            else{
-                chosenTile!!.first.scale = 1.0
-                chosenTile = tileLabel to idx
-                tileLabel.scale = 1.5
-            }
+    private fun setTile(tileLabel: ComponentView, idx: Int) {
+        val (selectedView, _) = chosenTile ?: run {
+            chosenTile = tileLabel to idx
+            tileLabel.scale = 1.5
+            return
         }
-        else{
+
+        if (selectedView == tileLabel) {
+            chosenTile = null
+            tileLabel.scale = 1.0
+        } else {
+            selectedView.scale = 1.0
             chosenTile = tileLabel to idx
             tileLabel.scale = 1.5
         }
@@ -711,12 +718,13 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    private fun showWithoutPossiblePositions(player: Player){
+    private fun showWithoutPossiblePositions(player: Player) {
+        val positions = player.tiles.mapNotNull { it?.position }
 
-        val minX = player.tiles.minOfOrNull { it?.position!!.x.toInt() } ?: 0
-        val maxX = player.tiles.maxOfOrNull { it?.position!!.x.toInt() } ?: 0
-        val minY = player.tiles.minOfOrNull { it?.position!!.y.toInt() } ?: 0
-        val maxY = player.tiles.maxOfOrNull { it?.position!!.y.toInt() } ?: 0
+        val minX = positions.minOfOrNull { it.x.toInt() } ?: 0
+        val maxX = positions.maxOfOrNull { it.x.toInt() } ?: 0
+        val minY = positions.minOfOrNull { it.y.toInt() } ?: 0
+        val maxY = positions.maxOfOrNull { it.y.toInt() } ?: 0
 
         val column = maxX - minX + 1
         val row = maxY - minY + 1
@@ -740,7 +748,8 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             posY = 161,
             width = 1858,
             height = 765,
-            target = gridHand
+            target = gridHand,
+            limitBounds = false
         ).apply {
             interactive = true
         }
@@ -773,7 +782,7 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             spacing = 5
         ).apply {
             placeTiles(this, player, offsetX, offsetY)
-            if (!isAlreadyPlayed && ifHuman!!) {
+            if (!isAlreadyPlayed && (ifHuman == true)) {
                 placePossiblePositions(this, validPositions, offsetX, offsetY)
             }
 
@@ -785,7 +794,8 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             posY = 161,
             width = 1858,
             height = 765,
-            target = gridHand
+            target = gridHand,
+            limitBounds = false
         ).apply {
             interactive = true
         }
@@ -794,7 +804,12 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
     }
 
-    private fun placePossiblePositions(grid: GridPane<ComponentView>, positions: List<SerializableCoordinate>, offsetX: Int, offsetY: Int){
+    private fun placePossiblePositions(
+        grid: GridPane<ComponentView>,
+        positions: List<SerializableCoordinate>,
+        offsetX: Int,
+        offsetY: Int
+    ) {
 
         for ( coord in positions){
 
@@ -808,9 +823,11 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
                         showError("First, you have to select a tile")
                     }
                     else{
-                        if (ifOfflineMode){
-                            isAlreadyPlayed = true
-                            rootService.playerActionService.playTile(chosenTile!!.second, coord)
+                        if (ifOfflineMode) {
+                            chosenTile?.let {
+                                isAlreadyPlayed = true
+                                rootService.playerActionService.playTile(it.second, coord)
+                            }
                         }
                     }
                 }
@@ -828,7 +845,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
 
         for (tile in player.tiles){
 
-            val tileLabel = createTile(tile!!)
+            if (tile == null) continue
+
+            val tileLabel = createTile(tile)
 
             for ((index, task) in tile.tasks.withIndex()){
                 if (task.second){
@@ -844,7 +863,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
                         posY = xy.second,
                         width = 50,
                         height = 50,
-                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply { style.borderRadius = BorderRadius(100) }
+                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
+                            style.borderRadius = BorderRadius(100)
+                        }
                     )
 
                     tileLabel.add(complited)
@@ -852,10 +873,12 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
                 }
             }
 
-            val x = tile.position!!.x.toInt()
-            val y = tile.position!!.y.toInt()
+            tile.position?.let { pos ->
+                val x = pos.x.toInt()
+                val y = pos.y.toInt()
+                grid[x + offsetX, -y + offsetY] = tileLabel
+            }
 
-            grid[x + offsetX, -y + offsetY] = tileLabel
         }
     }
 
@@ -1033,7 +1056,14 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
     }
 
 
-
+    /**
+     * Sets the tokens of the players on the MoonWheel UI.
+     *
+     * This function removes all existing tokens from the MoonWheel,
+     * then adds tokens for players according to their current moonTrackPosition.
+     *
+     * @param game The current NovaLunaGame instance containing player data.
+     */
     fun setTokens(game: NovaLunaGame){
 
         for (label in tokensOnTheMoonWheel){
@@ -1051,7 +1081,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
                         posY = tokenCoordinates[pos].second,
                         height = 35,
                         width = 35,
-                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply { style.borderRadius = BorderRadius(100) }
+                        visual = ColorVisual(getPlayerColor(player.playerColour)).apply {
+                            style.borderRadius = BorderRadius(100)
+                        }
                     )
 
                     contentPane.add(token)
