@@ -31,13 +31,7 @@ class NovaLunaNetworkClient(
 
     var sessionID: String? = null
     var otherPlayerName: String? = null
-    /**
-     * Handles the server response after trying to create a game.
-     * If successful, stores the session ID and informs the [NetworkService].
-     * Otherwise, disconnects and throws an error.
-     *
-     * @param response The server's response to a create game request.
-     */
+
 
 
     // Add this flag to track if we're ready to receive messages
@@ -55,7 +49,13 @@ class NovaLunaNetworkClient(
         }.start()
     }
 
-    fun isAnnotatedReceiversReady(): Boolean = annotatedReceiversReady
+    /**
+     * Handles the server response after trying to create a game.
+     * If successful, stores the session ID and informs the [NetworkService].
+     * Otherwise, disconnects and throws an error.
+     *
+     * @param response The server's response to a create game request.
+     */
     override fun onCreateGameResponse(response: CreateGameResponse) {
         check(networkService.connectionState == ConnectionState.WAITING_FOR_HOST_CONFIRMATION) {
             "Unexpected CreateGameResponse"
@@ -123,15 +123,14 @@ class NovaLunaNetworkClient(
             disconnectAndError("GameAction failed: ${response.status}")
         }
     }
+
     /**
      * Receiver for the initial game state message from the host.
      * Delegates handling to the [NetworkService].
      *
      * @param message The initial game setup message.
-     * @param sender The sender (host) of the message.
+     * @param sender The sender of the message.
      */
-
-
     @GameActionReceiver
     @Suppress("UNUSED_PARAMETER", "unused")
     fun onInitReceived(message: InitMessage, sender: String) {
@@ -161,7 +160,7 @@ class NovaLunaNetworkClient(
         try {
             networkService.startNewJoinedGame(message)
             println("DEBUG: startNewJoinedGame completed successfully")
-        } catch (e: Exception) {
+        } catch (e: IllegalStateException) {
             println("DEBUG: Exception in startNewJoinedGame: ${e.message}")
             e.printStackTrace()
         }

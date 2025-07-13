@@ -10,7 +10,7 @@ import entity.Player
 import entity.PlayerColour
 import entity.PlayerType
 import entity.SerializableCoordinate
-import service.TileLoader
+
 
 /**
  * Service layer class that realizes the necessary logic for sending and receiving Nova Luna network messages.
@@ -20,6 +20,10 @@ import service.TileLoader
  */
 class NetworkService(private val rootService: RootService) : AbstractRefreshingService() {
 
+    /**
+     * Holds all constants required to connect to the BGW-Net server
+     * for SoPra network games.
+     */
     companion object {
         /** URL of the BGW-Net server for SoPra network games */
         const val SERVER_ADDRESS = "sopra.cs.tu-dortmund.de:80/bgw-net/connect"
@@ -34,7 +38,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     /** Tracks host + guest names in join order */
     val currentSessionPlayers = mutableListOf<String>()
 
-    private var playerObjectIds = mutableMapOf<String, Int>()
+    private val playerObjectIds = mutableMapOf<String, Int>()
 
     /** Underlying BGW-Net client; null when offline */
     private var client: NovaLunaNetworkClient? = null
@@ -50,8 +54,6 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     var currentSessionID: String? = null
         private set
 
-    // Add this method to NetworkService.kt
-    fun getClientForTesting(): NovaLunaNetworkClient? = client
 
     /** Host side: called when createGame() succeeds */
     internal fun onCreateGameResponse(response: CreateGameResponse, hostName: String) {
@@ -81,10 +83,10 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         onAllRefreshables { refreshAfterPlayerJoined() }
     }
 
-    internal fun disconnectAndError() {
-        currentSessionPlayers.clear()
-        updateConnectionState(ConnectionState.DISCONNECTED)
-    }
+   // internal fun disconnectAndError() {
+     //   currentSessionPlayers.clear()
+     //   updateConnectionState(ConnectionState.DISCONNECTED)
+   // }
 
     /**
      * Host a new Nova Luna game session on the server.
@@ -173,7 +175,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
      * @param playersStartGame Fully initialized Player objects
      *                         (name, tokenCount, colour, type, tiles, height=0)
      * @param isFirstGame      Flag that determines if it's a first game
-     * @param randomOrder      From your "random" toggle in the UI
+     * @param randomOrder      From "random" toggle in the UI
      */
     fun startNewHostedGame(
         playersStartGame: List<Player>, isFirstGame: Boolean, randomOrder: Boolean
@@ -192,23 +194,28 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         }
 
         // 3) Delegate into GameService (host still uses regular startNewGame to shuffle)
-        rootService.gameService.startNewGame(annotatedPlayers, 10, randomOrder, isFirstGame, startTurnImmediately = false)
+        rootService.gameService.startNewGame(
+            annotatedPlayers,
+            10,
+            randomOrder,
+            isFirstGame,
+            startTurnImmediately = false)
         val game = rootService.currentGame ?: error("GameService failed to initialize the game state")
         game.players.forEach {
             playerObjectIds[it.playerName] = System.identityHashCode(it)
         }
-        println("   [HOST] Player object IDs: $playerObjectIds")
+        //println("   [HOST] Player object IDs: $playerObjectIds")
 
-// 4) Build and send the InitMessage using the ACTUAL shuffled tile order
+        // 4) Build and send the InitMessage using the ACTUAL shuffled tile order
         val drawPileIds = mutableListOf<Int>()
 
-// Get the actual tile order from the game (tileTrack + drawPile)
-// Skip index 0 of tileTrack (it's null for meeple)
+        // Get the actual tile order from the game (tileTrack + drawPile)
+        // Skip index 0 of tileTrack (it's null for meeple)
         for (i in 1 until game.tileTrack.size) {
             game.tileTrack[i]?.let { drawPileIds.add(it.id) }
         }
 
-// Add all tiles from drawPile
+        // Add all tiles from drawPile
         game.drawPile.forEach { tile ->
             tile?.let { drawPileIds.add(it.id) }
         }
@@ -225,11 +232,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         println("INIT-MSG ➜ $initMsg")
 
-
         // 5) Send the InitMessage first, before determining states
         client?.sendGameActionMessage(initMsg) ?: error("Network client not initialized")
-
-
 
         // 6) Who does the game say is up first?
         val firstIndex = game.activePlayer
@@ -289,16 +293,19 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             )
         }
 
-
-
         // 4) Delegate into game logic
-        rootService.gameService.startNetworkGame(localPlayers, 10, message.drawPile, message.isFirstGame, startTurnImmediately = false)
+        rootService.gameService.startNetworkGame(
+            localPlayers,
+            10,
+            message.drawPile,
+            message.isFirstGame,
+            startTurnImmediately = false)
 
         val game = rootService.currentGame ?: error("GameService failed to initialize after InitMessage")
         game.players.forEach {
             playerObjectIds[it.playerName] = System.identityHashCode(it)
         }
-        println("   [GUEST] Player object IDs: $playerObjectIds")
+        //println("   [GUEST] Player object IDs: $playerObjectIds")
         // 5) Figure out who starts
         val firstIndex = game.activePlayer
         val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
@@ -321,7 +328,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
     /**
      * Send the active‐player's turn to the opponent.
      *
-     * @param tileId       tileId The ID of the tile selected by the player. This corresponds to the ID in the CSV file,
+     * @param tileId       The ID of the tile selected by the player. This corresponds to the ID in the CSV file,
      * @param x            The X-coordinate where the tile is placed.
      * @param y            The Y-coordinate where the tile is placed.
      * @param refillTrack  true indicates that the player has done a refill Action
@@ -366,8 +373,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
                 println("DEBUG: Same player gets another turn")
                 updateConnectionState(ConnectionState.PLAYING_MY_TURN)
             }
-            println("[SEND] ${client!!.playerName} thinks next player is: ${game.players[game.activePlayer].playerName}")
-            println("[SEND] ${client!!.playerName} connection state is now: $connectionState")
+            //println("[SEND] ${client!!.playerName} thinks next player is: ${game.players[game.activePlayer].playerName}")
+            //println("[SEND] ${client!!.playerName} connection state is now: $connectionState")
         } else {
             // Game ended, update connection state appropriately
             updateConnectionState(ConnectionState.DISCONNECTED)
@@ -429,15 +436,17 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             val gameAfterEndTurn = rootService.currentGame
             if (gameAfterEndTurn != null) {
                 // Decide next connection state: if the same player remains active, grant another turn
-                val nextState = if (gameAfterEndTurn.players[gameAfterEndTurn.activePlayer].playerName == client!!.playerName) {
-                    ConnectionState.PLAYING_MY_TURN
-                } else {
-                    ConnectionState.WAITING_FOR_OPPONENT
-                }
+                val nextState =
+                    if (gameAfterEndTurn.players[gameAfterEndTurn.activePlayer].playerName == client!!.playerName) {
+                        ConnectionState.PLAYING_MY_TURN
+                    } else {
+                        ConnectionState.WAITING_FOR_OPPONENT
+                    }
+
                 updateConnectionState(nextState)
-                println("Who does ${client!!.playerName} think is next: ${gameAfterEndTurn.players[gameAfterEndTurn.activePlayer].playerName}")
-                println("My connection state will be: $nextState")
-                println("DEBUG: Transitioning to connectionState=$nextState for player {client.playerName}")
+               // println("Who does ${client!!.playerName} think is next: ${gameAfterEndTurn.players[gameAfterEndTurn.activePlayer].playerName}")
+                //println("My connection state will be: $nextState")
+               // println("DEBUG: Transitioning to connectionState=$nextState for player {client.playerName}")
             } else {
                 // Game ended, disconnect or go to appropriate state
                 updateConnectionState(ConnectionState.DISCONNECTED)
@@ -457,4 +466,5 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         connectionState = newState
         onAllRefreshables { refreshConnectionState(newState) }
     }
+
 }

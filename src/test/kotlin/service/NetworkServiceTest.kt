@@ -11,11 +11,81 @@ import tools.aqua.bgw.net.common.response.JoinGameResponse
 import tools.aqua.bgw.net.common.response.JoinGameResponseStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import tools.aqua.bgw.net.common.response.CreateGameResponse
+import tools.aqua.bgw.net.common.response.CreateGameResponseStatus
+
+
 
 /**
  * Test class for the NetworkService Class
  */
 class NetworkServiceTest {
+
+    private val secret = "neumond25"
+
+
+    private val p1 = Player("Paula", 0, 0, false, PlayerType.HUMAN, PlayerColour.WHITE, mutableListOf(), 0)
+    private val p2 = Player("Lilly", 0, 0, false, PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0)
+    private val p3 = Player("Zenon", 0, 0, false, PlayerType.HUMAN, PlayerColour.BLACK, mutableListOf(), 0)
+    private val p4 = p1.copy(playerName = "Xanthe")
+    private val p5 = p1.copy(playerName = "Quentin")
+
+    @Test fun connectBlanks() {
+        val svc = NetworkService(RootService())
+        assertFailsWith<IllegalArgumentException> { svc.hostGame("", "Paula") }
+        assertFailsWith<IllegalArgumentException> { svc.hostGame("starlight42", "") }
+    }
+
+
+    @Test fun connectSuccess() {
+        val svc = NetworkService(RootService())
+        svc.disconnect()
+        svc.hostGame(secret, "Paula")
+        assertEquals(
+            ConnectionState.WAITING_FOR_HOST_CONFIRMATION,
+            svc.connectionState
+        )
+    }
+
+    @Test fun connectAlready() {
+        val svc = NetworkService(RootService())
+        svc.disconnect()
+        svc.hostGame(secret, "Lilly")
+        assertFailsWith< IllegalArgumentException> {
+            svc.hostGame(secret, "Zenon")
+        }
+    }
+
+    @Test
+    fun startHostedWrongState() {
+        val svc = NetworkService(RootService())
+        assertFailsWith<IllegalStateException> {
+            svc.startNewHostedGame(listOf(p1, p2), isFirstGame = false, randomOrder = true)
+        }
+    }
+
+    @Test
+    fun startHostedBadSizes() {
+        val svc = NetworkService(RootService())
+        svc.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
+
+        assertFailsWith<IllegalArgumentException> {
+            svc.startNewHostedGame(listOf(p1), isFirstGame = false, randomOrder = false)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            svc.startNewHostedGame(listOf(p1, p2, p3, p4, p5), isFirstGame = true, randomOrder = true)
+        }
+    }
+
+    @Test
+    fun sendTurnWrongState() {
+        val svc = NetworkService(RootService())
+        // default state is DISCONNECTED
+        assertFailsWith<IllegalStateException> {
+            svc.sendTurnMessage(tileId = 42, x = 1, y = 2, refillTrack = false)
+        }
+    }
     /**
      * Tests for the HostGame function
      */
@@ -64,60 +134,45 @@ class NetworkServiceTest {
         val networkService = NetworkService(rootService)
 
         val players = listOf(
-            Player("Paula",
-                18,
-                0,
-                false,
-                PlayerType.HUMAN,
-                PlayerColour.WHITE,
-                mutableListOf(),
-                0),
-            Player("Player2",
-                18,
-                0,
-                false,
-                PlayerType.HUMAN,
-                PlayerColour.ORANGE,
-                mutableListOf(),
-                0)
+            Player("Paula", 18, 0, false, PlayerType.HUMAN, PlayerColour.WHITE, mutableListOf(), 0),
+            Player("Player2", 18, 0, false, PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0)
         )
 
-        assertThrows<IllegalStateException> {networkService.startNewHostedGame(players,
-            isFirstGame = false, randomOrder = true)}
+        assertThrows<IllegalStateException> {
+            networkService.startNewHostedGame(players, isFirstGame = false, randomOrder = true)
+        }
 
         networkService.hostGame("neumond25", "Paula", "Session1")
+        assertEquals(ConnectionState.WAITING_FOR_HOST_CONFIRMATION, networkService.connectionState)
+
+        networkService.onCreateGameResponse(
+            CreateGameResponse(CreateGameResponseStatus.SUCCESS to "Session1"), "Paula")
+        assertEquals(ConnectionState.WAITING_FOR_GUESTS, networkService.connectionState)
 
         networkService.onPlayerJoined(PlayerJoinedNotification("Hallo", "Nochmal Hallo"))
         assertEquals(ConnectionState.WAITING_FOR_GUESTS, networkService.connectionState)
 
-        assertThrows<IllegalArgumentException> { networkService.startNewHostedGame(
-            listOf(players[0]),
-            isFirstGame = false, randomOrder = true) }
+        assertThrows<IllegalArgumentException> {
+            networkService.startNewHostedGame(
+                listOf(players[0]),
+                isFirstGame = false,
+                randomOrder = true
+            )
+        }
 
         networkService.startNewHostedGame(players, isFirstGame = false, randomOrder = true)
 
-
         val players2 = listOf(
-            Player("Player1",
-                18,
-                0,
-                false,
-                PlayerType.HUMAN,
-                PlayerColour.WHITE,
-                mutableListOf(),
-                0),
-            Player("Paula",
-                18,
-                0,
-                false,
-                PlayerType.HUMAN,
-                PlayerColour.ORANGE,
-                mutableListOf(),
-                0)
+            Player("Player1", 18, 0, false, PlayerType.HUMAN, PlayerColour.WHITE, mutableListOf(), 0),
+            Player("Paula",   18, 0, false, PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0)
         )
+
         rootService.currentGame = null
         networkService.disconnect()
+
         networkService.hostGame("neumond25", "Paula", "Session2")
+        networkService.onCreateGameResponse(
+            CreateGameResponse(CreateGameResponseStatus.SUCCESS to "Session2"), "Paula")
         networkService.onPlayerJoined(PlayerJoinedNotification("Hallo", "Nochmal Hallo"))
         networkService.startNewHostedGame(players2, isFirstGame = false, randomOrder = true)
     }
@@ -169,37 +224,28 @@ class NetworkServiceTest {
      */
     @Test
     fun testReceiveTurnMessage(){
+
         val rootService = RootService()
         val networkService = NetworkService(rootService)
 
-       // assertThrows<IllegalStateException> { networkService.receiveTurnMessage(
-         //   TurnMessage(30, 0, 0, refillTrack = false)) }
-
         val players1 = listOf(
-            Player("Player1",
-                18,
-                0,
-                false,
-                PlayerType.HUMAN,
-                PlayerColour.WHITE,
-                mutableListOf(),
-                0),
-            Player("Paula",
-                18,
-                0,
-                false,
-                PlayerType.HUMAN,
-                PlayerColour.ORANGE,
-                mutableListOf(),
-                0)
+            Player("Player1", 18, 0, false, PlayerType.HUMAN, PlayerColour.WHITE,  mutableListOf(), 0),
+            Player("Paula",   18, 0, false, PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0)
         )
+
         networkService.hostGame("neumond25", "Paula", "Session2")
+        networkService.onCreateGameResponse(
+            CreateGameResponse(CreateGameResponseStatus.SUCCESS to "Session2"),
+            "Paula"
+        )
         networkService.onPlayerJoined(PlayerJoinedNotification("Hallo", "Nochmal Hallo"))
         networkService.startNewHostedGame(players1, isFirstGame = false, randomOrder = false)
 
-        val tileTrack = rootService.currentGame?.tileTrack!!
+        networkService.updateConnectionState(ConnectionState.WAITING_FOR_OPPONENT)
+
+        val tileTrack = rootService.currentGame!!.tileTrack
         val message = TurnMessage(tileTrack[1]!!.id, 0, 0, refillTrack = false)
-        //networkService.receiveTurnMessage(message)
+        networkService.receiveTurnMessage(message, "Player1")
     }
 
 }
