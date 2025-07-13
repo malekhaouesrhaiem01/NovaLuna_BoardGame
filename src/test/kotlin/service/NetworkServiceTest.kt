@@ -30,15 +30,21 @@ class NetworkServiceTest {
     private val p3 = Player("Zenon", 0, 0, false, PlayerType.HUMAN, PlayerColour.BLACK, mutableListOf(), 0)
     private val p4 = p1.copy(playerName = "Xanthe")
     private val p5 = p1.copy(playerName = "Quentin")
-
-    @Test fun connectBlanks() {
+    /**
+     * Tests Hosting a Game with no Name Input
+     */
+    @Test
+    fun connectBlanks() {
         val svc = NetworkService(RootService())
         assertFailsWith<IllegalArgumentException> { svc.hostGame("", "Paula") }
         assertFailsWith<IllegalArgumentException> { svc.hostGame("starlight42", "") }
     }
 
-
-    @Test fun connectSuccess() {
+    /**
+     * Tests connection when histing a Game
+     */
+    @Test
+    fun connectSuccess() {
         val svc = NetworkService(RootService())
         svc.disconnect()
         svc.hostGame(secret, "Paula")
@@ -48,7 +54,11 @@ class NetworkServiceTest {
         )
     }
 
-    @Test fun connectAlready() {
+    /**
+     * Tests if connecting twice throws an Exception
+     */
+    @Test
+    fun connectAlready() {
         val svc = NetworkService(RootService())
         svc.disconnect()
         svc.hostGame(secret, "Lilly")
@@ -57,6 +67,9 @@ class NetworkServiceTest {
         }
     }
 
+    /**
+     * Tests Hosting a Game with the wrong state throws an Exception
+     */
     @Test
     fun startHostedWrongState() {
         val svc = NetworkService(RootService())
@@ -65,6 +78,9 @@ class NetworkServiceTest {
         }
     }
 
+    /**
+     * Tests hosting a Game with wrong number of Players
+     */
     @Test
     fun startHostedBadSizes() {
         val svc = NetworkService(RootService())
@@ -78,6 +94,9 @@ class NetworkServiceTest {
         }
     }
 
+    /**
+     * Tests sending the Wrong turn Message
+     */
     @Test
     fun sendTurnWrongState() {
         val svc = NetworkService(RootService())

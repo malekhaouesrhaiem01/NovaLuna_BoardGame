@@ -621,16 +621,15 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         // Get neighbour Tile
         // neighbourTile
         for(neighbourTile in game.players[game.activePlayer].tiles){
-            if (neighbourTile != null){
-                try {
-                    when (neighbourTile.position) {
-                        SerializableCoordinate(coordinate.x + 1, coordinate.y) -> neighbors.add(neighbourTile)
-                        SerializableCoordinate(coordinate.x - 1, coordinate.y) -> neighbors.add(neighbourTile)
-                        SerializableCoordinate(coordinate.x, coordinate.y + 1) -> neighbors.add(neighbourTile)
-                        SerializableCoordinate(coordinate.x, coordinate.y - 1) -> neighbors.add(neighbourTile)
-                    }
-                } catch (_ : NullPointerException){}
-            }
+            checkNotNull(neighbourTile)
+            try {
+                when (neighbourTile.position) {
+                    SerializableCoordinate(coordinate.x + 1, coordinate.y) -> neighbors.add(neighbourTile)
+                    SerializableCoordinate(coordinate.x - 1, coordinate.y) -> neighbors.add(neighbourTile)
+                    SerializableCoordinate(coordinate.x, coordinate.y + 1) -> neighbors.add(neighbourTile)
+                    SerializableCoordinate(coordinate.x, coordinate.y - 1) -> neighbors.add(neighbourTile)
+                }
+            } catch (_ : NullPointerException){}
         }
         return neighbors
     }
