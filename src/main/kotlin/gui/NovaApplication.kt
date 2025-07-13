@@ -31,7 +31,9 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
                 try {
                     rootService.playerActionService.load()
                     this@NovaApplication.showGameScene(gameScene)
-                } catch (e: Exception) {
+                } catch (e: java.io.FileNotFoundException) {
+                    println("Failed to load game: the saved game can’t be found. \n${e.message}")
+                } catch (e: java.io.IOException) {
                     println("Failed to load game: ${e.message}")
                 }
             }
