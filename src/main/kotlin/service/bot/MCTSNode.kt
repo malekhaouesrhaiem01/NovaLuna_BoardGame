@@ -61,7 +61,7 @@ class MCTSNode(
      * @return The winner of the simulated game.
      */
     fun rollout(): Int {
-        var currentGameState = gameState.deepCopy()
+        val currentGameState = gameState.deepCopy()
         while (!isTerminal(currentGameState)) {
             val possibleMoves = getPossibleMoves(currentGameState)
             if (possibleMoves.isEmpty()) {
@@ -103,7 +103,8 @@ class MCTSNode(
      */
     fun isTerminal(gameState: NovaLunaGame): Boolean {
         // Implement the logic to check for a terminal state (e.g., a player has won or the game is a draw)
-        return gameState.players.any { it.tokenCount <= 0 } || (gameState.tileTrack.all { it == null } && gameState.drawPile.isEmpty())
+        return gameState.players.any { it.tokenCount <= 0 } ||
+                (gameState.tileTrack.all { it == null } && gameState.drawPile.isEmpty())
     }
 
     /**

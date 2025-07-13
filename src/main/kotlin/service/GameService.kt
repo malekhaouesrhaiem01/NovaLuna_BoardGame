@@ -20,7 +20,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      * @throws IllegalArgumentException or if the simulation speed is greater than 10.
      * @throws IllegalArgumentException If the number of players is not between 2 and 4
      */
-    fun startNewGame(players : List<Player>, simulationSpeed : Int, randomOrder : Boolean = false, firstGame : Boolean, startTurnImmediately: Boolean = true){
+    fun startNewGame(players : List<Player>, simulationSpeed : Int, randomOrder : Boolean = false,
+                     firstGame : Boolean,
+                     startTurnImmediately: Boolean = true){
 
         // überprüfe, ob Anzahl der Spieler passt (2 bis 4)
         require(players.size in 2..4) { "Spieleranzahl muss zwischen 2 und 4 sein." }
@@ -81,7 +83,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      * @param tileIds The exact order of tile IDs to use (no shuffling)
      * @param isFirstGame Whether this is the first game (affects token count)
      */
-    fun startNetworkGame(players: List<Player>, simulationSpeed: Int, tileIds: List<Int>, isFirstGame: Boolean, startTurnImmediately: Boolean = true) {
+    fun startNetworkGame(players: List<Player>, simulationSpeed: Int, tileIds: List<Int>, isFirstGame: Boolean,
+                         startTurnImmediately: Boolean = true) {
         require(players.size in 2..4) { "Spieleranzahl muss zwischen 2 und 4 sein." }
         require(simulationSpeed < 11) { "SimulationSpeed darf maximal 10 sein" }
 
@@ -217,9 +220,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
         val player = game.players[game.activePlayer]
 
-        if(player.playerType == entity.PlayerType.EASYBOT) {
+        if(player.playerType == PlayerType.EASYBOT) {
             rootService.easyBotService.executeEasyMove()
-        } else if(player.playerType == entity.PlayerType.HARDBOT) {
+        } else if(player.playerType == PlayerType.HARDBOT) {
             rootService.hardBotService.executeHardBotMove()
         }
 
@@ -269,9 +272,9 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         // If it's a bot's turn after restore, trigger the bot to make its move
         val player = game.players[game.activePlayer]
         if (!game.hasPlayedThisTurn) { // Only trigger if no move has been made this turn
-            if (player.playerType == entity.PlayerType.EASYBOT) {
+            if (player.playerType == PlayerType.EASYBOT) {
                 rootService.easyBotService.executeEasyMove()
-            } else if (player.playerType == entity.PlayerType.HARDBOT) {
+            } else if (player.playerType == PlayerType.HARDBOT) {
                 rootService.hardBotService.executeHardBotMove()
             }
         }
@@ -534,7 +537,8 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         checkNotNull(game) { "No game is currently running." }
         var count = 0
         for(tile in game.players[game.activePlayer].tiles){
-            for(task in tile?.tasks!!){
+            checkNotNull(tile)
+            for(task in tile.tasks){
                 if (task.second){
                     count++
                 }
@@ -556,7 +560,6 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
 
     private fun createPair(task : Map<TileColour, Int> , booleanList: List<Boolean>) :
             Pair<Map<TileColour, Int>, Boolean> {
-
         // Return a Pair with True if Boolean List contains no false inside else return false
         return if (booleanList.contains(false)){
             Pair(task, false)
@@ -565,40 +568,23 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
     }
 
+
     private fun checkSurroundingTiles(tile :Tile, visitedTiles : MutableList<Tile>,
                                       colorMap : MutableMap<TileColour, Int>) {
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
-        // Get Coords of the current Tile
-        val coordinate = tile.position
-        val neighbors = mutableListOf<Tile>()
-        visitedTiles.add(tile)
-
-        // Get neighbour Tile
-        // neighbourTile
-        for(neighbourTile in game.players[game.activePlayer].tiles){
-            if (neighbourTile != null){
-                try {
-                    when (neighbourTile.position) {
-                        SerializableCoordinate(coordinate!!.x + 1, coordinate.y) -> neighbors.add(neighbourTile)
-                        SerializableCoordinate(coordinate.x - 1, coordinate.y) -> neighbors.add(neighbourTile)
-                        SerializableCoordinate(coordinate.x, coordinate.y + 1) -> neighbors.add(neighbourTile)
-                        SerializableCoordinate(coordinate.x, coordinate.y - 1) -> neighbors.add(neighbourTile)
-                    }
-                } catch (_ : NullPointerException){}
-            }
-        }
+        val neighbors = getNeighbours(tile, visitedTiles)
 
         // For Every Neighbour Tile
         for(neighborTile in neighbors){
-
             // Check if visited. If not then add 1 count to color as neighbour
            if (!visitedTiles.contains(neighborTile)){
                 if (!colorMap.contains(neighborTile.tileColour)){
                     colorMap.put(neighborTile.tileColour, 1)
                 } else {
-                    val temp = colorMap[neighborTile.tileColour]!!
+                    val temp = colorMap[neighborTile.tileColour]
+                    checkNotNull(temp)
                     colorMap.replace(neighborTile.tileColour, temp, temp + 1)
                 }
             }
@@ -612,8 +598,24 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running."}
 
+        val neighbors = getNeighbours(tile, visitedTiles)
+
+        for(neighborTile in neighbors){
+            if(neighborTile.tileColour == tile.tileColour && !visitedTiles.contains(neighborTile)){
+                val temp = colorMap[neighborTile.tileColour]
+                checkNotNull(temp)
+                colorMap.replace(neighborTile.tileColour, temp, temp + 1)
+                checkForSequence(neighborTile, visitedTiles, colorMap)
+            }
+        }
+    }
+
+    private fun getNeighbours(tile :Tile, visitedTiles : MutableList<Tile>) : MutableList<Tile>{
+        val game = rootService.currentGame
+        checkNotNull(game) { "No game is currently running."}
         val neighbors = mutableListOf<Tile>()
         val coordinate = tile.position
+        checkNotNull(coordinate)
         visitedTiles.add(tile)
 
         // Get neighbour Tile
@@ -622,24 +624,16 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             if (neighbourTile != null){
                 try {
                     when (neighbourTile.position) {
-                        SerializableCoordinate(coordinate!!.x - 1, coordinate.y) -> neighbors.add(neighbourTile)
                         SerializableCoordinate(coordinate.x + 1, coordinate.y) -> neighbors.add(neighbourTile)
+                        SerializableCoordinate(coordinate.x - 1, coordinate.y) -> neighbors.add(neighbourTile)
                         SerializableCoordinate(coordinate.x, coordinate.y + 1) -> neighbors.add(neighbourTile)
                         SerializableCoordinate(coordinate.x, coordinate.y - 1) -> neighbors.add(neighbourTile)
                     }
                 } catch (_ : NullPointerException){}
             }
         }
-
-        for(neighborTile in neighbors){
-            if(neighborTile.tileColour == tile.tileColour && !visitedTiles.contains(neighborTile)){
-                val temp = colorMap[neighborTile.tileColour]!!
-                colorMap.replace(neighborTile.tileColour, temp, temp + 1)
-                checkForSequence(neighborTile, visitedTiles, colorMap)
-            }
-        }
+        return neighbors
     }
-
 
     /**
      * Gets all valid moves for the active player in a *specific game state*.

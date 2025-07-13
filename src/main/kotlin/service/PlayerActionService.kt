@@ -272,8 +272,8 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      *
      * @returns This method has no return value (`Unit`).
      *
-     * @throws FileNotFoundException If the saved game can’t be found.
-     * @throws IOException If something goes wrong while loading.
+     * @throws java.io.FileNotFoundException If the saved game can’t be found.
+     * @throws java.io.IOException If something goes wrong while loading.
      */
     fun load() {
         val file = File("novaluna.sav")
@@ -285,15 +285,22 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
                 val saveData = Json.decodeFromString<Map<String, String>>(saveContent)
                 
                 // Restore game state
-                rootService.currentGame = Json.decodeFromString<NovaLunaGame>(saveData["gameState"]!!)
+                rootService.currentGame = Json.decodeFromString<NovaLunaGame>(
+                    saveData.getValue("gameState")
+                )
                 
                 // Restore undo/redo history
                 undoStack.clear()
                 redoStack.clear()
-                undoStack.addAll(Json.decodeFromString<List<String>>(saveData["undoStack"]!!))
-                redoStack.addAll(Json.decodeFromString<List<String>>(saveData["redoStack"]!!))
+                undoStack.addAll(Json.decodeFromString<List<String>>(
+                    saveData.getValue("undoStack"))
+                )
+                redoStack.addAll(Json.decodeFromString<List<String>>(
+                    saveData.getValue("redoStack"))
+                )
                 
-                println("DEBUG: Loaded game with undo history. Undo stack size: ${undoStack.size}, Redo stack size: ${redoStack.size}")
+                println("DEBUG: Loaded game with undo history. Undo stack size: ${undoStack.size}, " +
+                        "Redo stack size: ${redoStack.size}")
                 
             } catch (e: Exception) {
                 // Fallback to old format (just game state) for backward compatibility

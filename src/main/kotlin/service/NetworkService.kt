@@ -20,17 +20,6 @@ import entity.SerializableCoordinate
  */
 class NetworkService(private val rootService: RootService) : AbstractRefreshingService() {
 
-    /**
-     * Holds all constants required to connect to the BGW-Net server
-     * for SoPra network games.
-     */
-    companion object {
-        /** URL of the BGW-Net server for SoPra network games */
-        const val SERVER_ADDRESS = "sopra.cs.tu-dortmund.de:80/bgw-net/connect"
-
-        /** Game identifier registered with the server */
-        const val GAME_ID = "NovaLuna"
-    }
 
     /** What *this* client chose — HUMAN, EASYBOT, or HARDBOT */
     var myPlayerType: PlayerType = PlayerType.HUMAN
@@ -373,7 +362,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
                 println("DEBUG: Same player gets another turn")
                 updateConnectionState(ConnectionState.PLAYING_MY_TURN)
             }
-            //println("[SEND] ${client!!.playerName} thinks next player is: ${game.players[game.activePlayer].playerName}")
+            //println("[SEND] ${client!!.playerName} thinks next player is:
+            //${game.players[game.activePlayer].playerName}")
             //println("[SEND] ${client!!.playerName} connection state is now: $connectionState")
         } else {
             // Game ended, update connection state appropriately
@@ -425,8 +415,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
 
 
-        // IMPORTANT: Check if game still exists after playTile
-        // playTile might have ended the game, so we need to check before calling endTurn
+        // IMPORTANT: Check if game still exists after playTile.
+        // PlayTile might have ended the game, so we need to check before calling endTurn
         val currentGame = rootService.currentGame
         if (currentGame != null) {
             // End their turn
@@ -444,7 +434,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
                     }
 
                 updateConnectionState(nextState)
-               // println("Who does ${client!!.playerName} think is next: ${gameAfterEndTurn.players[gameAfterEndTurn.activePlayer].playerName}")
+               // println("Who does ${client!!.playerName} think is next:
+                // ${gameAfterEndTurn.players[gameAfterEndTurn.activePlayer].playerName}")
                 //println("My connection state will be: $nextState")
                // println("DEBUG: Transitioning to connectionState=$nextState for player {client.playerName}")
             } else {
@@ -467,4 +458,15 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         onAllRefreshables { refreshConnectionState(newState) }
     }
 
+    /**
+     * Holds all constants required to connect to the BGW-Net server
+     * for SoPra network games.
+     */
+    companion object {
+        /** URL of the BGW-Net server for SoPra network games */
+        const val SERVER_ADDRESS = "sopra.cs.tu-dortmund.de:80/bgw-net/connect"
+
+        /** Game identifier registered with the server */
+        const val GAME_ID = "NovaLuna"
+    }
 }
