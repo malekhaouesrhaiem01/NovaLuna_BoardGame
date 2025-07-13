@@ -271,7 +271,8 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
         rootService.networkService.addRefreshable(this)
 
         selectColorPane.addAll(colorSelectLabel, noneColor, blackColor, whiteColor, blueColor, orangeColor)
-        contentPane.addAll(orderToken, playersToken, colorsToken, randomButton, backButton, firstGame, startButton, errorLabel)
+        contentPane.addAll(orderToken, playersToken, colorsToken, randomButton, backButton,
+            firstGame, startButton, errorLabel)
         addComponents(contentPane, selectColorPane)
 
         // bind colorPane buttons once

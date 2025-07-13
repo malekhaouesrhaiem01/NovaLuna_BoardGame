@@ -75,6 +75,7 @@ class JoinGameSceneTwo (private val rootService: RootService,
 
     init {
 
+        rootService.networkService.addRefreshable(this)
         addComponents(contentPane)
         contentPane.addAll(nameLabel, waitLabel, exitButton)
     }
