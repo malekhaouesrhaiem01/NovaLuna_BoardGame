@@ -203,9 +203,6 @@ class HostGameSceneOne (private val rootService: RootService) : MenuScene(1920, 
                 else -> PlayerType.HUMAN
             }
 
-            // 2) (Optional) If you let host pick a color here, record it too:
-            // rootService.networkService.myPlayerColour = ...
-
             // 3) Tell the service to host a game on the server
             rootService.networkService.hostGame(
                 secret     = secret,

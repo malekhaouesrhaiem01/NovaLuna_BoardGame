@@ -177,7 +177,6 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
     )
     private val playerGUIs = mutableListOf<PlayerGUI>()
 
-
     private val randomButton = Button(
         text = "random",
         width = 241,
@@ -219,7 +218,6 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
 
         }
     }
-
 
     private val firstGame = Button(
         text = "First Game",
@@ -272,19 +270,16 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
     init {
         rootService.networkService.addRefreshable(this)
 
-        selectColorPane.addAll(colorSelectLabel, noneColor, blackColor,
-            whiteColor, blueColor, orangeColor)
-
-        contentPane.addAll(orderToken, playersToken,
-            colorsToken, randomButton, backButton, firstGame, startButton, errorLabel)
-
+        selectColorPane.addAll(colorSelectLabel, noneColor, blackColor, whiteColor, blueColor, orangeColor)
+        contentPane.addAll(orderToken, playersToken, colorsToken, randomButton, backButton, firstGame, startButton, errorLabel)
         addComponents(contentPane, selectColorPane)
 
-        noneColor.onMouseClicked = { applyColor(4) }
-        blackColor.onMouseClicked = { applyColor(0) }
-        whiteColor.onMouseClicked = { applyColor(1) }
-        blueColor.onMouseClicked = { applyColor(2) }
-        orangeColor.onMouseClicked = { applyColor(3) }
+        // bind colorPane buttons once
+        noneColor.onMouseClicked   = { selectColor(currentColorPickerIndex) }
+        blackColor.onMouseClicked  = { selectColor(currentColorPickerIndex) }
+        whiteColor.onMouseClicked  = { selectColor(currentColorPickerIndex) }
+        blueColor.onMouseClicked   = { selectColor(currentColorPickerIndex) }
+        orangeColor.onMouseClicked = { selectColor(currentColorPickerIndex) }
 
         buildPlayerUIs()
 
@@ -393,10 +388,7 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
                 font = Font(48, Color.BLACK, "Space Grotesk"),
                 visual = ColorVisual(Color.GRAY).apply { style.borderRadius = BorderRadius(15) }
             ).apply {
-                onMouseClicked = {
-                    currentColorPickerIndex = idx
-                    selectColorPane.isVisible = true
-                }
+                onMouseClicked = { selectColor(idx) }
             }
             playerGUIs += PlayerGUI(orderLabel, nameLabel, colorButton)
             contentPane.addAll(orderLabel, nameLabel, colorButton)
@@ -404,25 +396,47 @@ class HostGameSceneTwo (private val rootService: RootService) : MenuScene(1920, 
     }
 
     // Apply color selection
-    private fun applyColor(colorIdx: Int) {
-        if (currentColorPickerIndex < 0) return
-        val gui = playerGUIs[currentColorPickerIndex]
-        if (gui.colorIndex != 4) availableColors[gui.colorIndex] = true
-        gui.colorIndex = colorIdx
-        gui.colorButton.apply {
-            text = when (colorIdx) {0->"Black";1->"White";2->"Blue";3->"Orange";else->"NONE"}
-            font = Font(48, if (colorIdx==1) Color.BLACK else Color.WHITE, "Space Grotesk")
-            visual = ColorVisual(
-                color = when (colorIdx) {
-                0->Color.BLACK
-                1->Color.WHITE
-                2->Color.BLUE
-                3->Color(0xFF8401)
-                else->Color.GRAY }
-            ).apply { style.borderRadius = BorderRadius(15) }
+    private fun selectColor(i: Int) {
+        if (i < 0 || i >= playerGUIs.size) return
+        currentColorPickerIndex = i
+        val gui = playerGUIs[i]
+
+        fun setup(
+            button: Button,
+            idx: Int,
+            name: String,
+            fontColor: Color,
+            bg: Color
+        ) {
+            button.isVisible = if (idx == 4) true else availableColors[idx]
+
+            button.onMouseClicked = {
+
+                if (gui.colorIndex in 0..3) {
+                    availableColors[gui.colorIndex] = true
+                }
+
+                gui.colorIndex = idx
+                gui.colorButton.apply {
+                    text = name
+                    font = Font(48, fontColor, "Space Grotesk")
+                    visual = ColorVisual(bg).apply { style.borderRadius = BorderRadius(15) }
+                }
+
+                if (idx in 0..3) {
+                    availableColors[idx] = false
+                }
+                selectColorPane.isVisible = false
+            }
         }
-        if (colorIdx < 4) availableColors[colorIdx] = false
-        selectColorPane.isVisible = false
+
+        setup(noneColor,   4, "NONE",  Color.WHITE, Color.GRAY)
+        setup(blackColor,  0, "Black", Color.WHITE, Color.BLACK)
+        setup(whiteColor,  1, "White", Color.BLACK, Color.WHITE)
+        setup(blueColor,   2, "Blue",  Color.WHITE, Color.BLUE)
+        setup(orangeColor, 3, "Orange",Color.WHITE, Color(0xFF8401))
+
+        selectColorPane.isVisible = true
     }
 
     /**
