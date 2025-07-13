@@ -7,6 +7,9 @@ import entity.PlayerColour
 
 class RefreshableTest {
 
+    /**
+     * Tests if all refreshable work correctly
+     */
     @Test
     fun defaultMethodsAreNoOp() {
         val ref = object : Refreshable {}
