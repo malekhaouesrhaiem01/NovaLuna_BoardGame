@@ -30,7 +30,9 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
             loadButton.onMouseClicked = {
                 try {
                     rootService.playerActionService.load()
+                    gameScene.ifOfflineMode = true
                     this@NovaApplication.showGameScene(gameScene)
+                    gameScene.refreshAfterStartGame()
                 } catch (e: java.io.FileNotFoundException) {
                     println("Failed to load game: the saved game can’t be found. \n${e.message}")
                 } catch (e: java.io.IOException) {

@@ -253,7 +253,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         )
         
         val saveJson = Json.encodeToString(saveData)
-        File("novaluna.sav").writeText(saveJson)
+        File("novaluna.json").writeText(saveJson)
     }
 
     /**
@@ -276,7 +276,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws java.io.IOException If something goes wrong while loading.
      */
     fun load() {
-        val file = File("novaluna.sav")
+        val file = File("novaluna.json")
         if (file.exists()) {
             val saveContent = file.readText()
             
