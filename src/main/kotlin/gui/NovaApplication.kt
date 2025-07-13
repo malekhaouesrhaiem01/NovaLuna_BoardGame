@@ -12,22 +12,12 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
 
     private val rootService = RootService()
 
-    private var mainMenuScene: MainMenuScene
-    private lateinit var offlineMenuScene: OfflineMenuScene
-    private lateinit var joinGameSceneOne: JoinGameSceneOne
-    private lateinit var joinGameSceneTwo: JoinGameSceneTwo
-    lateinit var hostGameSceneOne: HostGameSceneOne
-    private val resultMenuScene: ResultMenuScene
-
     var gameScene = GameScene(rootService)
     var onlineGameScene = OnlineGameScene(rootService)
 
-    init {
-        // Register all components that need refresh callbacks
-
-        mainMenuScene = MainMenuScene().apply {
+    private val mainMenuScene: MainMenuScene by lazy {
+        MainMenuScene().apply {
             offlineButton.onMouseClicked = {
-                // Reset the offline menu state when navigating to it
                 offlineMenuScene.resetMenuState()
                 showMenuScene(offlineMenuScene)
             }
@@ -40,42 +30,65 @@ object NovaApplication : BoardGameApplication("NovaLuna"), Refreshable {
             loadButton.onMouseClicked = {
                 try {
                     rootService.playerActionService.load()
-                    // If loading is successful, show the game scene
                     this@NovaApplication.showGameScene(gameScene)
                 } catch (e: Exception) {
-                    // If loading fails, we could show an error - for now just print to console
                     println("Failed to load game: ${e.message}")
                 }
             }
         }
-        offlineMenuScene = OfflineMenuScene(rootService).apply {
+    }
+
+    private val offlineMenuScene: OfflineMenuScene by lazy {
+        OfflineMenuScene(rootService).apply {
             backButton.onMouseClicked = {
                 showMenuScene(mainMenuScene)
             }
         }
-        joinGameSceneOne = JoinGameSceneOne(rootService).apply {
+    }
+
+    private val joinGameSceneOne: JoinGameSceneOne by lazy {
+        JoinGameSceneOne(rootService).apply {
             backButton.onMouseClicked = {
                 showMenuScene(mainMenuScene)
             }
         }
-        joinGameSceneTwo = JoinGameSceneTwo(rootService, playerName = joinGameSceneOne.playerName).apply {
+    }
+
+    private val joinGameSceneTwo: JoinGameSceneTwo by lazy {
+        // Greift auf joinGameSceneOne.playerName zu, deshalb lazy
+        JoinGameSceneTwo(rootService, playerName = joinGameSceneOne.playerName).apply {
             exitButton.onMouseClicked = {
                 showMenuScene(mainMenuScene)
             }
         }
-        hostGameSceneOne = HostGameSceneOne(rootService).apply {
+    }
 
+    val hostGameSceneOne: HostGameSceneOne by lazy {
+        HostGameSceneOne(rootService).apply {
             backButton.onMouseClicked = {
                 showMenuScene(mainMenuScene)
             }
         }
-        resultMenuScene = ResultMenuScene(rootService).apply{
+    }
+
+    private val resultMenuScene: ResultMenuScene by lazy {
+        ResultMenuScene(rootService).apply {
             newGameButton.onMouseClicked = {
                 gameScene.ifOfflineMode = false
                 onlineGameScene.ifOnlineMode = false
                 showMenuScene(mainMenuScene)
             }
         }
+    }
+
+    init {
+        // Register all components that need refresh callbacks
+        mainMenuScene
+        offlineMenuScene
+        joinGameSceneOne
+        joinGameSceneTwo
+        hostGameSceneOne
+        resultMenuScene
 
         gameScene = GameScene(rootService).apply{
             rageQuitButton.onMouseClicked = {
