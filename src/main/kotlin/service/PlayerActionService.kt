@@ -58,7 +58,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         val gameState = Json.encodeToString(game)
         undoStack.add(gameState)
         redoStack.clear()
-        println("DEBUG: PlayTile called. Added state to undo stack. Stack size: ${undoStack.size}")
+        // println("DEBUG: PlayTile called. Added state to undo stack. Stack size: ${undoStack.size}")
 
         // Get the selected tile from the tile track
         val selectedTile = game.tileTrack[tileTrackIndex]
@@ -78,13 +78,13 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         // update position on the moon wheel of the token
         // and the position of the meeple on the tile track
         rootService.gameService.moveMeepleAndPlayer(selectedTile)
-        println("   [playTile] AFTER moveMeepleAndPlayer")
-        println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
+        // println("   [playTile] AFTER moveMeepleAndPlayer")
+        // println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
 
         // check if tasks are now fulfilled
         rootService.gameService.updateTasks()
-        println("   [playTile] AFTER updateTasks")
-        println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
+        // println("   [playTile] AFTER updateTasks")
+        // println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
 
 
         // Send network message if it's a network game and it's our turn

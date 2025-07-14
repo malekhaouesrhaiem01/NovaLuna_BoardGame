@@ -1,0 +1,521 @@
+emina@Emins-MacBook-Air Projekt2-1 % ./gradlew run
+
+> Task :run
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+[BGW] Starting BGW Runtime (56602)
+[BGW] Initializing BGW Runtime...
+[BGW] Loading BGW Runtime...
+[BGW] Platform: MACOSX_ARM64
+[BGW] Runtime Version: JCEF Version = 135.0.20.333 CEF Version = 135.0.20 Chromium Version = 135.0.7049.85
+initialize on Thread[AWT-EventQueue-0,6,main] with library path /Users/emina/Library/Caches/bgw-gui.tools.aqua.bgw-runtime_0.10
+Exception in thread "AppKit Thread" DEBUG: OfflineMenuScene state reset - players: 2, colors available: [true, true, true, true]
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=0, height=2
+     Player 1 (e): pos=0, height=1
+   [startTurn] AFTER clone:
+MCTS: Early exit with confident choice after 6826 iterations
+MCTS completed with 6826 iterations
+Best move: Move(tile=Tile(id=40, time=3, tileColour=RED, tasks=[({CYAN=1, RED=1, BLUE=1}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=0.0)) with 5461 visits (-130.65% win rate)
+HardBot playing: 40 at SerializableCoordinate(x=0.0, y=0.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=3, height=1
+     Player 1 (e): pos=0, height=1
+EasyBot selected move: Place tile 61 at SerializableCoordinate(x=0.0, y=0.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=3, height=1
+     Player 1 (e): pos=4, height=1
+   [startTurn] AFTER clone:
+MCTS: 51293 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=2, time=2, tileColour=CYAN, tasks=[({CYAN=4}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=1.0)) with 6472 visits
+MCTS: 96769 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=2, time=2, tileColour=CYAN, tasks=[({CYAN=4}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=0.0)) with 10278 visits
+MCTS: Early exit after 100001 iterations
+MCTS completed with 100001 iterations
+Best move: Move(tile=Tile(id=2, time=2, tileColour=CYAN, tasks=[({CYAN=4}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=1.0)) with 10686 visits (237.58% win rate)
+HardBot playing: 2 at SerializableCoordinate(x=0.0, y=1.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=5, height=1
+     Player 1 (e): pos=4, height=1
+EasyBot selected move: Place tile 24 at SerializableCoordinate(x=-1.0, y=0.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=5, height=1
+     Player 1 (e): pos=7, height=1
+   [startTurn] AFTER clone:
+MCTS: 52224 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=52, time=1, tileColour=YELLOW, tasks=[({}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=2.0)) with 3783 visits
+MCTS: 88898 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=52, time=1, tileColour=YELLOW, tasks=[({}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-1.0)) with 9307 visits
+MCTS completed with 93398 iterations
+Best move: Move(tile=Tile(id=52, time=1, tileColour=YELLOW, tasks=[({}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=2.0)) with 10377 visits (900.59% win rate)
+HardBot playing: 52 at SerializableCoordinate(x=0.0, y=2.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=6, height=1
+     Player 1 (e): pos=7, height=1
+   [startTurn] AFTER clone:
+MCTS: 33100 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=37, time=2, tileColour=RED, tasks=[({RED=4}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=3.0)) with 2404 visits
+MCTS: 65824 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=37, time=2, tileColour=RED, tasks=[({RED=4}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=3.0)) with 6010 visits
+MCTS completed with 69600 iterations
+Best move: Move(tile=Tile(id=37, time=2, tileColour=RED, tasks=[({RED=4}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=3.0)) with 6498 visits (1035.75% win rate)
+HardBot playing: 37 at SerializableCoordinate(x=0.0, y=3.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=8, height=1
+     Player 1 (e): pos=7, height=1
+EasyBot selected move: Place tile 43 at SerializableCoordinate(x=0.0, y=-1.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=8, height=1
+     Player 1 (e): pos=11, height=1
+   [startTurn] AFTER clone:
+MCTS: 37993 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=41, time=3, tileColour=RED, tasks=[({CYAN=1, YELLOW=1, RED=1, BLUE=1}, false), ({CYAN=3}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=2.0)) with 2918 visits
+MCTS: 69998 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=41, time=3, tileColour=RED, tasks=[({CYAN=1, YELLOW=1, RED=1, BLUE=1}, false), ({CYAN=3}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=2.0)) with 7022 visits
+MCTS completed with 74256 iterations
+Best move: Move(tile=Tile(id=41, time=3, tileColour=RED, tasks=[({CYAN=1, YELLOW=1, RED=1, BLUE=1}, false), ({CYAN=3}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=2.0)) with 7591 visits (585.05% win rate)
+HardBot playing: 41 at SerializableCoordinate(x=1.0, y=2.0)
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread"                                                                                                       [startTurn] BEFORE clone:NG [1m 5s]
+     Player 0 (h): pos=11, height=2
+     Player 1 (e): pos=11, height=1
+   [startTurn] AFTER clone:
+MCTS: 38811 iterations completed, 3.498s remaining
+Current best: Move(tile=Tile(id=56, time=3, tileColour=YELLOW, tasks=[({CYAN=1, YELLOW=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=1.0)) with 2602 visits
+MCTS: 78137 iterations completed, 0.497s remaining
+Current best: Move(tile=Tile(id=56, time=3, tileColour=YELLOW, tasks=[({CYAN=1, YELLOW=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=1.0)) with 5667 visits
+MCTS completed with 83898 iterations
+Best move: Move(tile=Tile(id=56, time=3, tileColour=YELLOW, tasks=[({CYAN=1, YELLOW=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=1.0)) with 6138 visits (457.58% win rate)
+HardBot playing: 56 at SerializableCoordinate(x=1.0, y=1.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=14, height=1
+     Player 1 (e): pos=11, height=1
+EasyBot selected move: Place tile 54 at SerializableCoordinate(x=-2.0, y=0.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=14, height=1
+     Player 1 (e): pos=13, height=1
+EasyBot selected move: Place tile 13 at SerializableCoordinate(x=0.0, y=-2.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=14, height=1
+     Player 1 (e): pos=18, height=1
+     REFILL: Starting refill
+   - Active player: 0 (h)
+   - Connection state: DISCONNECTED
+   - Tiles before refill: 0
+   - Tiles after refill: 11
+   - refilledThisTurn flag: true
+   [startTurn] AFTER clone:
+MCTS: 39873 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=66, time=6, tileColour=YELLOW, tasks=[({CYAN=2}, false), ({RED=2}, false), ({BLUE=1}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=0.0)) with 3639 visits
+MCTS: 70907 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=55, time=3, tileColour=YELLOW, tasks=[({RED=1, BLUE=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=0.0)) with 6885 visits
+MCTS completed with 75769 iterations
+Best move: Move(tile=Tile(id=55, time=3, tileColour=YELLOW, tasks=[({RED=1, BLUE=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=0.0)) with 7638 visits (145.06% win rate)
+HardBot playing: 55 at SerializableCoordinate(x=1.0, y=0.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=17, height=1
+     Player 1 (e): pos=18, height=1
+   [startTurn] AFTER clone:
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" MCTS: 26539 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=6, time=3, tileColour=CYAN, tasks=[({CYAN=1, RED=1, YELLOW=1}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=3.0)) with 1485 visits
+MCTS: 58618 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=6, time=3, tileColour=CYAN, tasks=[({CYAN=1, RED=1, YELLOW=1}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=3.0)) with 3701 visits
+MCTS completed with 63664 iterations
+Best move: Move(tile=Tile(id=6, time=3, tileColour=CYAN, tasks=[({CYAN=1, RED=1, YELLOW=1}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=3.0)) with 4069 visits (854.80% win rate)
+HardBot playing: 6 at SerializableCoordinate(x=1.0, y=3.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=20, height=1
+     Player 1 (e): pos=18, height=1
+EasyBot selected move: Place tile 34 at SerializableCoordinate(x=-1.0, y=-2.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=20, height=1
+     Player 1 (e): pos=25, height=1
+   [startTurn] AFTER clone:
+MCTS: 38812 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=8, time=4, tileColour=CYAN, tasks=[({BLUE=3}, false), ({YELLOW=3}, false), ({RED=2}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=2.0)) with 4367 visits
+MCTS: 68404 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=8, time=4, tileColour=CYAN, tasks=[({BLUE=3}, false), ({YELLOW=3}, false), ({RED=2}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=2.0)) with 17833 visits
+MCTS completed with 73039 iterations
+Best move: Move(tile=Tile(id=8, time=4, tileColour=CYAN, tasks=[({BLUE=3}, false), ({YELLOW=3}, false), ({RED=2}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=2.0)) with 19610 visits (927.62% win rate)
+HardBot playing: 8 at SerializableCoordinate(x=-1.0, y=2.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=24, height=1
+     Player 1 (e): pos=25, height=1
+   [startTurn] AFTER clone:
+MCTS: 35474 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=44, time=4, tileColour=RED, tasks=[({CYAN=1, RED=1}, false), ({BLUE=1, YELLOW=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=3.0)) with 2291 visits
+MCTS: 65422 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=44, time=4, tileColour=RED, tasks=[({CYAN=1, RED=1}, false), ({BLUE=1, YELLOW=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=3.0)) with 3922 visits
+MCTS completed with 70118 iterations
+Best move: Move(tile=Tile(id=44, time=4, tileColour=RED, tasks=[({CYAN=1, RED=1}, false), ({BLUE=1, YELLOW=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=3.0)) with 4171 visits (188.54% win rate)
+HardBot playing: 44 at SerializableCoordinate(x=-1.0, y=3.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=28, height=1
+     Player 1 (e): pos=25, height=1
+EasyBot selected move: Place tile 66 at SerializableCoordinate(x=-2.0, y=-1.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=28, height=1
+     Player 1 (e): pos=31, height=1
+   [startTurn] AFTER clone:
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" MCTS: 29260 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=26, time=4, tileColour=BLUE, tasks=[({BLUE=3}, false), ({CYAN=1, RED=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-1.0)) with 1226 visits
+MCTS: 59101 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=26, time=4, tileColour=BLUE, tasks=[({BLUE=3}, false), ({CYAN=1, RED=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-1.0)) with 2486 visits
+MCTS completed with 63248 iterations
+Best move: Move(tile=Tile(id=26, time=4, tileColour=BLUE, tasks=[({BLUE=3}, false), ({CYAN=1, RED=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-1.0)) with 2668 visits (697.56% win rate)
+HardBot playing: 26 at SerializableCoordinate(x=0.0, y=-1.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=32, height=1
+     Player 1 (e): pos=31, height=1
+EasyBot selected move: Place tile 60 at SerializableCoordinate(x=-2.0, y=1.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=32, height=1
+     Player 1 (e): pos=35, height=1
+   [startTurn] AFTER clone:
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" MCTS: 21260 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=14, time=5, tileColour=CYAN, tasks=[({RED=2}, false), ({BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=-1.0)) with 1588 visits
+MCTS: 46809 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=14, time=5, tileColour=CYAN, tasks=[({RED=2}, false), ({BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=-1.0)) with 3297 visits
+MCTS completed with 50750 iterations
+Best move: Move(tile=Tile(id=14, time=5, tileColour=CYAN, tasks=[({RED=2}, false), ({BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=-1.0)) with 3540 visits (311.30% win rate)
+HardBot playing: 14 at SerializableCoordinate(x=1.0, y=-1.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=37, height=1
+     Player 1 (e): pos=35, height=1
+EasyBot selected move: Place tile 32 at SerializableCoordinate(x=-2.0, y=-2.0)
+   [startTurn] AFTER clone:
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread"    [startTurn] BEFORE clone:
+     Player 0 (h): pos=37, height=1
+     Player 1 (e): pos=41, height=1
+   [startTurn] AFTER clone:
+MCTS: 28870 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=62, time=4, tileColour=YELLOW, tasks=[({CYAN=4}, false), ({CYAN=2}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=1.0)) with 7254 visits
+MCTS: 52087 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=62, time=4, tileColour=YELLOW, tasks=[({CYAN=4}, false), ({CYAN=2}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=1.0)) with 14486 visits
+MCTS completed with 55983 iterations
+Best move: Move(tile=Tile(id=62, time=4, tileColour=YELLOW, tasks=[({CYAN=4}, false), ({CYAN=2}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=1.0)) with 15394 visits (181.14% win rate)
+HardBot playing: 62 at SerializableCoordinate(x=-1.0, y=1.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=41, height=2
+     Player 1 (e): pos=41, height=1
+     REFILL: Starting refill
+   - Active player: 0 (h)
+   - Connection state: DISCONNECTED
+   - Tiles before refill: 0
+   - Tiles after refill: 11
+   - refilledThisTurn flag: true
+   [startTurn] AFTER clone:
+MCTS: 25924 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=57, time=3, tileColour=YELLOW, tasks=[({RED=1, BLUE=1, YELLOW=1}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=0.0)) with 2352 visits
+MCTS: 49584 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=57, time=3, tileColour=YELLOW, tasks=[({RED=1, BLUE=1, YELLOW=1}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=0.0)) with 4473 visits
+MCTS completed with 53385 iterations
+Best move: Move(tile=Tile(id=57, time=3, tileColour=YELLOW, tasks=[({RED=1, BLUE=1, YELLOW=1}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=0.0)) with 4807 visits (195.80% win rate)
+HardBot playing: 57 at SerializableCoordinate(x=-1.0, y=0.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=44, height=1
+     Player 1 (e): pos=41, height=1
+EasyBot selected move: Place tile 20 at SerializableCoordinate(x=1.0, y=0.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=44, height=1
+     Player 1 (e): pos=43, height=1
+EasyBot selected move: Place tile 33 at SerializableCoordinate(x=2.0, y=0.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=44, height=1
+     Player 1 (e): pos=49, height=1
+   [startTurn] AFTER clone:
+MCTS: 24485 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=38, time=3, tileColour=RED, tasks=[({YELLOW=1, CYAN=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-1.0)) with 2795 visits
+MCTS: 46683 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=38, time=3, tileColour=RED, tasks=[({YELLOW=1, CYAN=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-1.0)) with 4922 visits
+MCTS completed with 50276 iterations
+Best move: Move(tile=Tile(id=38, time=3, tileColour=RED, tasks=[({YELLOW=1, CYAN=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-1.0)) with 5244 visits (235.76% win rate)
+HardBot playing: 38 at SerializableCoordinate(x=-1.0, y=-1.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=47, height=1
+     Player 1 (e): pos=49, height=1
+   [startTurn] AFTER clone:
+MCTS: 23326 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=16, time=6, tileColour=CYAN, tasks=[({RED=3}, false), ({RED=1, BLUE=1}, false), ({BLUE=2}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-2.0, y=-1.0)) with 1121 visits
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread"                                                                                                    MCTS: 37184 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=16, time=6, tileColour=CYAN, tasks=[({RED=3}, false), ({RED=1, BLUE=1}, false), ({BLUE=2}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-2.0, y=-1.0)) with 1877 visits
+MCTS completed with 40237 iterations
+Best move: Move(tile=Tile(id=16, time=6, tileColour=CYAN, tasks=[({RED=3}, false), ({RED=1, BLUE=1}, false), ({BLUE=2}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-2.0, y=-1.0)) with 2052 visits (-12.13% win rate)
+HardBot playing: 16 at SerializableCoordinate(x=-2.0, y=-1.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=53, height=1
+     Player 1 (e): pos=49, height=1
+EasyBot selected move: Place tile 36 at SerializableCoordinate(x=-1.0, y=-3.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=53, height=1
+     Player 1 (e): pos=51, height=1
+EasyBot selected move: Place tile 46 at SerializableCoordinate(x=-3.0, y=-2.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=53, height=1
+     Player 1 (e): pos=56, height=1
+   [startTurn] AFTER clone:
+MCTS: 23068 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=28, time=4, tileColour=BLUE, tasks=[({RED=4}, false), ({RED=2}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-2.0)) with 943 visits
+MCTS: 43267 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=28, time=4, tileColour=BLUE, tasks=[({RED=4}, false), ({RED=2}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-2.0)) with 1789 visits
+MCTS completed with 46358 iterations
+Best move: Move(tile=Tile(id=28, time=4, tileColour=BLUE, tasks=[({RED=4}, false), ({RED=2}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-2.0)) with 1920 visits (63.96% win rate)
+HardBot playing: 28 at SerializableCoordinate(x=-1.0, y=-2.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=57, height=1
+     Player 1 (e): pos=56, height=1
+EasyBot selected move: Place tile 11 at SerializableCoordinate(x=-1.0, y=-4.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=57, height=1
+     Player 1 (e): pos=60, height=1
+   [startTurn] AFTER clone:
+MCTS: 24719 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=19, time=2, tileColour=BLUE, tasks=[({BLUE=4}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-2.0)) with 2461 visits
+MCTS: 46623 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=19, time=2, tileColour=BLUE, tasks=[({BLUE=4}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-2.0)) with 4762 visits
+MCTS completed with 49868 iterations
+Best move: Move(tile=Tile(id=19, time=2, tileColour=BLUE, tasks=[({BLUE=4}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-2.0)) with 5112 visits (0.96% win rate)
+HardBot playing: 19 at SerializableCoordinate(x=0.0, y=-2.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=59, height=1
+     Player 1 (e): pos=60, height=1
+   [startTurn] AFTER clone:
+MCTS: 23251 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=4, time=3, tileColour=CYAN, tasks=[({BLUE=1, YELLOW=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=-2.0)) with 4693 visits
+MCTS: 42794 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=4, time=3, tileColour=CYAN, tasks=[({BLUE=1, YELLOW=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=-2.0)) with 8561 visits
+MCTS completed with 45901 iterations
+Best move: Move(tile=Tile(id=4, time=3, tileColour=CYAN, tasks=[({BLUE=1, YELLOW=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=-2.0)) with 9173 visits (82.34% win rate)
+HardBot playing: 4 at SerializableCoordinate(x=1.0, y=-2.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=62, height=1
+     Player 1 (e): pos=60, height=1
+     REFILL: Starting refill
+   - Active player: 1 (e)
+   - Connection state: DISCONNECTED
+   - Tiles before refill: 0
+   - Tiles after refill: 11
+   - refilledThisTurn flag: true
+EasyBot selected move: Place tile 63 at SerializableCoordinate(x=0.0, y=-4.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=62, height=1
+     Player 1 (e): pos=65, height=1
+   [startTurn] AFTER clone:
+MCTS: 19438 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=51, time=7, tileColour=RED, tasks=[({CYAN=1, BLUE=1}, false), ({CYAN=1, YELLOW=1}, false), ({BLUE=1, YELLOW=1}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-2.0, y=0.0)) with 1061 visits
+MCTS: 36122 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=51, time=7, tileColour=RED, tasks=[({CYAN=1, BLUE=1}, false), ({CYAN=1, YELLOW=1}, false), ({BLUE=1, YELLOW=1}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-2.0, y=0.0)) with 1969 visits
+MCTS completed with 38768 iterations
+Best move: Move(tile=Tile(id=51, time=7, tileColour=RED, tasks=[({CYAN=1, BLUE=1}, false), ({CYAN=1, YELLOW=1}, false), ({BLUE=1, YELLOW=1}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-2.0, y=0.0)) with 2113 visits (5.49% win rate)
+HardBot playing: 51 at SerializableCoordinate(x=-2.0, y=0.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=69, height=1
+     Player 1 (e): pos=65, height=1
+EasyBot selected move: Place tile 22 at SerializableCoordinate(x=-2.0, y=-4.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=69, height=1
+     Player 1 (e): pos=68, height=1
+EasyBot selected move: Place tile 23 at SerializableCoordinate(x=2.0, y=1.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=69, height=1
+     Player 1 (e): pos=71, height=1
+   [startTurn] AFTER clone:
+MCTS: 17178 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=30, time=5, tileColour=BLUE, tasks=[({CYAN=3}, false), ({CYAN=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=3.0)) with 702 visits
+MCTS: 34605 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=30, time=5, tileColour=BLUE, tasks=[({CYAN=3}, false), ({CYAN=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=3.0)) with 1410 visits
+MCTS completed with 37276 iterations
+Best move: Move(tile=Tile(id=30, time=5, tileColour=BLUE, tasks=[({CYAN=3}, false), ({CYAN=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=3.0)) with 1518 visits (0.99% win rate)
+HardBot playing: 30 at SerializableCoordinate(x=2.0, y=3.0)
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread"    [startTurn] BEFORE clone:
+     Player 0 (h): pos=74, height=1
+     Player 1 (e): pos=71, height=1
+EasyBot selected move: Place tile 64 at SerializableCoordinate(x=3.0, y=1.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=74, height=1
+     Player 1 (e): pos=76, height=1
+   [startTurn] AFTER clone:
+MCTS: 16100 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=47, time=5, tileColour=RED, tasks=[({BLUE=3}, false), ({BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-3.0)) with 695 visits
+MCTS: 32545 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=47, time=5, tileColour=RED, tasks=[({BLUE=3}, false), ({BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-3.0)) with 1400 visits
+MCTS completed with 35199 iterations
+Best move: Move(tile=Tile(id=47, time=5, tileColour=RED, tasks=[({BLUE=3}, false), ({BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-3.0)) with 1514 visits (0.99% win rate)
+HardBot playing: 47 at SerializableCoordinate(x=0.0, y=-3.0)
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread"    [startTurn] BEFORE clone:
+     Player 0 (h): pos=79, height=1
+     Player 1 (e): pos=76, height=1
+EasyBot selected move: Place tile 59 at SerializableCoordinate(x=1.0, y=-2.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=79, height=1
+     Player 1 (e): pos=80, height=1
+   [startTurn] AFTER clone:
+MCTS: 17092 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=39, time=3, tileColour=RED, tasks=[({BLUE=1, RED=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-3.0)) with 1111 visits
+MCTS: 33095 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=39, time=3, tileColour=RED, tasks=[({BLUE=1, RED=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-3.0)) with 2143 visits
+MCTS completed with 35434 iterations
+Best move: Move(tile=Tile(id=39, time=3, tileColour=RED, tasks=[({BLUE=1, RED=2}, false), ({}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-3.0)) with 2294 visits (0.61% win rate)
+HardBot playing: 39 at SerializableCoordinate(x=-1.0, y=-3.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=82, height=1
+     Player 1 (e): pos=80, height=1
+EasyBot selected move: Place tile 53 at SerializableCoordinate(x=-1.0, y=-5.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=82, height=1
+     Player 1 (e): pos=82, height=2
+EasyBot selected move: Place tile 35 at SerializableCoordinate(x=0.0, y=-3.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=82, height=1
+     Player 1 (e): pos=83, height=1
+     REFILL: Starting refill
+   - Active player: 0 (h)
+   - Connection state: DISCONNECTED
+   - Tiles before refill: 0
+   - Tiles after refill: 11
+   - refilledThisTurn flag: true
+   [startTurn] AFTER clone:
+MCTS: 16785 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=67, time=6, tileColour=YELLOW, tasks=[({BLUE=3}, false), ({CYAN=1, BLUE=1}, false), ({CYAN=2}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=-3.0)) with 998 visits
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" MCTS: 31063 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=67, time=6, tileColour=YELLOW, tasks=[({BLUE=3}, false), ({CYAN=1, BLUE=1}, false), ({CYAN=2}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=-3.0)) with 1841 visits
+MCTS completed with 33320 iterations
+Best move: Move(tile=Tile(id=67, time=6, tileColour=YELLOW, tasks=[({BLUE=3}, false), ({CYAN=1, BLUE=1}, false), ({CYAN=2}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=1.0, y=-3.0)) with 1974 visits (0.66% win rate)
+HardBot playing: 67 at SerializableCoordinate(x=1.0, y=-3.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=88, height=1
+     Player 1 (e): pos=83, height=1
+EasyBot selected move: Place tile 12 at SerializableCoordinate(x=-2.0, y=2.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=88, height=1
+     Player 1 (e): pos=88, height=2
+EasyBot selected move: Place tile 5 at SerializableCoordinate(x=-4.0, y=-2.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=88, height=1
+     Player 1 (e): pos=91, height=1
+   [startTurn] AFTER clone:
+MCTS: 14771 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=27, time=4, tileColour=BLUE, tasks=[({CYAN=1, YELLOW=1}, false), ({RED=1, BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-2.0, y=1.0)) with 505 visits
+MCTS: 28594 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=27, time=4, tileColour=BLUE, tasks=[({CYAN=1, YELLOW=1}, false), ({RED=1, BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=2.0)) with 976 visits
+MCTS completed with 30829 iterations
+Best move: Move(tile=Tile(id=27, time=4, tileColour=BLUE, tasks=[({CYAN=1, YELLOW=1}, false), ({RED=1, BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-2.0, y=1.0)) with 1053 visits (1.14% win rate)
+HardBot playing: 27 at SerializableCoordinate(x=-2.0, y=1.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=92, height=1
+     Player 1 (e): pos=91, height=1
+EasyBot selected move: Place tile 18 at SerializableCoordinate(x=1.0, y=1.0)
+   [startTurn] AFTER clone:
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread"    [startTurn] BEFORE clone:
+     Player 0 (h): pos=92, height=1
+     Player 1 (e): pos=92, height=2
+EasyBot selected move: Place tile 42 at SerializableCoordinate(x=0.0, y=1.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=92, height=1
+     Player 1 (e): pos=96, height=1
+   [startTurn] AFTER clone:
+MCTS: 15439 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=10, time=4, tileColour=CYAN, tasks=[({CYAN=1, YELLOW=1}, false), ({RED=1, BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=2.0)) with 529 visits
+MCTS: 28753 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=7, time=3, tileColour=CYAN, tasks=[({CYAN=1, YELLOW=1, RED=1, BLUE=1}, false), ({YELLOW=3}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=2.0)) with 995 visits
+MCTS completed with 30204 iterations
+Best move: Move(tile=Tile(id=7, time=3, tileColour=CYAN, tasks=[({CYAN=1, YELLOW=1, RED=1, BLUE=1}, false), ({YELLOW=3}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=2.0)) with 1050 visits (309.05% win rate)
+HardBot playing: 7 at SerializableCoordinate(x=2.0, y=2.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=95, height=1
+     Player 1 (e): pos=96, height=1
+   [startTurn] AFTER clone:
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" MCTS: 13443 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=10, time=4, tileColour=CYAN, tasks=[({CYAN=1, YELLOW=1}, false), ({RED=1, BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=1.0)) with 902 visits
+MCTS: 25451 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=10, time=4, tileColour=CYAN, tasks=[({CYAN=1, YELLOW=1}, false), ({RED=1, BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=1.0)) with 1704 visits
+MCTS completed with 27552 iterations
+Best move: Move(tile=Tile(id=10, time=4, tileColour=CYAN, tasks=[({CYAN=1, YELLOW=1}, false), ({RED=1, BLUE=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=1.0)) with 1844 visits (0.60% win rate)
+HardBot playing: 10 at SerializableCoordinate(x=2.0, y=1.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=99, height=1
+     Player 1 (e): pos=96, height=1
+EasyBot selected move: Place tile 1 at SerializableCoordinate(x=-1.0, y=-1.0)
+   [startTurn] AFTER clone:
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread"    [startTurn] BEFORE clone:
+     Player 0 (h): pos=99, height=1
+     Player 1 (e): pos=97, height=1
+EasyBot selected move: Place tile 29 at SerializableCoordinate(x=3.0, y=0.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=99, height=1
+     Player 1 (e): pos=102, height=1
+   [startTurn] AFTER clone:
+MCTS: 15808 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=65, time=5, tileColour=YELLOW, tasks=[({CYAN=2}, false), ({RED=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=0.0)) with 2335 visits
+MCTS: 30075 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=65, time=5, tileColour=YELLOW, tasks=[({CYAN=2}, false), ({RED=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=0.0)) with 4439 visits
+MCTS completed with 31243 iterations
+Best move: Move(tile=Tile(id=65, time=5, tileColour=YELLOW, tasks=[({CYAN=2}, false), ({RED=1}, false), ({}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=2.0, y=0.0)) with 4611 visits (0.20% win rate)
+HardBot playing: 65 at SerializableCoordinate(x=2.0, y=0.0)
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=104, height=1
+     Player 1 (e): pos=102, height=1
+     REFILL: Starting refill
+   - Active player: 1 (e)
+   - Connection state: DISCONNECTED
+   - Tiles before refill: 0
+   - Tiles after refill: 11
+   - refilledThisTurn flag: true
+EasyBot selected move: Place tile 49 at SerializableCoordinate(x=-5.0, y=-2.0)
+   [startTurn] AFTER clone:
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread"    [startTurn] BEFORE clone:
+     Player 0 (h): pos=104, height=1
+     Player 1 (e): pos=108, height=1
+   [startTurn] AFTER clone:
+MCTS: 14613 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=17, time=7, tileColour=CYAN, tasks=[({RED=1, BLUE=1}, false), ({RED=1, YELLOW=1}, false), ({BLUE=1, YELLOW=1}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-4.0)) with 613 visits
+MCTS: 27224 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=17, time=7, tileColour=CYAN, tasks=[({RED=1, BLUE=1}, false), ({RED=1, YELLOW=1}, false), ({BLUE=1, YELLOW=1}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-4.0)) with 1141 visits
+MCTS completed with 29024 iterations
+Best move: Move(tile=Tile(id=17, time=7, tileColour=CYAN, tasks=[({RED=1, BLUE=1}, false), ({RED=1, YELLOW=1}, false), ({BLUE=1, YELLOW=1}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=-1.0, y=-4.0)) with 1216 visits (0.66% win rate)
+HardBot playing: 17 at SerializableCoordinate(x=-1.0, y=-4.0)
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread"    [startTurn] BEFORE clone:
+     Player 0 (h): pos=111, height=1
+     Player 1 (e): pos=108, height=1
+EasyBot selected move: Place tile 50 at SerializableCoordinate(x=2.0, y=-1.0)
+   [startTurn] AFTER clone:
+   [startTurn] BEFORE clone:
+     Player 0 (h): pos=111, height=1
+     Player 1 (e): pos=114, height=1
+   [startTurn] AFTER clone:
+MCTS: 13883 iterations completed, 3.499s remaining
+Current best: Move(tile=Tile(id=68, time=7, tileColour=YELLOW, tasks=[({CYAN=1, RED=1}, false), ({CYAN=1, BLUE=1}, false), ({RED=1, BLUE=1}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-4.0)) with 667 visits
+MCTS: 25281 iterations completed, 0.498s remaining
+Current best: Move(tile=Tile(id=68, time=7, tileColour=YELLOW, tasks=[({CYAN=1, RED=1}, false), ({CYAN=1, BLUE=1}, false), ({RED=1, BLUE=1}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-4.0)) with 1214 visits
+MCTS completed with 27152 iterations
+Best move: Move(tile=Tile(id=68, time=7, tileColour=YELLOW, tasks=[({CYAN=1, RED=1}, false), ({CYAN=1, BLUE=1}, false), ({RED=1, BLUE=1}, false)], position=null, moonTrackPosition=null), position=SerializableCoordinate(x=0.0, y=-4.0)) with 1304 visits (0.61% win rate)
+HardBot playing: 68 at SerializableCoordinate(x=0.0, y=-4.0)
+DEBUG: Game state reset - cleared undo/redo history
+Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" Exception in thread "AppKit Thread" 
+<==========---> 83% EXECUTING [6m 3s]
+> :run
+^C%                                     

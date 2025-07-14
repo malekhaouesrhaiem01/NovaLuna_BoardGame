@@ -196,10 +196,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
-        println("   [startTurn] BEFORE clone:")
-        game.players.forEachIndexed { idx, p ->
-            println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
-        }
+        // println("   [startTurn] BEFORE clone:")
+        // game.players.forEachIndexed { idx, p ->
+        //     println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
+        // }
 
         // Reset the turn flags for the new turn
         game.hasPlayedThisTurn = false
@@ -463,6 +463,56 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
     }
 
     /**
+     * Gets possible positions for placing a tile for the current player in a given game state.
+     * This is similar to getPossiblePosition() but works on any game state, not just the current one.
+     *
+     * @param game The game state to analyze.
+     * @return List of possible positions.
+     */
+    private fun getPossiblePositionsForState(game: NovaLunaGame): List<SerializableCoordinate> {
+        val player = game.players[game.activePlayer]
+        
+        // Get all occupied positions
+        val occupied = player.tiles.mapNotNull { it?.position }.toSet()
+        
+        // If no tiles placed yet, can only place at origin
+        if (occupied.isEmpty()) {
+            return listOf(SerializableCoordinate(0.0, 0.0))
+        }
+        
+        // Find all adjacent positions to occupied tiles
+        val possible = mutableSetOf<SerializableCoordinate>()
+        for (pos in occupied) {
+            // Add the 6 hexagonal neighbors
+            val neighbors = getHexNeighbors(pos)
+            for (neighbor in neighbors) {
+                if (neighbor !in occupied) {
+                    possible.add(neighbor)
+                }
+            }
+        }
+        
+        return possible.toList()
+    }
+    
+    /**
+     * Gets the 6 hexagonal neighbor positions for a coordinate.
+     *
+     * @param position The center position.
+     * @return List of neighbor positions.
+     */
+    private fun getHexNeighbors(position: SerializableCoordinate): List<SerializableCoordinate> {
+        return listOf(
+            SerializableCoordinate(position.x + 1, position.y),
+            SerializableCoordinate(position.x - 1, position.y),
+            SerializableCoordinate(position.x + 0.5, position.y + 1),
+            SerializableCoordinate(position.x - 0.5, position.y + 1),
+            SerializableCoordinate(position.x + 0.5, position.y - 1),
+            SerializableCoordinate(position.x - 0.5, position.y - 1)
+        )
+    }
+
+    /**
      * Checks all open tasks of the current player and updates their status.
      * This method is usually called at the end of a turn to see if any new tiles
      * have completed more tasks.
@@ -642,11 +692,33 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
      * @return A list of all valid [Move] objects for the active player in the given state.
      */
     fun getPossibleMovesForState(game: NovaLunaGame): List<Move> {
-        // TODO: Implement the same logic as getPossibleMovesForCurrentPlayer,
-        // but for the given game state instead of the current one.
-
-        // Placeholder return
-        return emptyList()
+        // Get available tiles (next 3 positions after meeple, skipping empty spots)
+        val availableTileIndices = mutableListOf<Int>()
+        var position = game.meeplePosition
+        var checked = 0
+        
+        while (availableTileIndices.size < 3 && checked < game.tileTrack.size - 1) {
+            position = (position + 1) % game.tileTrack.size
+            if (game.tileTrack[position] != null) {
+                availableTileIndices.add(position)
+            }
+            checked++
+        }
+        
+        val availableTiles = availableTileIndices.map { game.tileTrack[it] }.filterNotNull()
+        
+        // Get possible positions for the current player
+        val possiblePositions = getPossiblePositionsForState(game)
+        
+        // Generate all combinations of tiles and positions
+        val moves = mutableListOf<Move>()
+        for (tile in availableTiles) {
+            for (pos in possiblePositions) {
+                moves.add(Move(tile, pos))
+            }
+        }
+        
+        return moves
     }
 
     /**
