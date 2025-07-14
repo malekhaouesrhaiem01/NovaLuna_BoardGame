@@ -100,14 +100,10 @@ class MCTSNode(
         return bias
     }
 
-    private fun evaluateTaskCompletionBias(player: Player, move: Move): Double {
-        val tile = move.tile ?: return 0.0
-        val position = move.position
-        var completionBias = 0.0
-        
+    private fun getAdjacentColors(player: Player, position: SerializableCoordinate): Map<TileColour, Int> {
         val adjacentColors = mutableMapOf<TileColour, Int>()
         val neighbors = getNeighborPositions(position)
-        
+
         for (neighbor in neighbors) {
             val adjacentTile = player.tiles.find { it?.position == neighbor }
             if (adjacentTile != null) {
@@ -115,61 +111,86 @@ class MCTSNode(
                 adjacentColors[color] = adjacentColors.getOrDefault(color, 0) + 1
             }
         }
-        
-        for ((requirements, isCompleted) in tile.tasks) {
-            if (isCompleted) continue
-            
-            var satisfiedRequirements = 0
-            var totalRequirements = 0
-            
-            for ((requiredColor, requiredCount) in requirements) {
-                totalRequirements += requiredCount
-                val available = adjacentColors.getOrDefault(requiredColor, 0)
-                satisfiedRequirements += minOf(available, requiredCount)
-                
-                if (available >= requiredCount) {
-                    completionBias += 25.0
-                }
-            }
-            
-            if (totalRequirements > 0) {
-                val progress = satisfiedRequirements.toDouble() / totalRequirements.toDouble()
-                completionBias += progress * 10.0
+        return adjacentColors
+    }
+
+    private fun wouldTaskComplete(
+        requirements: Map<TileColour, Int>,
+        adjacentColors: Map<TileColour, Int>
+    ): Boolean {
+        for ((requiredColor, requiredCount) in requirements) {
+            if (adjacentColors.getOrDefault(requiredColor, 0) < requiredCount) {
+                return false
             }
         }
-        
-        // Check if this helps complete tasks on adjacent tiles
+        return true
+    }
+
+    private fun calculateAdjacentTaskHelp(
+        player: Player,
+        tile: Tile,
+        position: SerializableCoordinate,
+        adjacentColors: Map<TileColour, Int>
+    ): Int {
         var adjacentHelped = 0
+        val neighbors = getNeighborPositions(position)
+
         for (neighbor in neighbors) {
             val adjacentTile = player.tiles.find { it?.position == neighbor }
             if (adjacentTile != null) {
                 for ((requirements, isCompleted) in adjacentTile.tasks) {
                     if (isCompleted) continue
-                    
-                    // Would adding this tile complete the adjacent task?
+
                     val adjacentColorsWithNew = adjacentColors.toMutableMap()
-                    adjacentColorsWithNew[tile.tileColour] = adjacentColorsWithNew.getOrDefault(tile.tileColour, 0) + 1
-                    
-                    var wouldComplete = true
-                    for ((requiredColor, requiredCount) in requirements) {
-                        if (adjacentColorsWithNew.getOrDefault(requiredColor, 0) < requiredCount) {
-                            wouldComplete = false
-                            break
-                        }
-                    }
-                    
-                    if (wouldComplete) {
+                    adjacentColorsWithNew[tile.tileColour] =
+                        adjacentColorsWithNew.getOrDefault(tile.tileColour, 0) + 1
+
+                    if (wouldTaskComplete(requirements, adjacentColorsWithNew)) {
                         adjacentHelped++
                     }
                 }
             }
         }
+        return adjacentHelped
+    }
+
+
+    private fun evaluateTaskCompletionBias(player: Player, move: Move): Double {
+        val tile = move.tile ?: return 0.0
+        val position = move.position
+        var completionBias = 0.0
+
+        val adjacentColors = getAdjacentColors(player, position)
+
+        for ((requirements, isCompleted) in tile.tasks) {
+            if (isCompleted) continue
+
+            var satisfiedRequirements = 0
+            var totalRequirements = 0
+
+            for ((requiredColor, requiredCount) in requirements) {
+                totalRequirements += requiredCount
+                val available = adjacentColors.getOrDefault(requiredColor, 0)
+                satisfiedRequirements += minOf(available, requiredCount)
+
+                if (available >= requiredCount) {
+                    completionBias += 25.0
+                }
+            }
+
+            if (totalRequirements > 0) {
+                val progress = satisfiedRequirements.toDouble() / totalRequirements.toDouble()
+                completionBias += progress * 10.0
+            }
+        }
+
+        val adjacentHelped = calculateAdjacentTaskHelp(player, tile, position, adjacentColors)
 
         // Synergy Bonus: Exponentially reward helping multiple adjacent tasks
         if (adjacentHelped > 0) {
             completionBias += (adjacentHelped * 15.0) * adjacentHelped // 1->15, 2->60, 3->135
         }
-        
+
         return completionBias
     }
     
@@ -265,18 +286,19 @@ class MCTSNode(
 
         // Standard Rollout: Use a heuristic combining efficiency and position.
         return moves.maxByOrNull { move ->
-            var score = 0.0
-            val tile = move.tile ?: return@maxByOrNull 0.0
-            // Efficiency Score: (Task Progress / Time Cost)
-            val taskScore = evaluateQuickTaskCompletion(currentPlayer, move)
-            val efficiency = if (tile.time > 0) taskScore / tile.time else taskScore * 2 // Avoid division by zero
-            score += efficiency * 50
-            // Positional Score: Simple clustering is good.
-            val adjacentCount = countAdjacentTiles(currentPlayer, move.position)
-            score += adjacentCount * 10
-            // Time Score: Lower time is generally better.
-            score += (10 - tile.time) * 5
-            score
+            move.tile?.let { tile ->
+                var score = 0.0
+                // Efficiency Score: (Task Progress / Time Cost)
+                val taskScore = evaluateQuickTaskCompletion(currentPlayer, move)
+                val efficiency = if (tile.time > 0) taskScore / tile.time else taskScore * 2
+                score += efficiency * 50
+                // Positional Score: Simple clustering is good.
+                val adjacentCount = countAdjacentTiles(currentPlayer, move.position)
+                score += adjacentCount * 10
+                // Time Score: Lower time is generally better.
+                score += (10 - tile.time) * 5
+                score
+            } ?: 0.0
         } ?: moves.random()
     }
     
@@ -522,6 +544,37 @@ class MCTSNode(
         player.tokenCount = maxOf(0, player.tokenCount - newlyCompletedTasks)
     }
 
+    private fun traverseGroup(
+        startPos: SerializableCoordinate,
+        player: Player,
+        color: TileColour,
+        visited: MutableSet<SerializableCoordinate>
+    ): Set<SerializableCoordinate> {
+        val group = mutableSetOf<SerializableCoordinate>()
+        val stack = ArrayDeque<SerializableCoordinate>()
+
+        stack.add(startPos)
+        group.add(startPos)
+        visited.add(startPos)
+
+        while (stack.isNotEmpty()) {
+            val currentPos = stack.removeLast()
+            val currentNeighbors = getNeighborPositions(currentPos)
+
+            for (currentNeighborPos in currentNeighbors) {
+                val currentNeighborTile = player.tiles.find { it?.position == currentNeighborPos }
+                if (currentNeighborTile != null && currentNeighborTile.tileColour == color &&
+                    currentNeighborPos !in group
+                ) {
+                    group.add(currentNeighborPos)
+                    visited.add(currentNeighborPos)
+                    stack.add(currentNeighborPos)
+                }
+            }
+        }
+        return group
+    }
+
     private fun findConnectedColorGroup(player: Player, startTile: Tile, color: TileColour): Int {
         val neighbors = getNeighborPositions(startTile.position ?: return 0)
         val visited = mutableSetOf<SerializableCoordinate>()
@@ -530,28 +583,7 @@ class MCTSNode(
         for (neighborPos in neighbors) {
             val neighborTile = player.tiles.find { it?.position == neighborPos }
             if (neighborTile != null && neighborTile.tileColour == color && neighborPos !in visited) {
-                val group = mutableSetOf<SerializableCoordinate>()
-                val stack = ArrayDeque<SerializableCoordinate>()
-
-                stack.add(neighborPos)
-                group.add(neighborPos)
-                visited.add(neighborPos)
-
-                while (stack.isNotEmpty()) {
-                    val currentPos = stack.removeLast()
-                    val currentNeighbors = getNeighborPositions(currentPos)
-
-                    for (currentNeighborPos in currentNeighbors) {
-                        val currentNeighborTile = player.tiles.find { it?.position == currentNeighborPos }
-                        if (currentNeighborTile != null && currentNeighborTile.tileColour == color && 
-                            currentNeighborPos !in group
-                        ) {
-                            group.add(currentNeighborPos)
-                            visited.add(currentNeighborPos)
-                            stack.add(currentNeighborPos)
-                        }
-                    }
-                }
+                val group = traverseGroup(neighborPos, player, color, visited)
                 count += group.size
             }
         }
