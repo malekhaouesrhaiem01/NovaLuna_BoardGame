@@ -2,3 +2,7 @@
 /.idea/
 /.gradle/
 /public/
+*.salive
+.DS_Store
+*.log
+novaluna.json
