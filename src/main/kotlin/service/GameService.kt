@@ -280,7 +280,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         }
     }
 
-    private fun saveForUndoRedo(game : NovaLunaGame) {}
+    //private fun saveForUndoRedo(game : NovaLunaGame) {}
 
     /**
      * The method [endTurn] ends the current Players turn,
@@ -634,20 +634,19 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         return neighbors
     }
 
-    /**
-     * Gets all valid moves for the active player in a *specific game state*.
-     * This version is used by MCTS in [service.bot.HardBotService] to explore hypothetical scenarios.
-     *
-     * @param game The hypothetical [NovaLunaGame] state to analyze.
-     * @return A list of all valid [Move] objects for the active player in the given state.
-     */
-    fun getPossibleMovesForState(game: NovaLunaGame): List<Move> {
-        // TODO: Implement the same logic as getPossibleMovesForCurrentPlayer,
-        // but for the given game state instead of the current one.
-
-        // Placeholder return
-        return emptyList()
-    }
+//    /**
+//     * Gets all valid moves for the active player in a *specific game state*.
+//     * This version is used by MCTS in [service.bot.HardBotService] to explore hypothetical scenarios.
+//     *
+//     * @param game The hypothetical [NovaLunaGame] state to analyze.
+//     * @return A list of all valid [Move] objects for the active player in the given state.
+//     */
+//    fun getPossibleMovesForState(game: NovaLunaGame): List<Move> {
+//        // but for the given game state instead of the current one.
+//
+//        // Placeholder return
+//        return emptyList()
+//    }
 
     /**
      * Gets all valid moves for the currently active player in the *current game*.

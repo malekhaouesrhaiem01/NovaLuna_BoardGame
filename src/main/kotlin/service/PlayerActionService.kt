@@ -2,8 +2,7 @@ package service
 import entity.Move
 import entity.NovaLunaGame
 import entity.SerializableCoordinate
-import entity.toBGWCoordinate
-import kotlinx.serialization.encodeToString
+
 import kotlinx.serialization.json.Json
 import java.io.File
 
@@ -37,7 +36,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
     fun resetGameState() {
         undoStack.clear()
         redoStack.clear()
-        println("DEBUG: Game state reset - cleared undo/redo history")
+        //println("DEBUG: Game state reset - cleared undo/redo history")
     }
 
     /**
@@ -45,12 +44,12 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * and place it on their personal space  at the desired position
      * the Meeple is  then moved to that index.
      * The player's time marker is advanced based on the tile's cost.
-     * Triggers [refreshAfterTilePlayed] to update the UI accordingly.
+     * Triggers [gui.NovaApplication.refreshAfterTilePlayed] to update the UI accordingly.
      *
      * @param tileTrackIndex The index of the tile to take from the tile track (must be one of the next 3 tiles).
      * @param position The coordinate where the tile should be placed on the current player's space .
      *
-     * @throws IllegalStateException If no game is active or it's not the current player's turn.
+     * @throws IllegalStateException If no game is active, or it's not the current player's turn.
      * @throws IllegalArgumentException If the selected tile is invalid or cannot be placed at the given position.
      */
     fun playTile(tileTrackIndex: Int, position: SerializableCoordinate) {
@@ -58,7 +57,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         val gameState = Json.encodeToString(game)
         undoStack.add(gameState)
         redoStack.clear()
-        println("DEBUG: PlayTile called. Added state to undo stack. Stack size: ${undoStack.size}")
+        //println("DEBUG: PlayTile called. Added state to undo stack. Stack size: ${undoStack.size}")
 
         // Get the selected tile from the tile track
         val selectedTile = game.tileTrack[tileTrackIndex]
@@ -78,18 +77,18 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         // update position on the moon wheel of the token
         // and the position of the meeple on the tile track
         rootService.gameService.moveMeepleAndPlayer(selectedTile)
-        println("   [playTile] AFTER moveMeepleAndPlayer")
-        println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
+        //println("   [playTile] AFTER moveMeepleAndPlayer")
+        //println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
 
         // check if tasks are now fulfilled
         rootService.gameService.updateTasks()
-        println("   [playTile] AFTER updateTasks")
-        println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
+        //println("   [playTile] AFTER updateTasks")
+        //println("   - Heights: ${game.players.map { "${it.playerName}:${it.height}" }}")
 
 
         // Send network message if it's a network game and it's our turn
         if (rootService.networkService.connectionState == ConnectionState.PLAYING_MY_TURN) {
-            println("    Sending network message...")
+            //println("    Sending network message...")
 
             rootService.networkService.sendTurnMessage(
                 tileId = tileId,
@@ -97,8 +96,8 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
                 y = position.y.toInt(),
                 refillTrack = game.refilledThisTurn
             )
-            println("    Network message sent")
-            println("    NOT sending network message (state: ${rootService.networkService.connectionState})")
+            //println("    Network message sent")
+            //println("    NOT sending network message (state: ${rootService.networkService.connectionState})")
 
         }
 
@@ -155,15 +154,15 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @throws NoSuchElementException If there's no undo state to go back to.
      */
     fun undo() {
-        println("DEBUG: Undo called. Stack size: ${undoStack.size}")
+        //println("DEBUG: Undo called. Stack size: ${undoStack.size}")
         if (undoStack.isNotEmpty()) {
             val game = checkNotNull(rootService.currentGame)
             val currentGameState = Json.encodeToString(game)
             redoStack.add(currentGameState)
-            println("DEBUG: Added current state to redo stack. Redo stack size: ${redoStack.size}")
+            //println("DEBUG: Added current state to redo stack. Redo stack size: ${redoStack.size}")
 
             val lastGameState = undoStack.removeAt(undoStack.lastIndex)
-            println("DEBUG: Removed state from undo stack. New undo stack size: ${undoStack.size}")
+            //println("DEBUG: Removed state from undo stack. New undo stack size: ${undoStack.size}")
             rootService.currentGame = Json.decodeFromString<NovaLunaGame>(lastGameState)
             
             // Restore the turn state without auto-triggering bots yet
@@ -176,7 +175,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
             // Now trigger bot if needed, after UI is refreshed
             triggerBotAfterRestore()
         } else {
-            println("DEBUG: Undo stack is empty, cannot undo")
+            //println("DEBUG: Undo stack is empty, cannot undo")
         }
     }
 
@@ -240,7 +239,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
      * @returns This method has no return value (`Unit`).
      *
      * @throws IllegalStateException If no game is running or if the game is online.
-     * @throws IOException If saving fails (example: due to file access issues).
+     * @throws java.io.IOException If saving fails (example: due to file access issues).
      */
     fun save() {
         val game = checkNotNull(rootService.currentGame)
@@ -299,12 +298,12 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
                     saveData.getValue("redoStack"))
                 )
                 
-                println("DEBUG: Loaded game with undo history. Undo stack size: ${undoStack.size}, " +
-                        "Redo stack size: ${redoStack.size}")
+                //println("DEBUG: Loaded game with undo history. Undo stack size: ${undoStack.size}, " +
+                //        "Redo stack size: ${redoStack.size}")
                 
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Fallback to old format (just game state) for backward compatibility
-                println("DEBUG: Loading old format save file")
+                //println("DEBUG: Loading old format save file")
                 rootService.currentGame = Json.decodeFromString<NovaLunaGame>(saveContent)
                 
                 // For old format, clear stacks - no history available
@@ -326,7 +325,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
 
 
     /**
-     * The method [refillWheel] fills up the moonWheel with cards in the [drawPile]
+     * The method [refillWheel] fills up the moonWheel with cards in the [entity.NovaLunaGame.drawPile]
      * when there are 2 or fewer cards in the moonWheel
      *
      *
@@ -351,10 +350,10 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         undoStack.add(gameState)
         redoStack.clear()
 
-        println("     REFILL: Starting refill")
-        println("   - Active player: ${game.activePlayer} (${game.players[game.activePlayer].playerName})")
-        println("   - Connection state: ${rootService.networkService.connectionState}")
-        println("   - Tiles before refill: ${game.tileTrack.count { it != null }}")
+        //println("     REFILL: Starting refill")
+        //println("   - Active player: ${game.activePlayer} (${game.players[game.activePlayer].playerName})")
+        //println("   - Connection state: ${rootService.networkService.connectionState}")
+        //println("   - Tiles before refill: ${game.tileTrack.count { it != null }}")
 
         val filled = game.tileTrack.count {it != null}
 
@@ -376,8 +375,8 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         // Mark that refill happened this turn
         game.refilledThisTurn = true
 
-        println("   - Tiles after refill: ${game.tileTrack.count { it != null }}")
-        println("   - refilledThisTurn flag: ${game.refilledThisTurn}")
+        //println("   - Tiles after refill: ${game.tileTrack.count { it != null }}")
+        //println("   - refilledThisTurn flag: ${game.refilledThisTurn}")
 
         onAllRefreshables { refreshAfterRefill() }
     }
