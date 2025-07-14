@@ -196,10 +196,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
-        // println("   [startTurn] BEFORE clone:")
-        // game.players.forEachIndexed { idx, p ->
-        //     println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
-        // }
+        println("   [startTurn] BEFORE clone:")
+        game.players.forEachIndexed { idx, p ->
+            println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
+        }
 
         // Reset the turn flags for the new turn
         game.hasPlayedThisTurn = false

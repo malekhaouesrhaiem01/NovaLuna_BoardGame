@@ -45,7 +45,7 @@ class HardBotService(private val rootService: RootService) {
         if (isNetworkGame) {
             // For network games: simpler flow, no automatic endTurn()
             Thread {
-                val bestMove = findBestMove(game, possibleMoves, System.currentTimeMillis() + 3500)
+                val bestMove = findBestMove(game, possibleMoves, System.currentTimeMillis() + 9500)
 
                 // Use minimal delay for network games to avoid timing issues
                 val networkDelay = if (delay == 0L) 0L else 500L
@@ -59,7 +59,7 @@ class HardBotService(private val rootService: RootService) {
         } else {
             // For offline games: keep the original behavior
             Thread {
-                val bestMove = findBestMove(game, possibleMoves, System.currentTimeMillis() + 6500)
+                val bestMove = findBestMove(game, possibleMoves, System.currentTimeMillis() + 9500)
                 scheduler.schedule({
                     println("HardBot playing: ${bestMove.tile?.id} at ${bestMove.position}")
                     rootService.playerActionService.playTile(bestMove)

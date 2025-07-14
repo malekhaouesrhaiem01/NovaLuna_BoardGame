@@ -58,7 +58,7 @@ open class PlayerActionService(private val rootService: RootService) : AbstractR
         val gameState = Json.encodeToString(game)
         undoStack.add(gameState)
         redoStack.clear()
-        // println("DEBUG: PlayTile called. Added state to undo stack. Stack size: ${undoStack.size}")
+        println("DEBUG: PlayTile called. Added state to undo stack. Stack size: ${undoStack.size}")
 
         // Get the selected tile from the tile track
         val selectedTile = game.tileTrack[tileTrackIndex]
