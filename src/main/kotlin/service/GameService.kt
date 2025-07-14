@@ -196,10 +196,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val game = rootService.currentGame
         checkNotNull(game) { "No game is currently running." }
 
-        println("   [startTurn] BEFORE clone:")
-        game.players.forEachIndexed { idx, p ->
-            println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
-        }
+//        println("   [startTurn] BEFORE clone:")
+//        game.players.forEachIndexed { idx, p ->
+//            println("     Player $idx (${p.playerName}): pos=${p.moonTrackPosition}, height=${p.height}")
+//        }
 
         // Reset the turn flags for the new turn
         game.hasPlayedThisTurn = false
@@ -226,7 +226,7 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
             rootService.hardBotService.executeHardBotMove()
         }
 
-        println("   [startTurn] AFTER clone:")
+        //println("   [startTurn] AFTER clone:")
     }
 
     /**
@@ -426,9 +426,10 @@ open class GameService(private val rootService: RootService) : AbstractRefreshin
         val occupied = mutableListOf<SerializableCoordinate>()
         for (tile in player.tiles)
         {
-            if(tile?.position != null)
-            {
-                occupied.add(tile.position!!)
+            if(tile?.position != null) {
+                val position = tile.position
+                checkNotNull(position)
+                occupied.add(position)
             }
         }
 

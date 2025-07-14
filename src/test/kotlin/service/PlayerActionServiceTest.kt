@@ -7,6 +7,10 @@ import entity.SerializableCoordinate
 import org.junit.jupiter.api.Test
 import kotlin.test.BeforeTest
 
+/**
+ * Test the functionality for the functions undo(), redo(), load() and save()
+ * in the Class PlayerActionService
+ */
 class PlayerActionServiceTest {
     /**
      * rootService to access the PlayerActionServices
@@ -79,6 +83,7 @@ class PlayerActionServiceTest {
      */
     @Test
     fun loadTest(){
+        rootService.playerActionService.load()
         rootService.gameService.endGame(rootService.currentGame!!.players[1])
         //rootService.playerActionService.playTile(tileTrackIndex = 2, SerializableCoordinate(0.0,0.0))
         rootService.playerActionService.load()
