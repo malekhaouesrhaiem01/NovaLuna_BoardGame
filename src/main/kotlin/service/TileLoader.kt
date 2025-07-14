@@ -6,7 +6,7 @@ import entity.TileColour
 /**
  *  Service layer Class that loads the Tiles for a Nova Luna Game
  */
-class TileLoader {
+open class TileLoader {
 
     val colourMap = mapOf(
         'c' to TileColour.CYAN,
@@ -30,8 +30,10 @@ class TileLoader {
      * @throws IllegalArgumentException if file can't be found
      * @throws
      */
-    fun readTiles(filePath : String = "/nl_tiles.csv") : MutableList<Tile?> {
+    open fun readTiles(filePath : String = "/nl_tiles.csv") : MutableList<Tile?> {
+
         // search for nl_tiles.csv in resources
+
         val fileURL = object{}.javaClass.getResourceAsStream( filePath )
             ?: throw IllegalArgumentException("file not found: $filePath")
 

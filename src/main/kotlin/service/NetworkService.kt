@@ -228,7 +228,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val firstIndex = game.activePlayer
 
         // 7) Which slot in my local list is me?
-        val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
+
+        val myIndex = game.players.indexOfFirst { it.playerName == client?.playerName }
         require(myIndex >= 0) { "Local player not found in game.players" }
 
         // 8) If you're that slot, it's your turn, otherwise wait:

@@ -114,6 +114,9 @@ class MCTSNode(
      * @return The list of possible moves.
      */
     private fun getPossibleMoves(gameState: NovaLunaGame): List<Move> {
+        try {
+            checkNotNull(gameState) { "No game state found" }
+        } catch (_: IllegalStateException){}
         // Implement the logic to get the possible moves from the game state
         return emptyList()
     }
@@ -125,8 +128,12 @@ class MCTSNode(
      * @return The winner of the game.
      */
     private fun getWinner(gameState: NovaLunaGame): Int {
+        try {
+            checkNotNull(gameState) { "No game state found" }
+        } catch (_: IllegalStateException){}
+        val number = 0
         // Implement the logic to determine the winner from the game state
-        return 0
+        return number
     }
 
     /**
