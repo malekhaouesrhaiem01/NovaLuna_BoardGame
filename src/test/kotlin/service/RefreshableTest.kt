@@ -5,6 +5,9 @@ import entity.Player
 import entity.PlayerType
 import entity.PlayerColour
 
+/**
+ * Tests the [Refreshable] interface.
+ */
 class RefreshableTest {
 
     /**

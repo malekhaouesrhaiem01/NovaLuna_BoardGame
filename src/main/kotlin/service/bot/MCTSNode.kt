@@ -9,6 +9,17 @@ import entity.SerializableCoordinate
 import kotlin.math.ln
 import kotlin.math.sqrt
 
+/**
+ * Represents a node in the Monte Carlo Tree Search tree.
+ *
+ * @property gameState The game state at this node.
+ * @property parent The parent node of this node.
+ * @property moveThatLedHere The move that led to this node.
+ * @property untriedMoves The list of moves that have not yet been tried from this node.
+ * @property children The list of child nodes of this node.
+ * @property visits The number of times this node has been visited.
+ * @property scores A map of player indices to their scores at this node.
+ */
 class MCTSNode(
     val gameState: NovaLunaGame,
     val parent: MCTSNode? = null,
@@ -19,6 +30,12 @@ class MCTSNode(
     val scores: MutableMap<Int, Double> = mutableMapOf()
 ) {
 
+    /**
+     * Selects the best child of this node using the UCT formula.
+     *
+     * @param explorationConstant The exploration constant to use in the UCT formula.
+     * @return The best child node.
+     */
     fun selectBestChild(explorationConstant: Double = 1.41): MCTSNode? {
         if (children.isEmpty()) return null
 
@@ -156,34 +173,7 @@ class MCTSNode(
         return completionBias
     }
     
-    private fun evaluateClusteringBonus(player: Player, position: SerializableCoordinate): Double {
-        val neighbors = getNeighborPositions(position)
-        var clusterBonus = 0.0
-        
-        val occupiedNeighbors = neighbors.count { neighbor ->
-            player.tiles.any { it?.position == neighbor }
-        }
-        
-        clusterBonus += occupiedNeighbors * 2.0
-        
-        var futureConnectionPotential = 0
-        for (neighbor in neighbors) {
-            val isOccupied = player.tiles.any { it?.position == neighbor }
-            if (!isOccupied) {
-                val secondLevelNeighbors = getNeighborPositions(neighbor)
-                val hasNearbyTiles = secondLevelNeighbors.any { secondNeighbor ->
-                    player.tiles.any { it?.position == secondNeighbor }
-                }
-                if (hasNearbyTiles) {
-                    futureConnectionPotential++
-                }
-            }
-        }
-        
-        clusterBonus += futureConnectionPotential * 1.5
-        
-        return clusterBonus
-    }
+    
     
     private fun countAdjacentTiles(player: Player, position: SerializableCoordinate): Int {
         val neighbors = getNeighborPositions(position)
@@ -192,6 +182,11 @@ class MCTSNode(
         }
     }
 
+    /**
+     * Expands this node by creating a new child node from an untried move.
+     *
+     * @return The new child node.
+     */
     fun expand(): MCTSNode {
         val move = untriedMoves.removeAt(0)
         val newGameState = gameState.deepCopy()
@@ -204,6 +199,11 @@ class MCTSNode(
         return newNode
     }
 
+    /**
+     * Simulates a game from this node to a terminal state.
+     *
+     * @return The score of the terminal state.
+     */
     fun rollout(): Double {
         val currentGameState = gameState.deepCopy()
         var depth = 0
@@ -324,6 +324,11 @@ class MCTSNode(
         return completionScore
     }
 
+    /**
+     * Backpropagates the score of a simulation up the tree.
+     *
+     * @param score The score of the simulation.
+     */
     fun backpropagate(score: Double) {
         var currentNode: MCTSNode? = this
         while (currentNode != null) {
@@ -336,8 +341,19 @@ class MCTSNode(
         }
     }
 
+    /**
+     * Checks if this node is fully expanded.
+     *
+     * @return True if this node is fully expanded, false otherwise.
+     */
     fun isFullyExpanded(): Boolean = untriedMoves.isEmpty()
 
+    /**
+     * Checks if the given game state is a terminal state.
+     *
+     * @param gameState The game state to check.
+     * @return True if the game state is a terminal state, false otherwise.
+     */
     fun isTerminal(gameState: NovaLunaGame): Boolean {
         if (gameState.players.any { it.tokenCount <= 0 }) {
             return true
@@ -379,40 +395,9 @@ class MCTSNode(
         return moves
     }
 
-    private fun getWinner(gameState: NovaLunaGame): Int {
-        var winnerIndex = 0
-        var minTokens = gameState.players[0].tokenCount
-        
-        for (i in 1 until gameState.players.size) {
-            if (gameState.players[i].tokenCount < minTokens) {
-                minTokens = gameState.players[i].tokenCount
-                winnerIndex = i
-            }
-        }
-        
-        return winnerIndex
-    }
     
-    private fun evaluatePosition(gameState: NovaLunaGame, forPlayer: Int): Double {
-        val player = gameState.players[forPlayer]
-        var score = 0.0
-        
-        val minTokens = gameState.players.minOf { it.tokenCount }
-        val maxTokens = gameState.players.maxOf { it.tokenCount }
-        val tokenRange = maxTokens - minTokens
-        if (tokenRange > 0) {
-            score += (maxTokens - player.tokenCount).toDouble() / tokenRange * 100
-        }
-        
-        val avgPosition = gameState.players.map { it.moonTrackPosition }.average()
-        if (player.moonTrackPosition < avgPosition) {
-            score += 10
-        }
-        
-        score += player.tiles.size * 2
-        
-        return score
-    }
+    
+    
 
     private fun uct(node: MCTSNode, explorationConstant: Double): Double {
         if (node.visits == 0) return Double.MAX_VALUE
@@ -571,7 +556,9 @@ class MCTSNode(
 
                     for (currentNeighborPos in currentNeighbors) {
                         val currentNeighborTile = player.tiles.find { it?.position == currentNeighborPos }
-                        if (currentNeighborTile != null && currentNeighborTile.tileColour == color && currentNeighborPos !in group) {
+                        if (currentNeighborTile != null && currentNeighborTile.tileColour == color && 
+                            currentNeighborPos !in group
+                        ) {
                             group.add(currentNeighborPos)
                             visited.add(currentNeighborPos)
                             stack.add(currentNeighborPos)

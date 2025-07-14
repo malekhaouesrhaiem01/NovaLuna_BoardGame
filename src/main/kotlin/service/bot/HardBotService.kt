@@ -3,6 +3,7 @@ package service.bot
 import entity.Move
 import service.ConnectionState
 import service.RootService
+import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
@@ -98,7 +99,8 @@ class HardBotService(private val rootService: RootService) {
         var iterations = 0
         var lastLogTime = System.currentTimeMillis()
         
-        while (System.currentTimeMillis() < endTime) {
+        var exitLoop = false
+        while (System.currentTimeMillis() < endTime && !exitLoop) {
             // Selection: traverse the tree using UCT
             var node = root
             while (node.untriedMoves.isEmpty() && node.children.isNotEmpty()) {
@@ -132,7 +134,7 @@ class HardBotService(private val rootService: RootService) {
             // Early exit if we've done a lot of iterations (performance optimization)
             if (iterations > 100000) {
                 println("MCTS: Early exit after $iterations iterations")
-                break
+                exitLoop = true
             }
             
             // Early exit if we have a very confident choice
@@ -141,7 +143,7 @@ class HardBotService(private val rootService: RootService) {
                 val totalVisits = root.children.sumOf { it.visits }
                 if (bestChild != null && bestChild.visits > totalVisits * 0.8) {
                     println("MCTS: Early exit with confident choice after $iterations iterations")
-                    break
+                    exitLoop = true
                 }
             }
         }
@@ -152,7 +154,10 @@ class HardBotService(private val rootService: RootService) {
         val bestChild = root.children.maxByOrNull { it.visits }
         if (bestChild != null) {
             val winRate = (bestChild.scores[game.activePlayer] ?: 0.0) / bestChild.visits
-            println("Best move: ${bestChild.moveThatLedHere} with ${bestChild.visits} visits (${String.format("%.2f", winRate * 100)}% win rate)")
+            println(
+                "Best move: ${bestChild.moveThatLedHere} with ${bestChild.visits} visits " +
+                    "(${String.format(Locale.US, "%.2f", winRate * 100)}% win rate)"
+            )
             return bestChild.moveThatLedHere!!
         }
         
@@ -246,7 +251,11 @@ class HardBotService(private val rootService: RootService) {
     /**
      * Calculates how this move helps complete tasks on adjacent existing tiles.
      */
-    private fun calculateAdjacentTaskHelp(player: entity.Player, move: Move, colorMap: MutableMap<entity.TileColour, Int>): Double {
+    private fun calculateAdjacentTaskHelp(
+        player: entity.Player, 
+        move: Move, 
+        colorMap: MutableMap<entity.TileColour, Int>
+    ): Double {
         val tile = move.tile ?: return 0.0
         val position = move.position
         var helpValue = 0.0
@@ -401,7 +410,10 @@ class HardBotService(private val rootService: RootService) {
     /**
      * Gets color distribution around a position.
      */
-    private fun getColorDistributionAroundPosition(player: entity.Player, position: entity.SerializableCoordinate): MutableMap<entity.TileColour, Int> {
+    private fun getColorDistributionAroundPosition(
+        player: entity.Player, 
+        position: entity.SerializableCoordinate
+    ): MutableMap<entity.TileColour, Int> {
         val colorMap = mutableMapOf<entity.TileColour, Int>()
         val neighbors = getNeighborPositions(position)
         
@@ -427,13 +439,5 @@ class HardBotService(private val rootService: RootService) {
         )
     }
     
-    /**
-     * Counts adjacent tiles to a position for a player.
-     */
-    private fun countAdjacentTiles(player: entity.Player, position: entity.SerializableCoordinate): Int {
-        val neighbors = getNeighborPositions(position)
-        return neighbors.count { neighbor ->
-            player.tiles.any { tile -> tile?.position == neighbor }
-        }
-    }
+    
 }
