@@ -119,7 +119,9 @@ class GameScene(private val rootService: RootService): BoardGameScene(1920, 1080
             try {
                 rootService.playerActionService.save()
                 showError("Game saved successfully!")
-            } catch (e: Exception) {
+            } catch (e: IllegalStateException) {
+                showError("Failed to save game: no game is running or the game is online\n${e.message}")
+            } catch (e: java.io.IOException) {
                 showError("Failed to save game: ${e.message}")
             }
         }

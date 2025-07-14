@@ -59,18 +59,25 @@ class EasyBotService(private val rootService: RootService) : AbstractRefreshingS
         // 2. Select a random move
         val randomMove = possibleMoves.random()
         println("EasyBot selected move: Place tile ${randomMove.tile?.id} at ${randomMove.position}")
-        // 3. Execute the move
-        playerActionService.playTile(randomMove)
 
         val waitTime = game.simulationSpeed.toLong()
         val scheduler = Executors.newSingleThreadScheduledExecutor()
 
         if(rootService.networkService.connectionState == service.ConnectionState.DISCONNECTED) {
+            playerActionService.playTile(randomMove)
             scheduler.schedule({
                 SwingUtilities.invokeLater {
                     gameService.endTurn()
                 }
             }, waitTime, TimeUnit.SECONDS)
+        }
+        else
+        {
+            scheduler.schedule({
+                SwingUtilities.invokeLater {
+                    playerActionService.playTile(randomMove)
+                }
+            }, 3, TimeUnit.SECONDS)
         }
     }
 }

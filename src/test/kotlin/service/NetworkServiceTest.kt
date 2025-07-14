@@ -14,6 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import tools.aqua.bgw.net.common.response.CreateGameResponse
 import tools.aqua.bgw.net.common.response.CreateGameResponseStatus
+import kotlin.test.assertFails
 
 
 
@@ -267,4 +268,134 @@ class NetworkServiceTest {
         networkService.receiveTurnMessage(message, "Player1")
     }
 
+    /**
+     * startNewHostedGame must reject when not in the lobby state
+     */
+    @Test
+    fun startNewHostedGame_wrongState() {
+        val svc = NetworkService(RootService())
+        assertFailsWith<IllegalStateException> {
+            svc.startNewHostedGame(emptyList(), isFirstGame = false, randomOrder = false)
+        }
+    }
+
+    /**
+     * startNewHostedGame must reject when list size < 2
+     */
+
+    @Test
+    fun startNewHostedGame_tooFewPlayers() {
+        val svc = NetworkService(RootService())
+        // Pretend we’re already in the lobby
+        svc.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
+
+        val onePlayer = listOf(
+            Player("Paula", 18, 0, false, PlayerType.HUMAN, PlayerColour.WHITE, mutableListOf(), 0)
+        )
+        assertFailsWith<IllegalArgumentException> {
+            svc.startNewHostedGame(onePlayer, isFirstGame = false, randomOrder = false)
+        }
+    }
+
+    /**
+     * StartNewHostedGame must reject when list size bigger than 4
+     */
+    @Test
+    fun startNewHostedGame_tooManyPlayers() {
+        val svc = NetworkService(RootService())
+        svc.updateConnectionState(ConnectionState.WAITING_FOR_GUESTS)
+
+        val base = Player("Paula", 18, 0, false, PlayerType.HUMAN, PlayerColour.WHITE, mutableListOf(), 0)
+        val players5 = listOf(
+            base,
+            base.copy(playerName = "Lilly"),
+            base.copy(playerName = "Zenon"),
+            base.copy(playerName = "Xanthe"),
+            base.copy(playerName = "Quentin")
+        )
+        assertFailsWith<IllegalArgumentException> {
+            svc.startNewHostedGame(players5, isFirstGame = true, randomOrder = true)
+        }
+    }
+
+    /**
+     * sendTurnMessage must reject when not in PLAYING_MY_TURN
+     */
+    @Test
+    fun sendTurnMessage_wrongState() {
+        val svc = NetworkService(RootService())
+        assertFailsWith<IllegalStateException> {
+            svc.sendTurnMessage(tileId = 42, x = 1, y = 1, refillTrack = false)
+        }
+    }
+
+    /**
+     * receiveTurnMessage must reject when not in WAITING_FOR_OPPONENT
+     */
+    @Test
+    fun receiveTurnMessage_wrongState() {
+        val svc = NetworkService(RootService())
+        val dummy = TurnMessage(tileId = 99, x = 0, y = 0, refillTrack = false)
+        assertFailsWith<IllegalStateException> {
+            svc.receiveTurnMessage(dummy, sender = "Paula")
+        }
+    }
+
+    /**
+     * startNewJoinedGame must reject when not in WAITING_FOR_INIT
+     */
+    @Test
+    fun startNewJoinedGame_wrongState() {
+        val svc = NetworkService(RootService())
+        val dtoList = listOf(
+            edu.udo.cs.sopra.ntf.subtypes.Player("Paula", edu.udo.cs.sopra.ntf.subtypes.Color.BLUE),
+            edu.udo.cs.sopra.ntf.subtypes.Player("Lilly", edu.udo.cs.sopra.ntf.subtypes.Color.BLACK)
+        )
+        val msg = InitMessage(drawPile = emptyList(), isFirstGame = true, players = dtoList)
+        assertFailsWith<IllegalStateException> {
+            svc.startNewJoinedGame(msg)
+        }
+    }
+
+    /**
+     * startNewJoinedGame exercises all token-count branches (3,4,else and non-first)
+     */
+    @Test
+    fun startNewJoinedGame_tokenCountBranches() {
+        val svc = NetworkService(RootService())
+        svc.updateConnectionState(ConnectionState.WAITING_FOR_INIT)
+
+        run {
+            val players3 = listOf(
+                edu.udo.cs.sopra.ntf.subtypes.Player("A", Color.ORANGE),
+                edu.udo.cs.sopra.ntf.subtypes.Player("B", Color.BLUE),
+                edu.udo.cs.sopra.ntf.subtypes.Player("C", Color.WHITE)
+            )
+            val msg3 = InitMessage(drawPile = emptyList(), isFirstGame = true, players = players3)
+            assertFails { svc.startNewJoinedGame(msg3) }
+        }
+
+        run {
+            val players4 = listOf(
+                edu.udo.cs.sopra.ntf.subtypes.Player("A", Color.ORANGE),
+                edu.udo.cs.sopra.ntf.subtypes.Player("B", Color.BLUE),
+                edu.udo.cs.sopra.ntf.subtypes.Player("C", Color.WHITE),
+                edu.udo.cs.sopra.ntf.subtypes.Player("D", Color.BLACK)
+            )
+            val msg4 = InitMessage(drawPile = emptyList(), isFirstGame = true, players = players4)
+            assertFails { svc.startNewJoinedGame(msg4) }
+        }
+
+        run {
+            val players = listOf(
+                edu.udo.cs.sopra.ntf.subtypes.Player("A", Color.ORANGE),
+                edu.udo.cs.sopra.ntf.subtypes.Player("B", Color.BLUE),
+                edu.udo.cs.sopra.ntf.subtypes.Player("C", Color.WHITE),
+                edu.udo.cs.sopra.ntf.subtypes.Player("D", Color.BLACK),
+            )
+            val msgNotFirst = InitMessage(drawPile = emptyList(), isFirstGame = false, players = players)
+            assertFails { svc.startNewJoinedGame(msgNotFirst) }
+        }
+
+}
 }
