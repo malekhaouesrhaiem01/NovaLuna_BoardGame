@@ -29,7 +29,7 @@ open class TileLoader {
      */
     open fun readTiles(filePath : String = "/nl_tiles.csv") : MutableList<Tile?> {
         // search for nl_tiles.csv in resources
-        val fileURL = object{}.javaClass.getResourceAsStream( filePath )
+        val fileURL = TileLoader::class.java.getResourceAsStream(filePath)
             ?: throw IllegalArgumentException("file not found: $filePath")
 
         val novaLunaTiles = mutableListOf<Tile?>()
