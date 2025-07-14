@@ -45,7 +45,7 @@ class NovaLunaNetworkClient(
         Thread {
             Thread.sleep(2000) // Give framework time to initialize
             annotatedReceiversReady = true
-            println("DEBUG: Annotated receivers are now ready")
+            //println("DEBUG: Annotated receivers are now ready")
         }.start()
     }
 
@@ -134,35 +134,35 @@ class NovaLunaNetworkClient(
     @GameActionReceiver
     @Suppress("UNUSED_PARAMETER", "unused")
     fun onInitReceived(message: InitMessage, sender: String) {
-        println("DEBUG: onInitReceived called with sender: $sender")
-        println("DEBUG: Current connection state: ${networkService.connectionState}")
+        //println("DEBUG: onInitReceived called with sender: $sender")
+        //println("DEBUG: Current connection state: ${networkService.connectionState}")
 
         if (sender == this.playerName) {
-            println("DEBUG: Ignoring my own InitMessage")
+            //println("DEBUG: Ignoring my own InitMessage")
             return
         }
 
         // Wait for receivers to be ready if needed
         if (!annotatedReceiversReady) {
-            println("DEBUG: Waiting for annotated receivers to be ready...")
+            //println("DEBUG: Waiting for annotated receivers to be ready...")
             var waited = 0
             while (!annotatedReceiversReady && waited < 50) { // 5 seconds max
                 Thread.sleep(100)
                 waited++
             }
-            if (annotatedReceiversReady) {
-                println("DEBUG: Annotated receivers now ready after ${waited * 100}ms")
-            } else {
-                println("DEBUG: WARNING: Annotated receivers still not ready after timeout")
-            }
+         //   if (annotatedReceiversReady) {
+                //println("DEBUG: Annotated receivers now ready after ${waited * 100}ms")
+           // } else {
+                //println("DEBUG: WARNING: Annotated receivers still not ready after timeout")
+           // }
         }
 
         try {
             networkService.startNewJoinedGame(message)
-            println("DEBUG: startNewJoinedGame completed successfully")
-        } catch (e: IllegalStateException) {
-            println("DEBUG: Exception in startNewJoinedGame: ${e.message}")
-            e.printStackTrace()
+            //println("DEBUG: startNewJoinedGame completed successfully")
+        } catch (_: IllegalStateException) {
+            //println("DEBUG: Exception in startNewJoinedGame: ${e.message}")
+            //e.printStackTrace()
         }
     }
     /**
@@ -177,7 +177,7 @@ class NovaLunaNetworkClient(
     fun onTurnReceived(message: TurnMessage, sender: String) {
         // ignore our own messages (the server echoes them back to us)
         if (sender == this.playerName) {
-            println("DEBUG: Ignoring my own TurnMessage for tile ${message.tileId}")
+            //println("DEBUG: Ignoring my own TurnMessage for tile ${message.tileId}")
             return
         }
             networkService.receiveTurnMessage(message, sender)

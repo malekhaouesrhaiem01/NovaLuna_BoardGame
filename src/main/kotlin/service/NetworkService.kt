@@ -228,7 +228,8 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         val firstIndex = game.activePlayer
 
         // 7) Which slot in my local list is me?
-        val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
+
+        val myIndex = game.players.indexOfFirst { it.playerName == client?.playerName }
         require(myIndex >= 0) { "Local player not found in game.players" }
 
         // 8) If you're that slot, it's your turn, otherwise wait:
@@ -297,7 +298,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         //println("   [GUEST] Player object IDs: $playerObjectIds")
         // 5) Figure out who starts
         val firstIndex = game.activePlayer
-        val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
+        val myIndex = game.players.indexOfFirst { it.playerName == client?.playerName }
         require(myIndex >= 0) { "Local player not found in game.players" }
 
         // 6) Transition into the correct state
@@ -355,7 +356,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
 
         val game = rootService.currentGame
         if (game != null) {
-            val myIndex = game.players.indexOfFirst { it.playerName == client!!.playerName }
+            val myIndex = game.players.indexOfFirst { it.playerName == client?.playerName }
 
             if (myIndex == game.activePlayer) {
                 // We get another turn!
@@ -427,7 +428,7 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
             if (gameAfterEndTurn != null) {
                 // Decide next connection state: if the same player remains active, grant another turn
                 val nextState =
-                    if (gameAfterEndTurn.players[gameAfterEndTurn.activePlayer].playerName == client!!.playerName) {
+                    if (gameAfterEndTurn.players[gameAfterEndTurn.activePlayer].playerName == client?.playerName) {
                         ConnectionState.PLAYING_MY_TURN
                     } else {
                         ConnectionState.WAITING_FOR_OPPONENT

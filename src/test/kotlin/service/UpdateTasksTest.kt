@@ -31,13 +31,12 @@ class UpdateTasksTest {
         rootService.gameService.startNewGame(players, 10, randomOrder = false, firstGame = false)
 
     }
+
     /**
      * Tests the `updateTasks()` method by:
      * - Giving the current player 10 tiles from the tile track.
      * - Positioning them in a pattern around the origin.
      * - Calling `updateTasks()` to process task checks.
-     *
-     *
      */
     @Test
     fun testUpdateTasks(){
@@ -68,6 +67,18 @@ class UpdateTasksTest {
         // Works for an unshuffled drawPile or If 11 Cyan Tiles are in Players Hands
         // assertEquals(true, currentPlayerHand[1]!!.tasks[0].second)
 
+        rootService.gameService.endGame(game.players[1])
+
+        rootService = RootService()
+        val players = mutableListOf(
+            (Player("Anna", 18, 0, false, PlayerType.HUMAN, PlayerColour.BLACK, mutableListOf(), 0)),
+            (Player("Bob",18 ,0 , false, PlayerType.HUMAN, PlayerColour.WHITE, mutableListOf(), 0)),
+            (Player("David",18, 0, false, PlayerType.HUMAN, PlayerColour.ORANGE, mutableListOf(), 0)),
+            Player("Charles", 18, 0, false, PlayerType.HUMAN, PlayerColour.BLUE, mutableListOf(), 0)
+        )
+        rootService.gameService.startNewGame(players, 10, randomOrder = false, firstGame = true)
 
     }
+
+
 }
