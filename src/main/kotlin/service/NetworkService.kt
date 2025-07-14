@@ -72,11 +72,6 @@ class NetworkService(private val rootService: RootService) : AbstractRefreshingS
         onAllRefreshables { refreshAfterPlayerJoined() }
     }
 
-   // internal fun disconnectAndError() {
-     //   currentSessionPlayers.clear()
-     //   updateConnectionState(ConnectionState.DISCONNECTED)
-   // }
-
     /**
      * Host a new Nova Luna game session on the server.
      * @param secret      Lobby secret/password

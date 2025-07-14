@@ -267,19 +267,15 @@ class MCTSNode(
         return moves.maxByOrNull { move ->
             var score = 0.0
             val tile = move.tile ?: return@maxByOrNull 0.0
-
             // Efficiency Score: (Task Progress / Time Cost)
             val taskScore = evaluateQuickTaskCompletion(currentPlayer, move)
             val efficiency = if (tile.time > 0) taskScore / tile.time else taskScore * 2 // Avoid division by zero
             score += efficiency * 50
-
             // Positional Score: Simple clustering is good.
             val adjacentCount = countAdjacentTiles(currentPlayer, move.position)
             score += adjacentCount * 10
-
             // Time Score: Lower time is generally better.
             score += (10 - tile.time) * 5
-
             score
         } ?: moves.random()
     }
@@ -516,16 +512,7 @@ class MCTSNode(
                 if (wasCompleted) continue
 
                 val requirements = tile.tasks[i].first
-                var allRequirementsMet = true
-                for ((requiredColor, requiredCount) in requirements) {
-                    val connectedColorTiles = findConnectedColorGroup(player, tile, requiredColor)
-                    if (connectedColorTiles < requiredCount) {
-                        allRequirementsMet = false
-                        break
-                    }
-                }
-
-                if (allRequirementsMet) {
+                if (areRequirementsMet(requirements, player, tile)) {
                     newlyCompletedTasks++
                     simulatedTaskStatus[tile.id]?.set(i, true)
                 }
@@ -536,7 +523,7 @@ class MCTSNode(
     }
 
     private fun findConnectedColorGroup(player: Player, startTile: Tile, color: TileColour): Int {
-        val neighbors = getNeighborPositions(startTile.position!!)
+        val neighbors = getNeighborPositions(startTile.position ?: return 0)
         val visited = mutableSetOf<SerializableCoordinate>()
         var count = 0
 
@@ -578,5 +565,22 @@ class MCTSNode(
             SerializableCoordinate(position.x, position.y + 1),
             SerializableCoordinate(position.x, position.y - 1)
         )
+    }
+    
+    /**
+     * Checks if all requirements for a task are met.
+     */
+    private fun areRequirementsMet(
+        requirements: Map<TileColour, Int>, 
+        player: Player, 
+        tile: Tile
+    ): Boolean {
+        for ((requiredColor, requiredCount) in requirements) {
+            val connectedColorTiles = findConnectedColorGroup(player, tile, requiredColor)
+            if (connectedColorTiles < requiredCount) {
+                return false
+            }
+        }
+        return true
     }
 }

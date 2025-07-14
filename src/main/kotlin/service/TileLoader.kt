@@ -28,9 +28,7 @@ open class TileLoader {
      * @throws IllegalArgumentException if file can't be found
      */
     open fun readTiles(filePath : String = "/nl_tiles.csv") : MutableList<Tile?> {
-
         // search for nl_tiles.csv in resources
-
         val fileURL = object{}.javaClass.getResourceAsStream( filePath )
             ?: throw IllegalArgumentException("file not found: $filePath")
 
