@@ -20,15 +20,12 @@ open class TileLoader {
      *
      * @param filePath The file of which should be read. The Default here is "/nl_tiles.cvs"
      *
-     * Pre-Conditions:
-     *
      * Post-Conditions:
      * - All the Tiles in the csv file has been Initialized as a Tile in [Tile]
      *
      * @returns Returns a List with all the NovaLuna Tiles that were read
      *
      * @throws IllegalArgumentException if file can't be found
-     * @throws
      */
     open fun readTiles(filePath : String = "/nl_tiles.csv") : MutableList<Tile?> {
 

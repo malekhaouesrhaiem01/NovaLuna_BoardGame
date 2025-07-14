@@ -38,8 +38,6 @@ class ReturnStateTest {
      */
     @Test
     fun testReturnState(){
-        val game = rootService.currentGame
-
         rootService.gameService.restoreTurnState()
     }
 }
