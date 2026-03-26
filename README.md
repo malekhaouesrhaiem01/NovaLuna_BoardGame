@@ -1,44 +1,68 @@
-Nova Luna Online
+# Nova Luna Online – Kotlin Board Game
 
-This project is a digital version of the board game Nova Luna by Uwe Rosenberg. It was developed as part of a software engineering project and focuses on implementing the full game logic, network communication, and bot integration for online play.
+A digital version of the board game **Nova Luna** by Uwe Rosenberg, developed in Kotlin at TU Dortmund.
+Features online multiplayer, AI bots (easy + hard), and a modular layered architecture.
 
-The goal was to reproduce the game’s mechanics accurately while allowing players to connect and play together over the network. The project also includes AI-controlled players that can act as opponents in single- or multi-player games.
+---
 
-Features
+## Screenshots
 
-Online multiplayer support through a custom network client (NovaLunaNetworkClient)
+![Main Menu](https://github.com/user-attachments/assets/00b0e5df-6cf6-43d8-8f09-3da6418c25ea)
 
-Local and AI-controlled players
+![Player Setup](https://github.com/user-attachments/assets/bb207743-8e97-46d5-8bfe-1dec463b0700)
 
-Core game logic implemented according to the official Nova Luna rules
+![Gameplay](https://github.com/user-attachments/assets/fcc1f2bb-0e30-4660-be4c-f422f34b909c)
 
-Clear separation between layers (entity, service, GUI)
+---
 
-Fully tested with JUnit 5 and documented using KDoc
+## Features
 
-Technical Details
+- online multiplayer via custom `NovaLunaNetworkClient`
+- AI-controlled players (easy + hard difficulty)
+- Full game logic based on official Nova Luna rules
+- Save & load game support
+- Clean layered architecture: Entity → Service → GUI
+- Fully tested with JUnit 5 and documented with KDoc
 
-Language: Kotlin
+---
 
-Frameworks: BGW GUI and BGW Net Common
+## Tech Stack
 
-Architecture: Layered structure (Entity / Service / GUI) following SoPra conventions
+`Kotlin` `BGW GUI` `BGW Net Common` `Gradle` `JUnit 5` `KDoc`
 
-Main class for networking: NovaLunaNetworkClient
+---
 
-Each class was designed based on activity and use case diagrams
+## How to Run
 
-How to Run
-
-Clone the repository and open it in IntelliJ IDEA (or another IDE with Kotlin support):
-
+```bash
 git clone https://github.com/malekhaouesrhaiem01/NovaLuna_BoardGame.git
-
-
-Then build and run the project:
-
+cd NovaLuna_BoardGame
 ./gradlew run
+```
 
-Notes
+Open in IntelliJ IDEA or any IDE with Kotlin support.
 
-The main focus during development was the ai bots  and game logic and the network layer  implementation  and making sure the communication between clients worked reliably. Each method and class was tested for possible edge cases to make sure the game runs smoothly in different scenarios.
+---
+
+## Architecture
+
+The project follows the SoPra layered structure:
+
+| Layer | Responsibility |
+|---|---|
+| **Entity** | Data models and game state |
+| **Service** | Game logic and network communication |
+| **GUI** | BGW-based user interface |
+
+Each class was designed based on activity and use case diagrams.
+The main networking class is `NovaLunaNetworkClient`.
+
+---
+
+## Testing
+
+```bash
+./gradlew test
+```
+
+All entity and service classes are covered by JUnit 5 tests, including edge cases for game logic and network communication.
